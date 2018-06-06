@@ -45,6 +45,7 @@
         "@types/node": "~8.9.4",
         "angularfire2": "^5.0.0-rc.10",
         "codelyzer": "~4.2.1",
+        "firebase": "^5.0.4",
         "jasmine-core": "~2.99.1",
         "jasmine-spec-reporter": "~4.2.1",
         "karma": "~1.7.1",
