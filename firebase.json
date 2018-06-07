@@ -6,7 +6,7 @@
         ]
     },
     "hosting": {
-        "public": "dist/selfiev2",
+        "public": "dist/selfiev2/",
         "ignore": [
             "firebase.json",
             "**/.*",

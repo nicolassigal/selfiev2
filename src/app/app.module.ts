@@ -12,10 +12,19 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { HttpModule } from '@angular/http';
+import { MaterialModule } from './app-material';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatTableModule, MatPaginatorModule, MatSortModule } from '@angular/material';
+import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
+import { ShippingComponent } from './shipping/shipping.component';
+import { TableComponent } from './shipping/table/table.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    AppSidenavComponent,
+    ShippingComponent,
+    TableComponent
   ],
   imports: [
     BrowserModule,
@@ -23,11 +32,22 @@ import { HttpModule } from '@angular/http';
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
     BrowserAnimationsModule,
     HttpModule,
+    FormsModule,
     ReactiveFormsModule,
+    MaterialModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule.enablePersistence(),
     AngularFireDatabaseModule,
-    AngularFireAuthModule
+    AngularFireAuthModule,
+    LayoutModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatListModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule
   ],
   providers: [
   ],

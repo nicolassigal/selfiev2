@@ -1,0 +1,5 @@
+<form>
+    <input class="ng-hide" id="input-file-id" (change)="onFileChange($event)" multiple="false" type="file" />
+    <label for="input-file-id">Choose files</label>
+    <app-table *ngIf="data" [datasrc]="data"></app-table>
+</form>
