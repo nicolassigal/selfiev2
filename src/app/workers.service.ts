@@ -7,8 +7,7 @@ export class WorkersService {
   public worker: Worker;
   constructor() { }
 
-  createWorker(body: Function, param: Array<any>) {
-    const params = JSON.stringify(param).slice(1, -1);
+  createWorker() {
     const blob = new Blob([
          `self.addEventListener("message", (e) => {
              if(e.data.msg === "Start Worker") {

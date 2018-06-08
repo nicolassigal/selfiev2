@@ -18,14 +18,18 @@ import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, Mat
 import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
 import { ShippingComponent } from './shipping/shipping.component';
 import { TableComponent } from './shipping/table/table.component';
-import { WebWorkerService } from 'angular2-web-worker';
+import { InfoComponent } from './info/info.component';
+import { InfoService } from './info/info.service';
+import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AppSidenavComponent,
     ShippingComponent,
-    TableComponent
+    TableComponent,
+    InfoComponent,
+    AirwaybillsComponent
   ],
   imports: [
     BrowserModule,
@@ -51,7 +55,7 @@ import { WebWorkerService } from 'angular2-web-worker';
     MatSortModule
   ],
   providers: [
-    WebWorkerService
+    InfoService
   ],
   bootstrap: [AppComponent]
 })
