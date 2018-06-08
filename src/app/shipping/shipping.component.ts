@@ -1,19 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { WebWorkerService } from 'angular2-web-worker';
 import { Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { WorkersService } from '../workers.service';
 
 @Component({
   selector: 'app-shipping',
   templateUrl: './shipping.component.html',
-  providers: [WebWorkerService],
   styleUrls: ['./shipping.component.scss']
 })
 export class ShippingComponent implements OnInit {
   data: any;
   results = new Subject<any>();
   xls = XLSX;
-  constructor(private _worker: WebWorkerService) { }
+  constructor(private _worker: WorkersService ) {}
 
   ngOnInit() {
     this.results.subscribe(wb => this.parseXLSX(wb));
@@ -25,9 +24,10 @@ export class ShippingComponent implements OnInit {
     reader.onload = (e: any) => {
       console.log('reader load file');
       const bstr: string = e.target.result;
-      this._worker.run(this.readXLSX, bstr)
-      .then((res => console.log(res)))
-      .catch(err => console.log(err));
+      this._worker.createWorker(this.readXLSX, [bstr]);
+      const msgToWorker = {url: document.location.protocol + '//' + document.location.host, msg: 'Start Worker'};
+      this._worker.postMessageToWorker(msgToWorker);
+      this._worker.worker.addEventListener('message', (evt) =>  console.log(evt.data));
     };
     reader.readAsBinaryString(target.files[0]);
   }
@@ -36,6 +36,7 @@ export class ShippingComponent implements OnInit {
     console.log('reading');
     const wb = XLSX.read(bstr, {type: 'binary'});
     console.log('wb', wb);
+    return wb;
   }
 
   parseXLSX = (wb) => {

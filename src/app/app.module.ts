@@ -18,6 +18,7 @@ import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, Mat
 import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
 import { ShippingComponent } from './shipping/shipping.component';
 import { TableComponent } from './shipping/table/table.component';
+import { WebWorkerService } from 'angular2-web-worker';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { TableComponent } from './shipping/table/table.component';
     MatSortModule
   ],
   providers: [
+    WebWorkerService
   ],
   bootstrap: [AppComponent]
 })
