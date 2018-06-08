@@ -12,7 +12,7 @@ export class WorkersService {
     const blob = new Blob([
          `self.addEventListener("message", (e) => {
              if(e.data.msg === "Start Worker") {
-                 importScripts(e.data.url + '/xlsx/xlsxcpexcel.js');
+                 importScripts(e.data.url + '/xlsx/cpexcel.js');
                  importScripts(e.data.url + '/xlsx/jszip.js');
                  importScripts(e.data.url + '/xlsx/shim.min.js');
                  importScripts(e.data.url + '/xlsx/xlsx.core.min.js');
