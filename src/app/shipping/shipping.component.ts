@@ -25,7 +25,7 @@ export class ShippingComponent implements OnInit {
     reader.onload = (e: any) => {
       console.log('reader load file');
       const bstr: string = e.target.result;
-      this._worker.run(this.readXLSX+, bstr)
+      this._worker.run(this.readXLSX, bstr)
       .then((res => console.log(res)))
       .catch(err => console.log(err));
     };
