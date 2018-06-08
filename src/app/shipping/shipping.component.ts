@@ -18,17 +18,15 @@ export class ShippingComponent implements OnInit {
   }
 
   onFileChange(evt: any) {
-    const target: DataTransfer = <DataTransfer>(evt.target);
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      console.log('reader load file', e);
       const bstr: string = e.target.result;
       this._worker.createWorker(this.readXLSX, [bstr]);
       const msgToWorker = {url: document.location.protocol + '//' + document.location.host, msg: 'Start Worker'};
       this._worker.postMessageToWorker(msgToWorker);
-      this._worker.worker.addEventListener('message', (evt) =>  console.log(evt.data));
+      this._worker.worker.addEventListener('message', () =>  console.log('done'));
     };
-    reader.readAsBinaryString(target.files[0]);
+    reader.readAsBinaryString(evt.target.files[0]);
   }
 
   readXLSX = (bstr) => {
