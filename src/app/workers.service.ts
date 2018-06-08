@@ -20,7 +20,7 @@ export class WorkersService {
                  importScripts(e.data.url + '/xlsx/xlsx.full.min.js');
                  importScripts(e.data.url + '/xlsx/xlsx.min.js');
                  importScripts(e.data.url + '/xlsx/xlsx.js');
-                 let wb = XLSX.read(e.bstr, {type: 'binary'});
+                 let wb = XLSX.read(e.data.bstr, {type: 'binary'});
                  console.log('wb', wb);
                  let wsname = wb.SheetNames[0];
                  let ws = wb.Sheets[wsname];
