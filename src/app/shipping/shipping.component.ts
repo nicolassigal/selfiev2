@@ -12,7 +12,7 @@ import { InfoService } from '../info/info.service';
 export class ShippingComponent implements OnInit {
   data: any;
   results = new Subject<any>();
-  xls = XLSX;
+  fileData: any;
   constructor(private _worker: WorkersService, private infoService: InfoService) {}
 
   ngOnInit() {
@@ -27,8 +27,13 @@ export class ShippingComponent implements OnInit {
   }
 
   onFileChange(evt: any) {
-    const target: DataTransfer = <DataTransfer>(evt.target);
+    this.fileData = evt;
+  }
+
+  parseXLS = () => {
+    const target: DataTransfer = <DataTransfer>(this.fileData.target);
     const reader: FileReader = new FileReader();
+
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       this._worker.createWorker();
@@ -43,6 +48,7 @@ export class ShippingComponent implements OnInit {
         setTimeout(() => { this.infoService.hideMessage(); }, 3000);
       });
     };
+
     reader.readAsBinaryString(target.files[0]);
   }
 }
