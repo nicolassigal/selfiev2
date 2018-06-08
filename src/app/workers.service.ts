@@ -11,14 +11,7 @@ export class WorkersService {
     const blob = new Blob([
          `self.addEventListener("message", (e) => {
              if(e.data.msg === "Start Worker") {
-                 importScripts(e.data.url + '/xlsx/cpexcel.js');
-                 importScripts(e.data.url + '/xlsx/jszip.js');
-                 importScripts(e.data.url + '/xlsx/shim.min.js');
-                 importScripts(e.data.url + '/xlsx/xlsx.core.min.js');
-                 importScripts(e.data.url + '/xlsx/xlsx.extendscript.js');
                  importScripts(e.data.url + '/xlsx/xlsx.full.min.js');
-                 importScripts(e.data.url + '/xlsx/xlsx.min.js');
-                 importScripts(e.data.url + '/xlsx/xlsx.js');
                  let wb = XLSX.read(e.data.bstr, {type: 'binary'});
                  console.log('wb', wb);
                  let wsname = wb.SheetNames[0];
