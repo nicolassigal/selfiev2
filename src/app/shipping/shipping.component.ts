@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import * as XLSX from 'xlsx';
 import { WebWorkerService } from 'angular2-web-worker';
 import { Subject } from 'rxjs';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-shipping',
@@ -12,6 +12,7 @@ import { Subject } from 'rxjs';
 export class ShippingComponent implements OnInit {
   data: any;
   results = new Subject<any>();
+  xls = XLSX;
   constructor(private _worker: WebWorkerService) { }
 
   ngOnInit() {
@@ -24,7 +25,9 @@ export class ShippingComponent implements OnInit {
     reader.onload = (e: any) => {
       console.log('reader load file');
       const bstr: string = e.target.result;
-      this._worker.run(this.readXLSX, bstr);
+      this._worker.run(this.readXLSX+, bstr)
+      .then((res => console.log(res)))
+      .catch(err => console.log(err));
     };
     reader.readAsBinaryString(target.files[0]);
   }
@@ -33,7 +36,6 @@ export class ShippingComponent implements OnInit {
     console.log('reading');
     const wb = XLSX.read(bstr, {type: 'binary'});
     console.log('wb', wb);
-    this.results.next(wb);
   }
 
   parseXLSX = (wb) => {
