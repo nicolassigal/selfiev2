@@ -21,11 +21,11 @@ export class WorkersService {
                  importScripts(e.data.url + '/xlsx/xlsx.min.js');
                  importScripts(e.data.url + '/xlsx/xlsx.js');
 
-                 let wb = XLSX.read(e.bstr, {type: 'binary'});
+                 let wb: WorkBook = XLSX.read(e.bstr, {type: 'binary'});
                  console.log('wb', wb);
                  let wsname: string = wb.SheetNames[0];
                  let ws: XLSX.WorkSheet = wb.Sheets[wsname];
-                 self.postMessage(XLSX.utils.sheet_to_json(ws, { defval: null, blankrows: false}));
+                 self.postMessage(JSON.stringify(XLSX.utils.sheet_to_json(ws, { defval: null, blankrows: false})));
              }
              if(e.data.msg === "Stop Worker") {
                  self.close();
