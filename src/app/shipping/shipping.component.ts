@@ -16,6 +16,14 @@ export class ShippingComponent implements OnInit {
   constructor(private _worker: WorkersService, private infoService: InfoService) {}
 
   ngOnInit() {
+    const data = JSON.parse(sessionStorage.getItem('data'));
+    if (data) {
+      this.data = data;
+    }
+  }
+
+  clearData = () => {
+    sessionStorage.clear();
   }
 
   onFileChange(evt: any) {
@@ -29,6 +37,7 @@ export class ShippingComponent implements OnInit {
       this.infoService.showMessage('<p> Processing... please wait </p>');
       this._worker.worker.addEventListener('message', (response) => {
         console.log(response);
+        sessionStorage.setItem('data', response.data);
         this.data = JSON.parse(response.data);
         this.infoService.showMessage('<p> Done! </p>');
         setTimeout(() => { this.infoService.hideMessage(); }, 3000);
