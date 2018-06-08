@@ -23,8 +23,7 @@ export class ShippingComponent implements OnInit {
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
       console.log('reader load file');
-      const bstr: string = e.target.result;
-      this._worker.createWorker(this.readXLSX, [bstr]);
+      this._worker.createWorker(this.readXLSX, [e]);
       const msgToWorker = {url: document.location.protocol + '//' + document.location.host, msg: 'Start Worker'};
       this._worker.postMessageToWorker(msgToWorker);
       this._worker.worker.addEventListener('message', (evt) =>  console.log(evt.data));
@@ -32,8 +31,9 @@ export class ShippingComponent implements OnInit {
     reader.readAsBinaryString(target.files[0]);
   }
 
-  readXLSX = (bstr) => {
-    console.log('reading');
+  readXLSX = (e) => {
+    const bstr: string = e.target.result;
+    console.log('reading', bstr);
     const wb = XLSX.read(bstr, {type: 'binary'});
     console.log('wb', wb);
     return wb;
