@@ -5,23 +5,11 @@ import { Injectable } from '@angular/core';
 })
 export class WorkersService {
   public worker: Worker;
+
   constructor() { }
 
-  createWorker() {
-    const blob = new Blob([
-         `self.addEventListener("message", (e) => {
-             if(e.data.msg === "Start Worker") {
-                 importScripts(e.data.url + '/xlsx/xlsx.full.min.js');
-                 let wb = XLSX.read(e.data.bstr, {type: 'binary'});
-                 console.log('wb', wb);
-                 let wsname = wb.SheetNames[0];
-                 let ws = wb.Sheets[wsname];
-                 self.postMessage(JSON.stringify(XLSX.utils.sheet_to_json(ws, { defval: null, blankrows: false})));
-             }
-             if(e.data.msg === "Stop Worker") {
-                 self.close();
-             }
-          });`]);
+  createWorker(workerFunction) {
+    const blob = new Blob([workerFunction]);
 
     const blobURL = window.URL.createObjectURL(blob);
     this.worker = new Worker(blobURL);
