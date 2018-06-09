@@ -70,8 +70,17 @@ export class ShippingComponent implements OnInit {
         this._worker.createWorker(this.xlsxWorker);
         const msgToWorker = {url: document.location.protocol + '//' + document.location.host, msg: 'Start Worker', bstr: bstr};
         this._worker.postMessageToWorker(msgToWorker);
-        this.infoService.showMessage('<p> Processing... please wait </p>');
+        this.infoService.showMessage(`
+        <ul>
+          <li><p>Getting data... Please Wait</p></li>
+        </ul>
+        `);
         this._worker.worker.addEventListener('message', (response) => {
+          this.infoService.showMessage(`
+          <ul>
+            <li><p>Getting data... Finished </p></li>
+          </ul>
+          `);
           this._worker.terminateWorker();
           this.prepareData(this.data, JSON.parse(response.data));
         });
@@ -81,7 +90,12 @@ export class ShippingComponent implements OnInit {
   }
 
   prepareData = (data, xls) => {
-    this.infoService.showMessage('<p> Preparing Data... </p>');
+    this.infoService.showMessage(`
+    <ul>
+      <li><p>Getting data... Finished </p></li>
+      <li><p>Preparing data... Please wait </p></li>
+    </ul>
+    `);
     this._worker.createWorker(this.checkDBWorker);
     const msgToWorker = { msg: 'Start Worker', xlsData: xls, dbData: data };
     this._worker.postMessageToWorker(msgToWorker);
@@ -91,14 +105,26 @@ export class ShippingComponent implements OnInit {
       if (result.length) {
         this.addEntry(result);
       } else {
-        this.infoService.showMessage('<p> Nothing to update. </p>');
+        this.infoService.showMessage(`
+        <ul>
+          <li><p>Getting data... Finished </p></li>
+          <li><p>Preparing data... Finished </p></li>
+          <li><p>Nothing to update. </p></li>
+        </ul>
+        `);
         setTimeout(this.finishProccesing, 3000);
       }
     });
   }
 
   addEntry = (data) => {
-    this.infoService.showMessage(`<p> Updating database with ${data.length} new entries </p>'`);
+    this.infoService.showMessage(`
+    <ul>
+      <li><p>Getting data... Finished </p></li>
+      <li><p>Preparing data... Finished </p></li>
+      <li><p>Updating ${data.length} new entries... please wait </p></li>
+    </ul>
+    `);
     const promiseArr = [];
     data.map(entry => {
       promiseArr.push(this._db.collection('operations').add(entry));
@@ -106,7 +132,16 @@ export class ShippingComponent implements OnInit {
 
     Promise.all(promiseArr)
       .then(res => console.log(res))
-      .then(() => this.finishProccesing())
+      .then(() => {
+        this.infoService.showMessage(`
+        <ul>
+          <li><p>Getting data... Finished </p></li>
+          <li><p>Preparing data... Finished </p></li>
+          <li><p>Updating ${data.length} new entries... Finished</p></li>
+        </ul>
+        `);
+        this.finishProccesing();
+      })
       .catch(res => console.log(res));
   }
 
@@ -115,7 +150,6 @@ export class ShippingComponent implements OnInit {
   }
 
   finishProccesing = () => {
-    this.infoService.showMessage('<p> Done </p>');
     setTimeout(this.infoService.hideMessage, 3000);
   }
 
