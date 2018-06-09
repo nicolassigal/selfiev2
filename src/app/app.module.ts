@@ -14,7 +14,6 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 import { HttpModule } from '@angular/http';
 import { MaterialModule } from './app-material';
 import { LayoutModule } from '@angular/cdk/layout';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatTableModule, MatPaginatorModule, MatSortModule } from '@angular/material';
 import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
 import { ShippingComponent } from './shipping/shipping.component';
 import { TableComponent } from './shipping/table/table.component';
@@ -44,15 +43,7 @@ import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
     AngularFirestoreModule.enablePersistence(),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
-    LayoutModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule
+    LayoutModule
   ],
   providers: [
     InfoService

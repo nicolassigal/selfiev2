@@ -4,19 +4,40 @@ import {
   MatFormField,
   MatInputModule,
   MatFormFieldModule,
-  MatTableModule
+  MatTableModule,
+  MatSortModule,
+  MatListModule,
+  MatPaginatorModule,
+  MatButtonModule,
+  MatToolbarModule,
+  MatSidenavModule,
+  MatIconModule
 } from '@angular/material';
 
 @NgModule({
   imports: [
     MatInputModule,
     MatFormFieldModule,
-    MatTableModule
+    MatTableModule,
+    MatSortModule,
+    MatListModule,
+    MatPaginatorModule,
+    MatSidenavModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatIconModule
   ],
   exports: [
     MatInputModule,
     MatFormFieldModule,
-    MatTableModule
+    MatTableModule,
+    MatSortModule,
+    MatListModule,
+    MatPaginatorModule,
+    MatSidenavModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatIconModule
   ],
 })
 export class MaterialModule { }

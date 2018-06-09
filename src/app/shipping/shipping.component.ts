@@ -5,17 +5,17 @@ import { WorkersService } from '../workers.service';
 import { InfoService } from '../info/info.service';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
+import { ShippingService } from './shipping.service';
 
 @Component({
   selector: 'app-shipping',
   templateUrl: './shipping.component.html',
+  providers: [ShippingService],
   styleUrls: ['./shipping.component.scss']
 })
 export class ShippingComponent implements OnInit {
   data: any;
   results = new Subject<any>();
-  dataToBeAdded;
-  dataToBeUpdated;
   xlsxWorker = `self.addEventListener("message", (e) => {
     if(e.data.msg === "Start Worker") {
         importScripts(e.data.url + '/xlsx/xlsx.full.min.js');
@@ -52,15 +52,13 @@ export class ShippingComponent implements OnInit {
   constructor(
     private _worker: WorkersService,
     private infoService: InfoService,
-    private _db: AngularFirestore) {}
+    private _db: AngularFirestore,
+    private _shippingService: ShippingService) {}
 
   ngOnInit() {
     this._db.collection('operations')
     .valueChanges()
-    .subscribe(data => {
-      this.data = data;
-      console.log('new data!');
-    });
+    .subscribe(data =>  this.data = data);
   }
 
   parseXLS = (evt: any) => {
@@ -119,5 +117,9 @@ export class ShippingComponent implements OnInit {
   finishProccesing = () => {
     this.infoService.showMessage('<p> Done </p>');
     setTimeout(this.infoService.hideMessage, 3000);
+  }
+
+  setFilterData = (data) => {
+    this._shippingService.filterSubject.next(data);
   }
 }
