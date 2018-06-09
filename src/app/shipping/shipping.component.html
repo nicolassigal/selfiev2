@@ -1,8 +1,7 @@
 <div class="shipping">
-  <form>
-    <input #file class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
-    <button (click)="file.click()" mat-raised-button color="primary">Upload File</button>
-    <button (click)="clearData()" mat-raised-button color="primary">Clear</button>
-    <app-table *ngIf="data" [datasrc]="data"></app-table>
-</form>
+    <form>
+        <input #file class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
+        <button (click)="file.click()" mat-raised-button color="primary">Upload File</button>
+        <app-table *ngIf="data" [datasrc]="data"></app-table>
+    </form>
 </div>
