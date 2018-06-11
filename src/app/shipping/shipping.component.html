@@ -1,13 +1,13 @@
-<div class="shipping">
+<div class="shipping" *ngIf="!loadingData">
     <form>
         <mat-form-field>
             <input matInput (keyup)="setFilterData($event.target.value)" placeholder="Search" autocomplete="off">
         </mat-form-field>
-        <input #file class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
+        <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
         <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop">Upload File</button>
         <button (click)="file.click()" mat-mini-fab color="primary" class="btn-mobile">
             <mat-icon aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
         </button>
     </form>
-    <app-table *ngIf="data" [datasrc]="data"></app-table>
+    <app-table [datasrc]="data"></app-table>
 </div>

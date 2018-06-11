@@ -10,11 +10,13 @@ import { map } from 'rxjs/operators';
 })
 export class AppSidenavComponent {
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches)
-    );
-    
+  isHandset$: Observable<boolean> = this.breakpointObserver.observe([
+    Breakpoints.Handset,
+    Breakpoints.Tablet,
+    Breakpoints.Small,
+    Breakpoints.Medium
+  ]).pipe(map(result => result.matches));
+
   constructor(private breakpointObserver: BreakpointObserver) {}
-  
+
   }

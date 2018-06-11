@@ -36,15 +36,19 @@ export class TableComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.dataSource = new MatTableDataSource(this.datasrc);
+    this.generateDataSource(this.datasrc);
+    this._shippingService.dataSubject.subscribe(data => this.generateDataSource(data));
+    this._shippingService.filterSubject.subscribe(query => this.applyFilter(query));
+  }
+
+  generateDataSource = (ds) => {
+    this.dataSource = new MatTableDataSource(ds);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-
-    this._shippingService.filterSubject.subscribe(data => this.applyFilter(data));
   }
 
   applyFilter(data) {
-    this.dataSource.filter = data.trim().toLowerCase();
+      this.dataSource.filter = data.trim().toLowerCase();
   }
 }
 
