@@ -56,7 +56,7 @@ export class ShippingComponent implements OnInit {
     private _shippingService: ShippingService) {}
 
   ngOnInit() {
-    this._db.collection('operations')
+    this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
     .valueChanges()
     .subscribe(data =>  this.data = data);
   }
@@ -127,7 +127,13 @@ export class ShippingComponent implements OnInit {
     `);
     const promiseArr = [];
     data.map(entry => {
-      promiseArr.push(this._db.collection('operations').add(entry));
+      entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
+      entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
+      entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
+      entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
+      if (entry.hbr_id) {
+        promiseArr.push(this._db.collection('operations').add(entry));
+      }
     });
 
     Promise.all(promiseArr)

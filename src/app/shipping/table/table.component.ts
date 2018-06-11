@@ -19,6 +19,7 @@ export class TableComponent implements OnInit {
   constructor(private _shippingService: ShippingService){}
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = [
+    'actions',
     'hbr_id',
     'warehouse',
     'box_qty',

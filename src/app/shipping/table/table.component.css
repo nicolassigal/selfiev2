@@ -3,6 +3,12 @@
     width: 150vw;
 }
 
+.mat-row:hover {
+    background-color: #ededed;
+    transition: 0.5s ease-in-out;
+    cursor: pointer;
+}
+
 .mat-paginator-container {
     display: flex;
     align-items: center;
@@ -12,6 +18,79 @@
     position: sticky;
     bottom: 0;
     right: 0;
+}
+
+.mat-column-actions {
+    flex: 0 0 60px;
+    justify-content: flex-start;
+}
+
+.mat-column-hbr_id {
+    flex: 0 0 100px;
+    justify-content: center;
+}
+
+.mat-column-warehouse {
+    flex: 0 0 200px;
+    justify-content: center;
+}
+
+.mat-column-box_qty {
+    flex: 0 0 80px;
+    justify-content: center;
+}
+
+.mat-column-courier {
+    flex: 0 0 200px;
+    justify-content: center;
+}
+
+.mat-column-customer {}
+
+.mat-column-date {
+    flex: 0 0 120px;
+    justify-content: center;
+}
+
+.mat-column-description>span {
+    text-transform: lowercase;
+}
+
+.mat-column-description>span::first-letter {
+    text-transform: capitalize;
+}
+
+.mat-column-destination {
+    flex: 0 0 200px;
+    justify-content: center;
+}
+
+.mat-column-proforma {
+    flex: 0 0 80px;
+    justify-content: center;
+}
+
+.mat-column-shipping_date {
+    flex: 0 0 120px;
+    justify-content: center;
+}
+
+.mat-column-total_value {
+    flex: 0 0 120px;
+    justify-content: center;
+}
+
+.mat-column-total_weight {
+    flex: 0 0 120px;
+    justify-content: center;
+}
+
+.mat-column-tracking {
+    justify-content: flex-start;
+}
+
+.mat-column-tracking>span {
+    max-width: 100%;
 }
 
 .mat-header-row {
