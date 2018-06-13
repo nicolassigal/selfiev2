@@ -20,6 +20,7 @@ import { TableComponent } from './shipping/table/table.component';
 import { InfoComponent } from './info/info.component';
 import { InfoService } from './info/info.service';
 import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
+import { HbrTableComponent } from './shared/hbr-table/hbr-table.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
     ShippingComponent,
     TableComponent,
     InfoComponent,
-    AirwaybillsComponent
+    AirwaybillsComponent,
+    HbrTableComponent
   ],
   imports: [
     BrowserModule,
