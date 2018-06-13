@@ -2,8 +2,9 @@
     <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
         <mat-toolbar color="primary">Menu</mat-toolbar>
         <mat-nav-list>
-            <a mat-list-item [routerLink]="'shipping'">Shipping</a>
-            <a mat-list-item [routerLink]="'airwaybills'">Airway bill</a>
+            <a mat-list-item [routerLink]="'stock'">Stock</a>
+            <a mat-list-item [routerLink]="'delivered'">Delivered</a>
+            <a mat-list-item [routerLink]="'transit'">Transit</a>
             <a mat-list-item href="#">Log Out</a>
         </mat-nav-list>
     </mat-sidenav>

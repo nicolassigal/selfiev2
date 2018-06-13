@@ -1,3 +1,15 @@
-<p>
-  hbr-table works!
-</p>
+<mat-table #table matSort [dataSource]="dataSource">
+  <!-- Generic column definition -->
+  <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnDef">
+    <mat-header-cell *matHeaderCellDef  mat-sort-header>{{ column.header }}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+        <span class="mobile-label">Id: </span>
+        <span *ngIf="column.cell(row)">{{ column.cell(row) }}</span>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+<mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]" showFirstLastButtons>
+</mat-paginator>

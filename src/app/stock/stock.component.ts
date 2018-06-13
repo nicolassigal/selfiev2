@@ -5,23 +5,37 @@ import { WorkersService } from '../workers.service';
 import { InfoService } from '../info/info.service';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
-import { ShippingService } from './shipping.service';
-
+import { TableService } from '../shared/hbr-table/table.service';
+import { saveAs } from 'file-saver';
 @Component({
-  selector: 'app-shipping',
-  templateUrl: './shipping.component.html',
-  providers: [ShippingService],
-  styleUrls: ['./shipping.component.scss']
+  selector: 'app-stock',
+  templateUrl: './stock.component.html',
+  styleUrls: ['./stock.component.scss']
 })
 export class ShippingComponent implements OnInit {
   loadingData = false;
   data;
   fileUploader = '';
+  cols = [
+    { columnDef: 'hbr_id', header: 'Hbr id',    cell: (element) => `${element.hbr_id}` },
+    { columnDef: 'warehouse',     header: 'Warehouse',   cell: (element) => `${element.warehouse ? element.warehouse : ''}`},
+    { columnDef: 'courier',   header: 'Courier', cell: (element) => `${element.courier ? element.courier : ''}`},
+    { columnDef: 'customer',   header: 'Customer', cell: (element) => `${element.customer ? element.customer : ''}`},
+    { columnDef: 'date',   header: 'WH In date', cell: (element) => `${element.date ? element.date : ''}`},
+    { columnDef: 'description',   header: 'Description', cell: (element) => `${element.description ? element.description : ''}`},
+    { columnDef: 'destination',   header: 'Destination', cell: (element) => `${element.destination ? element.destination : ''}`},
+    { columnDef: 'proforma',   header: 'Proforma', cell: (element) => `${element.proforma ? element.proforma : ''}`},
+    { columnDef: 'shipping_date',   header: 'Shipping date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}`},
+    { columnDef: 'total_value',   header: 'Total Value', cell: (element) => `${element.total_value ? element.total_value : ''}`},
+    { columnDef: 'total_weight',   header: 'Total Weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}`},
+    { columnDef: 'tracking',   header: 'Tracking', cell: (element) => `${element.tracking ? element.tracking : ''}`}
+  ];
+
   constructor(
     private _worker: WorkersService,
     private infoService: InfoService,
     private _db: AngularFirestore,
-    private _shippingService: ShippingService) {}
+    private _tableService: TableService) {}
 
   ngOnInit() {
     this.loadingData = true;
@@ -48,7 +62,7 @@ export class ShippingComponent implements OnInit {
 
         this.infoService.showMessage(`<ul><li><p>Getting data... Please Wait</p></li></ul>`);
 
-        this._worker.createWorker(this._shippingService.getXlsxWorker());
+        this._worker.createWorker(this._worker.getXlsxWorker());
         this._worker.postMessageToWorker(msgToWorker);
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
@@ -70,7 +84,7 @@ export class ShippingComponent implements OnInit {
     </ul>
     `);
 
-    this._worker.createWorker(this._shippingService.getUniqueDBWorker());
+    this._worker.createWorker(this._worker.getUniqueDBWorker());
     this._worker.postMessageToWorker(msgToWorker);
     this._worker.worker.addEventListener('message', (response) => {
       this._worker.terminateWorker();
@@ -124,7 +138,7 @@ export class ShippingComponent implements OnInit {
         </ul>
         `);
         this.finishProccesing();
-        this._shippingService.dataSubject.next(this.data);
+        this._tableService.dataSubject.next(this.data);
       })
       .catch(res => console.log(res));
   }
@@ -135,7 +149,7 @@ export class ShippingComponent implements OnInit {
   }
 
   setFilterData = (data) => {
-    this._shippingService.filterSubject.next(data);
+    this._tableService.filterSubject.next(data);
   }
 
   capitalizeText = (text) => {
@@ -143,4 +157,42 @@ export class ShippingComponent implements OnInit {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     })).join(' ');
   }
+
+  download = () => {
+    const ordered = [...this.data];
+    const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), { header: [
+      'hbr_id',
+      'warehouse',
+      'courier',
+      'customer',
+      'contact_name',
+      'cuit',
+      'email',
+      'tel',
+      'address',
+      'city',
+      'country',
+      'date',
+      'description',
+      'destination',
+      'proforma',
+      'shipping_date',
+      'box_qty',
+      'total_value',
+      'total_weight',
+      'tracking'
+    ]});
+    const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
+    const excelBuffer: any = XLSX.write(workbook, {bookType: 'xlsx', bookSST: true, type: 'binary'});
+    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), 'stock.xlsx');
+  }
+
+  s2ab = (s) => {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i != s.length; ++i) {
+      view[i] = s.charCodeAt(i) & 0xFF;
+    }
+    return buf;
+}
 }

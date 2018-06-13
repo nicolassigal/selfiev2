@@ -15,25 +15,26 @@ import { HttpModule } from '@angular/http';
 import { MaterialModule } from './app-material';
 import { LayoutModule } from '@angular/cdk/layout';
 import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
-import { ShippingComponent } from './shipping/shipping.component';
-import { TableComponent } from './shipping/table/table.component';
+import { ShippingComponent } from './stock/stock.component';
 import { InfoComponent } from './info/info.component';
 import { InfoService } from './info/info.service';
-import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
 import { HbrTableComponent } from './shared/hbr-table/hbr-table.component';
+import { TableService } from './shared/hbr-table/table.service';
+import { DeliveredComponent } from './delivered/delivered.component';
+import { TransitComponent } from './transit/transit.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AppSidenavComponent,
     ShippingComponent,
-    TableComponent,
     InfoComponent,
-    AirwaybillsComponent,
-    HbrTableComponent
+    HbrTableComponent,
+    DeliveredComponent,
+    TransitComponent
   ],
   imports: [
-    BrowserModule,
+  BrowserModule,
     AppRoutingModule,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
     BrowserAnimationsModule,
@@ -48,7 +49,8 @@ import { HbrTableComponent } from './shared/hbr-table/hbr-table.component';
     LayoutModule
   ],
   providers: [
-    InfoService
+    InfoService,
+    TableService
   ],
   bootstrap: [AppComponent]
 })

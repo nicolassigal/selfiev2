@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CdkTableModule } from '@angular/cdk/table';
 import {
   MatFormField,
   MatInputModule,
@@ -29,7 +30,8 @@ import {
     MatToolbarModule,
     MatIconModule,
     MatCheckboxModule,
-    MatMenuModule
+    MatMenuModule,
+    CdkTableModule
   ],
   exports: [
     MatInputModule,
@@ -43,7 +45,8 @@ import {
     MatToolbarModule,
     MatIconModule,
     MatCheckboxModule,
-    MatMenuModule
+    MatMenuModule,
+    CdkTableModule
   ],
 })
 export class MaterialModule { }

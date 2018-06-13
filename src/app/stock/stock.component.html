@@ -8,6 +8,7 @@
         <button (click)="file.click()" mat-mini-fab color="primary" class="btn-mobile">
             <mat-icon aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
         </button>
+        <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">Download</button>
     </form>
-    <app-table [datasrc]="data"></app-table>
+    <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
 </div>

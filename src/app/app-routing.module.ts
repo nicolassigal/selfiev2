@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ShippingComponent } from './shipping/shipping.component';
-import { AirwaybillsComponent } from './airwaybills/airwaybills.component';
+import { ShippingComponent } from './stock/stock.component';
+import { TransitComponent } from './transit/transit.component';
+import { DeliveredComponent } from './delivered/delivered.component';
 
 const routes: Routes = [
-  { path: 'shipping', component: ShippingComponent },
-  { path: 'airwaybills', component: AirwaybillsComponent }
+  { path: 'stock', component: ShippingComponent },
+  { path: 'delivered', component: DeliveredComponent },
+  { path: 'transit', component: TransitComponent },
 ];
 
 @NgModule({
