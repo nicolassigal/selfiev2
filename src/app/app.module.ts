@@ -15,7 +15,7 @@ import { HttpModule } from '@angular/http';
 import { MaterialModule } from './app-material';
 import { LayoutModule } from '@angular/cdk/layout';
 import { AppSidenavComponent } from './app-sidenav/app-sidenav.component';
-import { ShippingComponent } from './stock/stock.component';
+import { StockComponent } from './stock/stock.component';
 import { InfoComponent } from './info/info.component';
 import { InfoService } from './info/info.service';
 import { HbrTableComponent } from './shared/hbr-table/hbr-table.component';
@@ -27,7 +27,7 @@ import { TransitComponent } from './transit/transit.component';
   declarations: [
     AppComponent,
     AppSidenavComponent,
-    ShippingComponent,
+    StockComponent,
     InfoComponent,
     HbrTableComponent,
     DeliveredComponent,

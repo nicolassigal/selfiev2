@@ -17,6 +17,7 @@ export class HbrTableComponent implements OnInit {
   @Input('cols') cols;
   columns;
   isMobile;
+  totalizer;
   dataSource: MatTableDataSource<any>;
   displayedColumns;
 
@@ -28,6 +29,8 @@ export class HbrTableComponent implements OnInit {
     this.generateDataSource(this.datasrc);
     this._tableService.dataSubject.subscribe(source => this.generateDataSource(source));
     this._tableService.filterSubject.subscribe(query => this.applyFilter(query));
+    this.calcTotals();
+
   }
 
   generateDataSource = (ds) => {
@@ -39,6 +42,10 @@ export class HbrTableComponent implements OnInit {
 
   setColumns = () => {
     this.columns = this.cols;
+  }
+
+  calcTotals = () => {
+
   }
 
   applyFilter(data) {

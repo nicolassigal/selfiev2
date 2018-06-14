@@ -12,23 +12,20 @@ import { saveAs } from 'file-saver';
   templateUrl: './stock.component.html',
   styleUrls: ['./stock.component.scss']
 })
-export class ShippingComponent implements OnInit {
+export class StockComponent implements OnInit {
   loadingData = false;
   data;
   fileUploader = '';
   cols = [
     { columnDef: 'hbr_id', header: 'Hbr id',    cell: (element) => `${element.hbr_id}` },
     { columnDef: 'warehouse',     header: 'Warehouse',   cell: (element) => `${element.warehouse ? element.warehouse : ''}`},
-    { columnDef: 'courier',   header: 'Courier', cell: (element) => `${element.courier ? element.courier : ''}`},
-    { columnDef: 'customer',   header: 'Customer', cell: (element) => `${element.customer ? element.customer : ''}`},
-    { columnDef: 'date',   header: 'WH In date', cell: (element) => `${element.date ? element.date : ''}`},
+    { columnDef: 'box_qty',     header: 'Box qty.',   cell: (element) => `${element.box_qty ? element.box_qty : ''}`},
+    { columnDef: 'total_weight',   header: 'Total Weight', cell: (element) =>
+      `${element.total_weight ? element.total_weight  + ' Kg.' : ''}`},
+    { columnDef: 'total_value',   header: 'Total Value', cell: (element) => `${element.total_value ? 'U$D' + element.total_value : ''}`},
     { columnDef: 'description',   header: 'Description', cell: (element) => `${element.description ? element.description : ''}`},
-    { columnDef: 'destination',   header: 'Destination', cell: (element) => `${element.destination ? element.destination : ''}`},
-    { columnDef: 'proforma',   header: 'Proforma', cell: (element) => `${element.proforma ? element.proforma : ''}`},
-    { columnDef: 'shipping_date',   header: 'Shipping date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}`},
-    { columnDef: 'total_value',   header: 'Total Value', cell: (element) => `${element.total_value ? element.total_value : ''}`},
-    { columnDef: 'total_weight',   header: 'Total Weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}`},
-    { columnDef: 'tracking',   header: 'Tracking', cell: (element) => `${element.tracking ? element.tracking : ''}`}
+    { columnDef: 'customer',   header: 'Customer', cell: (element) => `${element.customer ? element.customer : ''}`},
+    { columnDef: 'date',   header: 'WH In date', cell: (element) => `${element.date ? element.date : ''}`}
   ];
 
   constructor(
