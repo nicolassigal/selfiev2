@@ -7,30 +7,27 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
 import { TableService } from '../shared/hbr-table/table.service';
 import { saveAs } from 'file-saver';
-
 @Component({
-  selector: 'app-transit',
-  templateUrl: './transit.component.html',
-  styleUrls: ['./transit.component.scss']
+  selector: 'app-stock',
+  templateUrl: './stock.component.html',
+  styleUrls: ['./stock.component.scss']
 })
-export class TransitComponent implements OnInit {
+export class StockComponent implements OnInit {
   loadingData = false;
-  isMakingChangesOnData = false;
   data;
   fileUploader = '';
   cols = [
-    { columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
+    { columnDef: 'hbr_id', header: 'Hbr id', cell: (element) => `${element.hbr_id}` },
+    { columnDef: 'warehouse', header: 'Warehouse', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     {
       columnDef: 'total_weight', header: 'Total Weight', cell: (element) =>
         `${element.total_weight ? element.total_weight + ' Kg.' : ''}`
     },
     { columnDef: 'total_value', header: 'Total Value', cell: (element) => `${element.total_value ? 'U$D' + element.total_value : ''}` },
-    { columnDef: 'shipping_date', header: 'Shipping Date', cell: (element) => `${element.date ? element.date : ''}` }
-    { columnDef: 'courier', header: 'Courier', cell: (element) => `${element.courier ? element.courier : ''}` },
-    { columnDef: 'tracking', header: 'Tracking', cell: (element) => `${element.tracking ? element.tracking : ''}` },
-    { columnDef: 'destination', header: 'Destination', cell: (element) => `${element.destination ? element.destination : ''}` },
-    { columnDef: 'status', header: 'Status', cell: (element) => `${element.status ? element.status : ''}` },
+    { columnDef: 'description', header: 'Description', cell: (element) => `${element.description ? element.description : ''}` },
+    { columnDef: 'customer', header: 'Customer', cell: (element) => `${element.customer ? element.customer : ''}` },
+    { columnDef: 'date', header: 'WH In date', cell: (element) => `${element.date ? element.date : ''}` }
   ];
 
   constructor(
@@ -41,24 +38,11 @@ export class TransitComponent implements OnInit {
 
   ngOnInit() {
     this.loadingData = true;
-    this._db.collection('awbs', ref => ref.orderBy('id', 'desc'))
+    this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
       .valueChanges()
       .subscribe(data => {
         this.loadingData = false;
         this.data = data;
-        this.data.box_qty = 0;
-        this.data.total_weight = 0;
-        this.data.total_value = 0;
-        this.data.map(row => {
-          row.processes.map(process => {
-            this.data.box_qty = this.data.box_qty + Number(process.box_qty);
-            this.data.total_weight = this.data.total_weight + Number(process.total_weight);
-            this.data.total_value = this.data.total_value + Number(process.total_value);
-          })
-        })
-        if (!this.isMakingChangesOnData) {
-          this._tableService.dataSubject.next(this.data);
-        }
       });
   }
 

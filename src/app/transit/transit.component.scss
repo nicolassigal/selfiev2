@@ -1,0 +1,46 @@
+.ng-hide {
+    display: none;
+}
+
+.transit {
+    form {
+        background: white;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-content: center;
+        align-items: center;
+        height: 64px;
+        padding: 10px 15px;
+        .mat-form-field {
+            width: 70%;
+        }
+        input {
+            width: 70%;
+        }
+        button.btn-desktop {
+            height: 60%;
+        }
+        button.btn-mobile {
+            display: none;
+        }
+        @media(max-width: 600px) {
+            input {
+                width: 100%;
+            }
+            .mat-form-field {
+                width: 100%;
+            }
+            button.btn-desktop {
+                display: none;
+            }
+            button.btn-mobile {
+                display: inline-block;
+                position: fixed;
+                bottom: 2%;
+                right: 3%;
+                z-index: 1;
+            }
+        }
+    }
+}

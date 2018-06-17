@@ -1,0 +1,38 @@
+<mat-toolbar mat-dialog-title color="primary">
+  <mat-toolbar-row>
+    <span> {{ data.title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-dialog-content>
+  <div class="form-container">
+    <mat-form-field>
+      <mat-select placeholder="Warehouse"  [(ngModel)]="box.wh_id">
+        <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
+    </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="number" placeholder="Box Quantity" [(ngModel)]="box.box_qty">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="number" placeholder="Total weight" [(ngModel)]="box.total_weight">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="number" placeholder="Total value" [(ngModel)]="box.total_value">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select placeholder="Customers"  [(ngModel)]="box.customer_id">
+        <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
+    </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="date" matInput placeholder="WH in date"  [(ngModel)]="box.date"/>
+    </mat-form-field>
+    <mat-form-field>
+        <textarea matInput placeholder="Description" [(ngModel)]="box.description"></textarea>
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
+  <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
+</mat-dialog-actions>

@@ -1,16 +1,46 @@
 <mat-table #table matSort [dataSource]="dataSource">
   <!-- Generic column definition -->
-  <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnDef">
-    <mat-header-cell *matHeaderCellDef  mat-sort-header>{{ column.header }}</mat-header-cell>
-    <mat-cell *matCellDef="let row">
-        <span class="mobile-label">Id: </span>
-        <span *ngIf="column.cell(row)">{{ column.cell(row) }}</span>
-    </mat-cell>
-  </ng-container>
+  <div *ngFor="let column of columns">
+    <ng-container *ngIf="column.header === 'Actions'" [matColumnDef]="column.columnDef">
+      <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
+      <mat-cell *matCellDef="let row">
+      <button mat-icon-button [matMenuTriggerFor]="appMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #appMenu="matMenu">
+          <button mat-menu-item (click)="editRow(row)">Edit</button>
+          <button *ngIf="column.showSendStock" mat-menu-item (click)="sendBoxes(row)">Send Boxes</button>
+          <button mat-menu-item (click)="deleteRow(row)">Delete</button>
+        </mat-menu>
+      </mat-cell>
+    </ng-container>
+    <ng-container *ngIf="column.header !== 'Actions'" [matColumnDef]="column.columnDef">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column.header }}</mat-header-cell>
+      <mat-cell *matCellDef="let row">
+        <span class="mobile-label">{{ column.header }}: </span>
+        <span *ngIf="column.cell(row)
+         && column.type !== 'value'
+         && column.type !== 'weight'
+         && column.type !== 'date'">{{ column.cell(row) }}</span>
+         <span *ngIf="column.cell(row)
+         && column.type === 'value'">U$D {{ column.cell(row) }}</span>
+         <span *ngIf="column.cell(row)
+         && column.type === 'weight'">{{ column.cell(row) }} Kg.</span>
+         <span *ngIf="column.cell(row)
+         && column.type === 'date'"> {{ column.cell(row) * 1000 | date:'dd-MM-yy' }}</span>
+      </mat-cell>
+    </ng-container>
+  </div>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 </mat-table>
-
-<mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]" showFirstLastButtons>
+<div class="totalizer">
+  <span class="totalizer-title">Total Value: </span><span class="totalizer-value"> U$D{{ totalizer.value }}</span>
+  <span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight }} Kg</span>
+  <span class="totalizer-title">Total Quantity: </span><span class="totalizer-value">{{ totalizer.quantity }}</span>
+  <span class="totalizer-title">Total Operations: </span><span class="totalizer-value">{{ totalizer.operations }}</span>
+</div>
+<mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]"
+  showFirstLastButtons>
 </mat-paginator>

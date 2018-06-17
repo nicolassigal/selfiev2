@@ -29,8 +29,6 @@ export class HbrTableComponent implements OnInit {
     this.generateDataSource(this.datasrc);
     this._tableService.dataSubject.subscribe(source => this.generateDataSource(source));
     this._tableService.filterSubject.subscribe(query => this.applyFilter(query));
-    this.calcTotals();
-
   }
 
   generateDataSource = (ds) => {
@@ -38,17 +36,41 @@ export class HbrTableComponent implements OnInit {
     this.dataSource = new MatTableDataSource(ds);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.calcTotals(this.dataSource.data);
   }
 
   setColumns = () => {
     this.columns = this.cols;
   }
 
-  calcTotals = () => {
+  calcTotals = (data) => {
+    this.totalizer = { weight: 0, value: 0, quantity: 0, operations: 0 };
 
+    data.map(row => {
+      this.totalizer.weight = Number(this.totalizer.weight) + Number(row.total_weight) || 0;
+      this.totalizer.value = Number(this.totalizer.value) + Number(row.total_value)  || 0;
+      this.totalizer.quantity = Number(this.totalizer.quantity) + Number(row.box_qty)  || 0
+    });
+
+    this.totalizer.weight = this.totalizer.weight.toFixed(2);
+    this.totalizer.value = this.totalizer.value.toFixed(2);
+    this.totalizer.operations = data.length;
+  }
+
+  editRow = (row) => {
+    this._tableService.editRowSubject.next(row);
+  }
+
+  deleteRow = (row) => {
+    this._tableService.deleteRowSubject.next(row);
+  }
+
+  sendBoxes = (row) => {
+    this._tableService.sendBoxesSubject.next(row);
   }
 
   applyFilter(data) {
     this.dataSource.filter = data.trim().toLowerCase();
+    this.calcTotals(this.dataSource.filteredData);
   }
 }

@@ -1,0 +1,44 @@
+<mat-toolbar mat-dialog-title color="primary">
+  <mat-toolbar-row>
+    <span> {{ data.title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-dialog-content>
+  <div class="form-container">
+    <mat-form-field>
+      <mat-select placeholder="Send to Warehouse"  [(ngModel)]="box.wh_id" [disabled]="box.id">
+          <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Send to customer"  [(ngModel)]="box.customer_id" [disabled]="box.id">
+            <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput type="number" min="0" (change)="changeQty($event.target.value)" max="maxQty" placeholder="Box Quantity" [(ngModel)]="box.quantity">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="Courier"  [(ngModel)]="box.courier_id" [disabled]="box.id">
+            <mat-option *ngFor="let courier of couriers" [value]="courier.id"> {{ courier.name }} </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput placeholder="Tracking" [(ngModel)]="box.tracking" [disabled]="box.id">
+    </mat-form-field>
+    <mat-form-field>
+        <mat-select placeholder="AWB N°" [(ngModel)]="box.id" (ngModelChange)="selectAwb(box.id)">
+            <mat-option [value]="''"> Select </mat-option>
+            <mat-option *ngFor="let awb of awbs" [value]="awb.id"> {{ awb.id }} </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="date" matInput [(ngModel)]="box.shipping_date" placeholder="Shipping date" [disabled]="box.id">
+    </mat-form-field>
+
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
+  <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
+</mat-dialog-actions>

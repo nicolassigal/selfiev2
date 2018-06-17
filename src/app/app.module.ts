@@ -22,6 +22,8 @@ import { HbrTableComponent } from './shared/hbr-table/hbr-table.component';
 import { TableService } from './shared/hbr-table/table.service';
 import { DeliveredComponent } from './delivered/delivered.component';
 import { TransitComponent } from './transit/transit.component';
+import { EditStockDialogComponent } from './stock/dialogs/edit-stock/edit-stock.component';
+import { SendStockDialogComponent } from './stock/dialogs/send-stock/send-stock.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +33,9 @@ import { TransitComponent } from './transit/transit.component';
     InfoComponent,
     HbrTableComponent,
     DeliveredComponent,
-    TransitComponent
+    TransitComponent,
+    EditStockDialogComponent,
+    SendStockDialogComponent
   ],
   imports: [
   BrowserModule,
@@ -51,6 +55,10 @@ import { TransitComponent } from './transit/transit.component';
   providers: [
     InfoService,
     TableService
+  ],
+  entryComponents: [
+    EditStockDialogComponent,
+    SendStockDialogComponent
   ],
   bootstrap: [AppComponent]
 })
