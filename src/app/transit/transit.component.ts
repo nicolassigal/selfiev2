@@ -11,7 +11,8 @@ import { saveAs } from 'file-saver';
 import { ReceivedStockDialogComponent } from './dialogs/received/received.component';
 import { MatDialog } from '@angular/material';
 import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
-
+import { ExpandTransitDialogComponent } from './dialogs/expand/expand.component';
+import * as _moment from 'moment';
 @Component({
   selector: 'app-transit',
   templateUrl: './transit.component.html',
@@ -20,6 +21,7 @@ import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
 export class TransitComponent implements OnInit, OnDestroy {
   loadingData = false;
   isMakingChangesOnData = false;
+  moment = _moment;
   data;
   fileUploader = '';
   couriers = [];
@@ -27,7 +29,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   warehouses = [];
   status = [];
   cols = [
-    { columnDef: 'actions', header: 'Actions', type: '', showReceived: true, cell: (element) => '' },
+    { columnDef: 'actions', header: 'Actions', type: '', showReceived: true, showExpand: true, cell: (element) => '' },
     { columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
@@ -52,15 +54,11 @@ export class TransitComponent implements OnInit, OnDestroy {
     this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
     this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
     this._db.collection('status').valueChanges().subscribe(status => this.status = status);
-    this._tableService.receivedBoxesSubject.subscribe(row => this.markAsReceived(row));
-    this._tableService.editRowSubject.subscribe(row => this.editTransit(row));
-    this._tableService.deleteRowSubject.subscribe(row => this.deleteTransit(row));
     this._db.collection('awbs', ref => ref.orderBy('id', 'desc'))
       .valueChanges()
       .subscribe(data => {
-        data.map(row => row.feature = 'transit');
         this.loadingData = false;
-        this.data = data.filter(row => row.status_id !== 3);
+        this.data = data.filter(row => row['status_id'] !== 3);
 
         this.data.map(row => {
           row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
@@ -68,7 +66,7 @@ export class TransitComponent implements OnInit, OnDestroy {
           row.status_id = row.status ? row.status.id : 0;
           row.status =  row.status ? row.status.name : null;
           row.destination = this.getDestination(row);
-        })
+        });
         if (!this.isMakingChangesOnData) {
           this._tableService.dataSubject.next(this.data);
         }
@@ -90,8 +88,17 @@ export class TransitComponent implements OnInit, OnDestroy {
     return destination;
   }
 
-  markAsReceived = (row) => {
-    if (row.feature === 'transit') {
+  onExpandRowDataEvent = (row) => {
+    this._dialog.open(ExpandTransitDialogComponent, {
+      data: {
+        row: row,
+        title: 'Processes',
+        confirmBtn: 'Ok',
+      }, width: '500px'
+    });
+  }
+
+  onReceivedRow = (row) => {
       this._dialog.open(ReceivedStockDialogComponent, {
         data: {
           row: row,
@@ -99,12 +106,10 @@ export class TransitComponent implements OnInit, OnDestroy {
           confirmBtn: 'Ok',
           cancelBtn: 'Cancel'
         }, width: '300px'
-      })
-    }
+      });
   }
 
-  editTransit = (row) => {
-    if (row.feature === 'transit') {
+  onEditRow = (row) => {
       this._dialog.open(EditTransitDialogComponent, {
         data: {
           row: row,
@@ -112,12 +117,10 @@ export class TransitComponent implements OnInit, OnDestroy {
           confirmBtn: 'Edit',
           cancelBtn: 'Cancel'
         }, width: '500px'
-      })
-    }
+      });
   }
 
-  deleteTransit = (row) => {
-    if (row.feature === 'transit') {
+  onDeleteRow = (row) => {
       this._dialog.open(DeleteTransitDialogComponent, {
         data: {
           row: row,
@@ -125,8 +128,7 @@ export class TransitComponent implements OnInit, OnDestroy {
           confirmBtn: 'Delete',
           cancelBtn: 'Cancel'
         }, width: '500px'
-      })
-    }
+      });
   }
 
   parseXLS = (evt: any) => {
@@ -241,34 +243,39 @@ export class TransitComponent implements OnInit, OnDestroy {
   }
 
   download = () => {
-    const ordered = [...this.data];
-    const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
+    const ordered = JSON.parse(JSON.stringify(this.data));
+    ordered.map(row => {
+      row.shipping_date = row.shipping_date ? this.moment.unix(row.shipping_date).format('DD-MM-YYYY') : null;
+      row.processes_list = '';
+      row.processes.map(process => {
+        row.processes_list = `${row.processes_list} ${process.hbr_id}`;
+      });
+
+      delete row.processes;
+      delete row.quantity;
+    });
+
+    const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.id) - Number(row2.id)), {
       header: [
-        'hbr_id',
-        'warehouse',
-        'courier',
-        'customer',
-        'contact_name',
-        'cuit',
-        'email',
-        'tel',
-        'address',
-        'city',
-        'country',
-        'date',
-        'description',
-        'destination',
-        'proforma',
-        'shipping_date',
+        'id',
+        'processes_list',
         'box_qty',
-        'total_value',
         'total_weight',
-        'tracking'
+        'total_value',
+        'shipping_date',
+        'courier_id',
+        'courier',
+        'tracking',
+        'wh_id',
+        'customer_id',
+        'destination',
+        'status_id',
+        'status'
       ]
     });
-    const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
+    const workbook: any = { Sheets: { 'in_transit': worksheet }, SheetNames: ['in_transit'] };
     const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', bookSST: true, type: 'binary' });
-    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'stock.xlsx');
+    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'in_transit.xlsx');
   }
 
   s2ab = (s) => {

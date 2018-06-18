@@ -10,5 +10,12 @@
       </button>
       <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">Download</button>
   </form>
-  <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
+  <app-hbr-table
+    [datasrc]="data"
+    [cols]="cols"
+    (editRowEvent)="onEditRow($event)"
+    (deleteRowEvent)="onDeleteRow($event)"
+    (ReceivedRowEvent)="onReceivedRow($event)"
+    (expandRowDataEvent)="onExpandRowDataEvent($event)"
+  ></app-hbr-table>
 </div>

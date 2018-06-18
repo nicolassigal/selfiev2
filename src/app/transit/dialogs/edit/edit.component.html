@@ -27,7 +27,7 @@
                         <input matInput placeholder="Tracking" [(ngModel)]="box.tracking">
                     </mat-form-field>
                     <mat-form-field>
-                        <mat-select placeholder="AWB N°"  [disabled]="box.id" [(ngModel)]="box.id" (ngModelChange)="selectAwb(box.id)">
+                        <mat-select placeholder="AWB N°"  [disabled]="box.id" [(ngModel)]="box.id">
                             <mat-option [value]="''"> Select </mat-option>
                             <mat-option *ngFor="let awb of awbs" [value]="awb.id"> {{ awb.id }} </mat-option>
                         </mat-select>
@@ -35,7 +35,7 @@
                     <mat-form-field>
                       <input type="date" matInput [(ngModel)]="box.shipping_date" placeholder="Shipping date">
                     </mat-form-field>
-                
+
                   </div>
       </mat-dialog-content>
       <mat-dialog-actions>

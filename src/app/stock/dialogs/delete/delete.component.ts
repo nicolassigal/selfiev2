@@ -14,11 +14,11 @@ export class DeleteStockDialogComponent implements OnInit {
     couriers = [];
     awbs = [];
     box = {
-        id: null, 
+        id: null,
         status_id: null,
-        processes: [], 
-        received_date: null, 
-        customer_id: null, 
+        processes: [],
+        received_date: null,
+        customer_id: null,
         wh_id: null,
         quantity: null,
         shipping_date: null
@@ -40,7 +40,8 @@ export class DeleteStockDialogComponent implements OnInit {
     }
 
     update = () => {
-        this._db.collection('operations').doc(`${this.data.row.hbr_id}`).delete()
+        this.data.row.deleted = 1;
+        this._db.collection('operations').doc(`${this.data.row.hbr_id}`).set(this.data.row)
             .then(res => this.closeDialog())
             .catch(err => console.log(err));
     }

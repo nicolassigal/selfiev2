@@ -12,11 +12,12 @@ export class ReceivedStockDialogComponent implements OnInit {
     warehouses = [];
     customers = [];
     box = {
-        id: null, 
+        id: null,
         status_id: null,
-        processes: [], 
-        received_date: null, 
-        customer_id: null, 
+        status: null,
+        processes: [],
+        received_date: null,
+        customer_id: null,
         wh_id: null
     };
     moment = _moment;
@@ -39,7 +40,8 @@ export class ReceivedStockDialogComponent implements OnInit {
     }
 
     update = () => {
-        if(this.box.status_id !== 3) {
+        this.box.status = this.status.filter(e => e.id === this.box.status_id)[0].name;
+        if (this.box.status_id !== 3) {
         this._db.collection('awbs')
             .doc(`${this.box.id}`)
             .set(this.box)
@@ -47,12 +49,6 @@ export class ReceivedStockDialogComponent implements OnInit {
             .catch(err => console.log(err));
         } else {
             let promises = [];
-            this._db.collection('awbs')
-                .doc(`${this.box.id}`)
-                .set(this.box)
-                .then(res => this._dialogRef.close())
-                .catch(err => console.log(err));
-
             this.box.received_date = this.box.received_date ? this.moment(this.box.received_date).unix() : null;
 
             this.box.processes.map(process => {
@@ -60,10 +56,17 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.wh_id = this.box.wh_id;
                 process.customer_id = this.box.customer_id;
                 process.destination = this.getDestination(process);
-                promises.push(this._db.collection('delivered').doc(`${process.hbr_id}`).set(process));
+                const id = this._db.createId();
+                promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
             });
             Promise.all(promises)
-                .then(res => console.log(res))
+                .then(res => {
+                  this._db.collection('awbs')
+                  .doc(`${this.box.id}`)
+                  .delete()
+                  .then(res => this._dialogRef.close())
+                  .catch(err => console.log(err));
+                })
                 .catch(err => console.log(err));
         }
     }

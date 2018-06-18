@@ -1,0 +1,30 @@
+.mat-toolbar {
+  margin: -24px;
+  margin-bottom: 0;
+  width: auto;
+}
+
+.mat-form-field-infix {
+width: 100% !important
+}
+.form-container{
+padding-top:30px;
+}
+.form-container > * {
+width: 100%;
+}
+.data {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.col {
+  width: 50%;
+  padding-bottom: 10px;
+  &-title {
+    font-weight: 700;
+  }
+  &-desc {
+    color: rgba(0,0,0,0.65);
+  }
+}

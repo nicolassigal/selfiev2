@@ -17,15 +17,17 @@ export class DeliveredComponent implements OnInit {
   data;
   fileUploader = '';
   cols = [
-    { columnDef: 'hbr_id', header: 'Hbr id',    cell: (element) => `${element.hbr_id}` },
-    { columnDef: 'warehouse',     header: 'Warehouse',   cell: (element) => `${element.warehouse ? element.warehouse : ''}`},
-    { columnDef: 'box_qty',     header: 'Box qty.',   cell: (element) => `${element.box_qty ? element.box_qty : ''}`},
-    { columnDef: 'total_weight',   header: 'Total Weight', cell: (element) =>
-      `${element.total_weight ? element.total_weight  + ' Kg.' : ''}`},
-    { columnDef: 'total_value',   header: 'Total Value', cell: (element) => `${element.total_value ? 'U$D' + element.total_value : ''}`},
-    { columnDef: 'description',   header: 'Description', cell: (element) => `${element.description ? element.description : ''}`},
-    { columnDef: 'customer',   header: 'Customer', cell: (element) => `${element.customer ? element.customer : ''}`},
-    { columnDef: 'date',   header: 'WH In date', cell: (element) => `${element.date ? element.date : ''}`}
+    { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
+    { columnDef: 'warehouse', header: 'Origin', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
+    { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
+    { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
+    { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
+    { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
+    { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
+    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
+    { columnDef: 'received_date', header: 'Delivered', type: 'date', cell: (element) => `${element.received_date ? element.received_date : ''}` },
+    { columnDef: 'destination', header: 'Final Destination', type: '', cell: (element) => `${element.destination ? element.destination : ''}` }
+
   ];
 
   constructor(
@@ -36,7 +38,7 @@ export class DeliveredComponent implements OnInit {
 
   ngOnInit() {
     this.loadingData = true;
-    this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
+    this._db.collection('delivered', ref => ref.orderBy('hbr_id', 'desc'))
     .valueChanges()
     .subscribe(data =>  {
       this.loadingData = false;

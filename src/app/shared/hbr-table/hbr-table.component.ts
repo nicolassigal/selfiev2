@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Observable, of } from 'rxjs';
@@ -15,6 +15,12 @@ export class HbrTableComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input('datasrc') datasrc;
   @Input('cols') cols;
+  @Output() editRowEvent = new EventEmitter<{}>();
+  @Output() deleteRowEvent = new EventEmitter<{}>();
+  @Output() sendRowEvent = new EventEmitter<{}>();
+  @Output() ReceivedRowEvent = new EventEmitter<{}>();
+  @Output() expandRowDataEvent = new EventEmitter<{}>();
+
   columns;
   isMobile;
   totalizer;
@@ -58,19 +64,23 @@ export class HbrTableComponent implements OnInit {
   }
 
   editRow = (row) => {
-    this._tableService.editRowSubject.next(row);
+    this.editRowEvent.emit(row);
   }
 
   deleteRow = (row) => {
-    this._tableService.deleteRowSubject.next(row);
+    this.deleteRowEvent.emit(row);
   }
 
   sendBoxes = (row) => {
-    this._tableService.sendBoxesSubject.next(row);
+    this.sendRowEvent.emit(row);
   }
 
   received = (row) => {
-    this._tableService.receivedBoxesSubject.next(row);
+    this.ReceivedRowEvent.emit(row);
+  }
+
+  expand = (row) => {
+    this.expandRowDataEvent.emit(row);
   }
 
   applyFilter(data) {

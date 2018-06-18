@@ -1,0 +1,46 @@
+<mat-toolbar mat-dialog-title color="primary">
+  <mat-toolbar-row>
+    <span> {{ data.title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-dialog-content>
+  <div class="form-container">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let p of process.processes" (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="col">
+              <span class="col-title">Id: </span>
+              <span class="col-desc"> #{{p.hbr_id}}</span>
+            </div>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="data">
+          <div class="col">
+            <span class="col-title">Box Qty: </span>
+            <span class="col-desc"> {{p.box_qty}}</span>
+          </div>
+          <div class="col">
+            <span class="col-title">Weight: </span>
+            <span class="col-desc">{{p.total_weight}} Kg.</span>
+          </div>
+          <div class="col">
+            <span class="col-title">Value: </span>
+            <span class="col-desc">U$D {{p.total_value}}</span>
+          </div>
+          <div class="col">
+            <span class="col-title">Customer: </span>
+            <span class="col-desc">{{p.customer}}</span>
+          </div>
+          <div class="col">
+            <span class="col-title">Desc.: </span>
+            <span class="col-desc">{{p.description}}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>{{ data.confirmBtn }}</button>
+</mat-dialog-actions>

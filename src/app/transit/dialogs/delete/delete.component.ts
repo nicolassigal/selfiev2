@@ -1,66 +1,89 @@
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
-import { Component, OnInit, Inject } from '@angular/core';
-import { AngularFirestore } from 'angularfire2/firestore';
-import * as _moment from 'moment';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from "@angular/material";
+import { Component, OnInit, Inject } from "@angular/core";
+import { AngularFirestore } from "angularfire2/firestore";
+import * as _moment from "moment";
+import { take } from "rxjs/operators";
+export interface Operation {
+  total_weight: number;
+  total_value: number;
+  box_qty: number;
+  hbr_id: number;
+  deleted: number;
+}
+
 @Component({
-    templateUrl: './delete.component.html',
-    styleUrls: ['./delete.component.scss']
+  templateUrl: "./delete.component.html",
+  styleUrls: ["./delete.component.scss"]
 })
 
 export class DeleteTransitDialogComponent implements OnInit {
-    status = [];
-    warehouses = [];
-    customers = [];
-    couriers = [];
-    awbs = [];
-    operations = [];
-    box = {
-        id: null, 
-        status_id: null,
-        processes: [], 
-        received_date: null, 
-        customer_id: null, 
-        wh_id: null,
-        quantity: null,
-        shipping_date: null
-    };
-    moment = _moment;
-    maxQty;
-    constructor(
-        private _dialogRef: MatDialogRef<any>,
-        private _dialog: MatDialog,
-        private _db: AngularFirestore,
-        @Inject(MAT_DIALOG_DATA) public data: any) { }
+  status = [];
+  warehouses = [];
+  customers = [];
+  couriers = [];
+  awbs = [];
+  operations = [];
+  box = {
+    id: null,
+    status_id: null,
+    processes: [],
+    received_date: null,
+    customer_id: null,
+    wh_id: null,
+    quantity: null,
+    shipping_date: null
+  };
+  moment = _moment;
+  maxQty;
 
-    ngOnInit(){
-        this.box = { ...this.data.row };
-        this._db.collection('operations').valueChanges().subscribe(operations => this.operations = operations);
-    }
+  constructor(
+    private _dialogRef: MatDialogRef<any>,
+    private _dialog: MatDialog,
+    private _db: AngularFirestore,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {}
 
-    public closeDialog() {
-        this._dialogRef.close();
-    }
+  ngOnInit() {
+    this.box = { ...this.data.row };
+  }
 
-    update = () => {
-        this.box.processes.map(process => {
-            this.operations.map(operation => {
-                if (operation.hbr_id === process.hbr_id) {
-                    let kgPerUnit = Number(operation.total_weight) / Number(operation.box_qty);
-                    let valuePerUnit = Number(operation.total_value) / Number(operation.box_qty);
+  public closeDialog() {
+    this._dialogRef.close();
+  }
 
-                    operation.box_qty = Number(process.box_qty) + Number(operation.box_qty);
-                    operation.total_weight = Number(operation.total_weight) * Number(operation.box_qty);
-                    operation.total_value = Number(operation.total_value) * Number(operation.box_qty);
+  update = () => {
+    let operationsPromiseArray = [];
+    this.box.processes.forEach(process => {
+      this._db.collection('operations', ref => ref.where('hbr_id', '==', process.hbr_id))
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((operation: Operation[]) => {
+        let op = operation[0];
+        if (op.box_qty > 0) {
+          const kgPerUnit = Number(op.total_weight) / Number(op.box_qty);
+          const valuePerUnit = Number(op.total_value) / Number(op.box_qty);
+          op.box_qty = Number(process.box_qty) + Number(op.box_qty);
+          op.total_weight = Number(kgPerUnit) * Number(op.box_qty);
+          op.total_value = Number(valuePerUnit) * Number(op.box_qty);
+        } else {
+          if (op.box_qty === 0) {
+            op.deleted = 0;
+          }
+          op.box_qty = Number(process.box_qty);
+          op.total_weight = Number(process.total_weight);
+          op.total_value = Number(process.total_value);
 
-                    this._db.collection('operations').doc(`${operation.hbr_id}`).set(operation)
-                        .then(res => console.log(res))
-                        .catch(err => console.log(err));
-                }
-            });
-        })
+        }
 
-        this._db.collection('awbs').doc(`${this.data.row.id}`).delete()
-            .then(res => this.closeDialog())
-            .catch(err => console.log(err));
-    }
+        operationsPromiseArray.push(this._db.collection('operations').doc(`${op.hbr_id}`).set(op));
+      });
+    });
+
+    Promise.all(operationsPromiseArray).then(res => {
+    this._db.collection('awbs').doc(`${this.data.row.id}`)
+        .delete()
+        .then(res => this.closeDialog())
+        .catch(err => console.log(err));
+    });
+  }
 }

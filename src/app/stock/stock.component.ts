@@ -49,19 +49,15 @@ export class StockComponent implements OnInit, OnDestroy {
     this.loadingData = true;
     this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
     this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
-    this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
+    this._db.collection('operations', ref => ref.where('deleted','==', 0).orderBy('hbr_id', 'desc'))
       .valueChanges()
       .subscribe(data => {
         this.loadingData = false;
-        data.map(row => row.feature = 'stock');
         this.data = data;
         if (!this.isMakingChangesOnData) {
           this._tableService.dataSubject.next(this.data);
         }
       });
-    this._tableService.editRowSubject.subscribe(row => this.editRow(row));
-    this._tableService.deleteRowSubject.subscribe(row => this.deleteRow(row));
-    this._tableService.sendBoxesSubject.subscribe(row => this.sendStock(row));
   }
 
   ngOnDestroy() {
@@ -200,6 +196,7 @@ export class StockComponent implements OnInit, OnDestroy {
     });
     Promise.all(customerPromise).then(res => console.log(res)).catch(err => console.log(err));
     data.map(entry => {
+      entry.deleted = 0;
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
       entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
@@ -1839,8 +1836,7 @@ export class StockComponent implements OnInit, OnDestroy {
     return maxid + 1;
   }
 
-  editRow = (row) => {
-    if (row.feature === 'stock') {
+  onEditRow = (row) => {
       this._dialog.open(EditStockDialogComponent, {
         data: {
           row: row,
@@ -1849,11 +1845,9 @@ export class StockComponent implements OnInit, OnDestroy {
           cancelBtn: 'Cancel'
         }, width: '500px'
       })
-    }
   }
 
-  deleteRow = (row) => {
-    if (row.feature === 'stock') {
+  onDeleteRow = (row) => {
       this._dialog.open(DeleteStockDialogComponent, {
         data: {
           row: row,
@@ -1862,11 +1856,9 @@ export class StockComponent implements OnInit, OnDestroy {
           cancelBtn: 'Cancel'
         }, width: '500px'
       })
-    }
   }
 
-  sendStock = (row) => {
-    if (row.feature === 'stock') {
+  onSendRow = (row) => {
       this._dialog.open(SendStockDialogComponent, {
         data: {
           row: row,
@@ -1875,6 +1867,5 @@ export class StockComponent implements OnInit, OnDestroy {
           cancelBtn: 'Cancel'
         }, width: '500px'
       })
-    }
   }
 }

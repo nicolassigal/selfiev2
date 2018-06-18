@@ -14,14 +14,17 @@ export class EditTransitDialogComponent implements OnInit {
     couriers = [];
     awbs = [];
     box = {
-        id: null, 
+        id: null,
         status_id: null,
-        processes: [], 
-        received_date: null, 
-        customer_id: null, 
+        processes: [],
+        received_date: null,
+        customer_id: null,
         wh_id: null,
         quantity: null,
-        shipping_date: null
+        shipping_date: null,
+        box_qty: null,
+        courier_id: null,
+        tracking: null
     };
     moment = _moment;
     maxQty;
@@ -33,7 +36,7 @@ export class EditTransitDialogComponent implements OnInit {
 
     ngOnInit(){
         this.box = { ...this.data.row };
-        this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null; 
+        this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null;
         this._db.collection('status').valueChanges().subscribe(status => this.status = status);
         this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
             .valueChanges()

@@ -28,6 +28,7 @@ import { SendStockDialogComponent } from './stock/dialogs/send-stock/send-stock.
 import { ReceivedStockDialogComponent } from './transit/dialogs/received/received.component';
 import { EditTransitDialogComponent } from './transit/dialogs/edit/edit.component';
 import { DeleteStockDialogComponent } from './stock/dialogs/delete/delete.component';
+import { ExpandTransitDialogComponent } from './transit/dialogs/expand/expand.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { DeleteStockDialogComponent } from './stock/dialogs/delete/delete.compon
     ReceivedStockDialogComponent,
     EditTransitDialogComponent,
     DeleteStockDialogComponent,
-    DeleteTransitDialogComponent
+    DeleteTransitDialogComponent,
+    ExpandTransitDialogComponent
   ],
   imports: [
   BrowserModule,
@@ -70,7 +72,8 @@ import { DeleteStockDialogComponent } from './stock/dialogs/delete/delete.compon
     ReceivedStockDialogComponent,
     EditTransitDialogComponent,
     DeleteStockDialogComponent,
-    DeleteTransitDialogComponent
+    DeleteTransitDialogComponent,
+    ExpandTransitDialogComponent
   ],
   bootstrap: [AppComponent]
 })

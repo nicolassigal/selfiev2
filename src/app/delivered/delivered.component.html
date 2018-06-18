@@ -3,11 +3,6 @@
       <mat-form-field>
           <input matInput (keyup)="setFilterData($event.target.value)" placeholder="Search" autocomplete="off">
       </mat-form-field>
-      <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
-      <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop">Upload File</button>
-      <button (click)="file.click()" mat-mini-fab color="primary" class="btn-mobile">
-          <mat-icon aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
-      </button>
       <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">Download</button>
   </form>
   <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>

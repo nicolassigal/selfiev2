@@ -10,13 +10,17 @@ import * as _moment from 'moment';
   export class EditStockDialogComponent implements OnInit {
     warehouses = [];
     customers = [];
-    box = { 
+    box = {
       date: null,
-      hbr_id: null, 
-      wh_id: null, 
+      hbr_id: null,
+      wh_id: null,
       warehouse: null,
       customer_id: null,
-      customer: null
+      customer: null,
+      box_qty: null,
+      total_weight: null,
+      total_value: null,
+      description: null
      };
     moment = _moment;
     constructor(
@@ -24,11 +28,11 @@ import * as _moment from 'moment';
       private _dialog: MatDialog,
       private _db: AngularFirestore,
       @Inject(MAT_DIALOG_DATA) public data: any) { }
-  
-    
+
+
     ngOnInit(){
       this.box = { ...this.data.row };
-      this.box.date = this.box.date ? this.moment.unix(this.box.date).format("YYYY-MM-DD") : null; 
+      this.box.date = this.box.date ? this.moment.unix(this.box.date).format("YYYY-MM-DD") : null;
       this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
       .valueChanges()
       .subscribe(warehouses => this.warehouses = warehouses);
@@ -36,7 +40,7 @@ import * as _moment from 'moment';
       .valueChanges()
       .subscribe(customers => this.customers = customers);
     }
-  
+
     update = () => {
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh =>wh.id === this.box.wh_id)[0].name : null;
@@ -48,7 +52,7 @@ import * as _moment from 'moment';
         this._dialogRef.close();
       }).catch(err => console.log(err));
     }
-  
+
     public closeDialog() {
       this._dialogRef.close();
     }

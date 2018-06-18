@@ -24,7 +24,9 @@ export class SendStockDialogComponent implements OnInit {
         total_weight: 0,
         total_value: 0,
         box_qty: 0,
-        status_id: 0
+        status_id: 0,
+        courier_id: null,
+        tracking: null,
     };
     maxQty;
     constructor(
@@ -44,7 +46,7 @@ export class SendStockDialogComponent implements OnInit {
         this._db.collection('users', ref => ref.orderBy('name', 'asc'))
             .valueChanges()
             .subscribe(users => this.customers = users);
-        this._db.collection('awbs', ref => ref.orderBy('id', 'asc'))
+        this._db.collection('awbs', ref => ref.where('id', '<', 3).orderBy('id', 'asc'))
             .valueChanges()
             .subscribe(awbs => this.awbs = awbs);
     }
@@ -65,7 +67,7 @@ export class SendStockDialogComponent implements OnInit {
     selectAwb(awb) {
         if (awb) {
             this.box = { ...this.awbs.filter(el => el.id === awb)[0] };
-            this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null; 
+            this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null;
             this.box.quantity = null;
         } else {
             this.box = {
@@ -78,7 +80,9 @@ export class SendStockDialogComponent implements OnInit {
                 total_weight: 0,
                 total_value: 0,
                 box_qty: 0,
-                status: 0
+                status_id: 0,
+                courier_id: null,
+                tracking: null
             };
         }
     }
@@ -94,7 +98,7 @@ export class SendStockDialogComponent implements OnInit {
     /**
      * update airwaybill in database
      */
-    private update() {
+    update() {
         if (this.box.quantity) {
             let attachedProcess = { ...this.data.row };
             attachedProcess.box_qty = this.box.quantity;
@@ -125,6 +129,9 @@ export class SendStockDialogComponent implements OnInit {
             this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
             this.data.row.total_value = Number(valuePerUnit) * Number(this.data.row.box_qty);
 
+            if (this.data.row.box_qty === 0) {
+              this.data.row.deleted = 1;
+            }
             //get box id
             this.box.id = this.box.id === null ? this.getId() : this.box.id;
             this.box.status_id = 0;
