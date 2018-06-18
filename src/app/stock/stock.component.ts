@@ -12,7 +12,8 @@ import { SendStockDialogComponent } from './dialogs/send-stock/send-stock.compon
 import { EditStockDialogComponent } from './dialogs/edit-stock/edit-stock.component';
 import * as _moment from 'moment';
 import { DeleteStockDialogComponent } from './dialogs/delete/delete.component';
-
+import { take } from 'rxjs/operators';
+import * as firebase from 'firebase';
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
@@ -1780,6 +1781,23 @@ export class StockComponent implements OnInit, OnDestroy {
     let p = [];
     users.map(user => p.push(this._db.collection('users').doc(`${user.id}`).set(user)));
     Promise.all(p).then(res => console.log(res));
+  }
+
+  updateUserPass = () => {
+    let p = [];
+    this._db.collection('users')
+    .valueChanges()
+    .pipe(take(1))
+    .subscribe(u => {
+      let users = JSON.parse(JSON.stringify(u));
+      users.map(user => {
+        user.username = `username_${user.id}@tucourier.com.ar`;
+        user.password = `password_${user.id}`;
+        // p.push(this._db.collection('users').doc(`${user.id}`).set(user));
+        firebase.auth().createUserWithEmailAndPassword(user.username, user.password);
+      });
+     // Promise.all(p).then(res => console.log(res));
+    })
   }
 
   download = () => {
