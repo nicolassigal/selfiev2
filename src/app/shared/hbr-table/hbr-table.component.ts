@@ -69,6 +69,10 @@ export class HbrTableComponent implements OnInit {
     this._tableService.sendBoxesSubject.next(row);
   }
 
+  received = (row) => {
+    this._tableService.receivedBoxesSubject.next(row);
+  }
+
   applyFilter(data) {
     this.dataSource.filter = data.trim().toLowerCase();
     this.calcTotals(this.dataSource.filteredData);

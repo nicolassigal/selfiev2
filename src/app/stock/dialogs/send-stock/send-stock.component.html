@@ -6,12 +6,12 @@
 <mat-dialog-content>
   <div class="form-container">
     <mat-form-field>
-      <mat-select placeholder="Send to Warehouse"  [(ngModel)]="box.wh_id" [disabled]="box.id">
+      <mat-select placeholder="Send to Warehouse" (ngModelChange)="clearSelect('wh')"  [(ngModel)]="box.wh_id" [disabled]="box.id">
           <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
       </mat-select>
     </mat-form-field>
     <mat-form-field>
-        <mat-select placeholder="Send to customer"  [(ngModel)]="box.customer_id" [disabled]="box.id">
+        <mat-select placeholder="Send to customer" (ngModelChange)="clearSelect('customer')"  [(ngModel)]="box.customer_id" [disabled]="box.id">
             <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
         </mat-select>
     </mat-form-field>

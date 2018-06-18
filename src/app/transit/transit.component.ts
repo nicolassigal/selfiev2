@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { DeleteTransitDialogComponent } from './dialogs/delete/delete.component';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { WorkersService } from '../workers.service';
@@ -7,59 +8,125 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
 import { TableService } from '../shared/hbr-table/table.service';
 import { saveAs } from 'file-saver';
+import { ReceivedStockDialogComponent } from './dialogs/received/received.component';
+import { MatDialog } from '@angular/material';
+import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
 
 @Component({
   selector: 'app-transit',
   templateUrl: './transit.component.html',
   styleUrls: ['./transit.component.scss']
 })
-export class TransitComponent implements OnInit {
+export class TransitComponent implements OnInit, OnDestroy {
   loadingData = false;
   isMakingChangesOnData = false;
   data;
   fileUploader = '';
+  couriers = [];
+  customers = [];
+  warehouses = [];
+  status = [];
   cols = [
+    { columnDef: 'actions', header: 'Actions', type: '', showReceived: true, cell: (element) => '' },
     { columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
-    {
-      columnDef: 'total_weight', header: 'Total Weight', cell: (element) =>
-        `${element.total_weight ? element.total_weight + ' Kg.' : ''}`
-    },
-    { columnDef: 'total_value', header: 'Total Value', cell: (element) => `${element.total_value ? 'U$D' + element.total_value : ''}` },
-    { columnDef: 'shipping_date', header: 'Shipping Date', cell: (element) => `${element.date ? element.date : ''}` }
-    { columnDef: 'courier', header: 'Courier', cell: (element) => `${element.courier ? element.courier : ''}` },
-    { columnDef: 'tracking', header: 'Tracking', cell: (element) => `${element.tracking ? element.tracking : ''}` },
-    { columnDef: 'destination', header: 'Destination', cell: (element) => `${element.destination ? element.destination : ''}` },
-    { columnDef: 'status', header: 'Status', cell: (element) => `${element.status ? element.status : ''}` },
+    { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
+    { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : ''}` },
+    { columnDef: 'shipping_date', header: 'Shipping Date', type: 'date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}` },
+    { columnDef: 'courier', header: 'Courier', type: '', cell: (element) => `${element.courier ? element.courier : ''}` },
+    { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
+    { columnDef: 'destination', header: 'Destination', type: '', cell: (element) => `${element.destination ? element.destination : ''}` },
+    { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.status ? element.status : ''}` }
   ];
 
   constructor(
     private _worker: WorkersService,
     private infoService: InfoService,
     private _db: AngularFirestore,
-    private _tableService: TableService) { }
+    private _tableService: TableService,
+    private _dialog: MatDialog) { }
 
   ngOnInit() {
     this.loadingData = true;
+    this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
+    this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
+    this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
+    this._db.collection('status').valueChanges().subscribe(status => this.status = status);
+    this._tableService.receivedBoxesSubject.subscribe(row => this.markAsReceived(row));
+    this._tableService.editRowSubject.subscribe(row => this.editTransit(row));
+    this._tableService.deleteRowSubject.subscribe(row => this.deleteTransit(row));
     this._db.collection('awbs', ref => ref.orderBy('id', 'desc'))
       .valueChanges()
       .subscribe(data => {
+        data.map(row => row.feature = 'transit');
         this.loadingData = false;
-        this.data = data;
-        this.data.box_qty = 0;
-        this.data.total_weight = 0;
-        this.data.total_value = 0;
+        this.data = data.filter(row => row.status_id !== 3);
+
         this.data.map(row => {
-          row.processes.map(process => {
-            this.data.box_qty = this.data.box_qty + Number(process.box_qty);
-            this.data.total_weight = this.data.total_weight + Number(process.total_weight);
-            this.data.total_value = this.data.total_value + Number(process.total_value);
-          })
+          row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
+          row.status = this.status.filter(e => e.id === row.status_id)[0];
+          row.status_id = row.status ? row.status.id : 0;
+          row.status =  row.status ? row.status.name : null;
+          row.destination = this.getDestination(row);
         })
         if (!this.isMakingChangesOnData) {
           this._tableService.dataSubject.next(this.data);
         }
       });
+  }
+
+  ngOnDestroy() {
+  }
+
+  getDestination = (row) => {
+    let destination = null;
+    if (row.wh_id) {
+      let warehouse = this.warehouses.filter(wh => wh.id === row.wh_id)[0];
+      destination = warehouse.name ? `WH: ${warehouse.name}` : null;
+    } else if (row.customer_id) {
+      let customer = this.customers.filter(customer => customer.id === row.customer_id)[0];
+      destination = customer.name ? `${customer.name}` : null;
+    }
+    return destination;
+  }
+
+  markAsReceived = (row) => {
+    if (row.feature === 'transit') {
+      this._dialog.open(ReceivedStockDialogComponent, {
+        data: {
+          row: row,
+          title: 'Mark as...',
+          confirmBtn: 'Ok',
+          cancelBtn: 'Cancel'
+        }, width: '300px'
+      })
+    }
+  }
+
+  editTransit = (row) => {
+    if (row.feature === 'transit') {
+      this._dialog.open(EditTransitDialogComponent, {
+        data: {
+          row: row,
+          title: 'Edit Box in transit',
+          confirmBtn: 'Edit',
+          cancelBtn: 'Cancel'
+        }, width: '500px'
+      })
+    }
+  }
+
+  deleteTransit = (row) => {
+    if (row.feature === 'transit') {
+      this._dialog.open(DeleteTransitDialogComponent, {
+        data: {
+          row: row,
+          title: 'Delete Box in transit',
+          confirmBtn: 'Delete',
+          cancelBtn: 'Cancel'
+        }, width: '500px'
+      })
+    }
   }
 
   parseXLS = (evt: any) => {

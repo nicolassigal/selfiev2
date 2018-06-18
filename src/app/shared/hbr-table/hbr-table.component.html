@@ -10,6 +10,7 @@
         <mat-menu #appMenu="matMenu">
           <button mat-menu-item (click)="editRow(row)">Edit</button>
           <button *ngIf="column.showSendStock" mat-menu-item (click)="sendBoxes(row)">Send Boxes</button>
+          <button *ngIf="column.showReceived" mat-menu-item (click)="received(row)">Mark as...</button>
           <button mat-menu-item (click)="deleteRow(row)">Delete</button>
         </mat-menu>
       </mat-cell>

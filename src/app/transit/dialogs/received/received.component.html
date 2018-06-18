@@ -1,0 +1,21 @@
+<mat-toolbar mat-dialog-title color="primary">
+  <mat-toolbar-row>
+    <span> {{ data.title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<mat-dialog-content>
+  <div class="form-container">
+    <mat-form-field>
+      <mat-select placeholder="Status" [(ngModel)]="box.status_id">
+        <mat-option *ngFor="let e of status" [value]="e.id"> {{ e.name }} </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field  *ngIf="box.status_id === 3">
+        <input type="date" matInput [(ngModel)]="box.received_date" placeholder="Received date">
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
+  <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
+</mat-dialog-actions>

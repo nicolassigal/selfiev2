@@ -10,4 +10,5 @@ export class TableService {
   editRowSubject: Subject<any> = new Subject<any>();
   deleteRowSubject: Subject<any> = new Subject<any>();
   sendBoxesSubject: Subject<any> = new Subject<any>();
+  receivedBoxesSubject: Subject<any> = new Subject<any>();
 }

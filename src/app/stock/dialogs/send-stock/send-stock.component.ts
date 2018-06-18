@@ -1,7 +1,7 @@
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
-
+import * as _moment from 'moment';
 @Component({
     templateUrl: './send-stock.component.html',
     styleUrls: ['./../dialog.component.scss']
@@ -13,11 +13,18 @@ export class SendStockDialogComponent implements OnInit {
     couriers = [];
     warehouses = [];
     awbs = [];
+    moment = _moment;
     box = {
         id: null,
         shipping_date: null,
         processes: [],
         quantity: null,
+        customer_id: null,
+        wh_id: null,
+        total_weight: 0,
+        total_value: 0,
+        box_qty: 0,
+        status_id: 0
     };
     maxQty;
     constructor(
@@ -58,8 +65,7 @@ export class SendStockDialogComponent implements OnInit {
     selectAwb(awb) {
         if (awb) {
             this.box = { ...this.awbs.filter(el => el.id === awb)[0] };
-            let splitted = this.box.shipping_date.split('/');
-            this.box.shipping_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
+            this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null; 
             this.box.quantity = null;
         } else {
             this.box = {
@@ -67,21 +73,65 @@ export class SendStockDialogComponent implements OnInit {
                 shipping_date: null,
                 processes: [],
                 quantity: null,
+                customer_id: null,
+                wh_id: null,
+                total_weight: 0,
+                total_value: 0,
+                box_qty: 0,
+                status: 0
             };
         }
     }
 
+    clearSelect (feature) {
+        if (feature === 'wh') {
+            this.box.customer_id  = null;
+        } else {
+            this.box.wh_id  = null;
+        }
+    }
+
+    /**
+     * update airwaybill in database
+     */
     private update() {
         if (this.box.quantity) {
             let attachedProcess = { ...this.data.row };
             attachedProcess.box_qty = this.box.quantity;
             attachedProcess.doc_id = this._db.createId();
-            this.box.processes.push({ ...attachedProcess });
-            this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
-            let splitted = this.box.shipping_date.split('-');
-            this.box.shipping_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-            this.box.id = this.box.id === null ? this.getId() : this.box.id;
 
+            //get value per unit
+            let kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
+            let valuePerUnit = Number(this.data.row.total_value) / Number(this.data.row.box_qty);
+
+            //calc actual weight and value in transit
+            attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
+            attachedProcess.total_value = Number(valuePerUnit) * Number(attachedProcess.box_qty);
+
+            this.box.processes.push({ ...attachedProcess });
+
+            //calc total values in guide
+            this.box.total_weight = 0;
+            this.box.total_value = 0;
+            this.box.box_qty = 0;
+            this.box.processes.map(process => {
+                this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
+                this.box.total_value = Number(this.box.total_value) + Number(process.total_value);
+                this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
+            });
+
+            //calc remaining values in stock
+            this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
+            this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
+            this.data.row.total_value = Number(valuePerUnit) * Number(this.data.row.box_qty);
+
+            //get box id
+            this.box.id = this.box.id === null ? this.getId() : this.box.id;
+            this.box.status_id = 0;
+            //parse date to unix timestamp
+            this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
+            console.log(this.box, this.data.row);
+            //push to database
             this._db.collection('awbs').doc(`${this.box.id}`).set(this.box)
                 .then(res => {
                     this._db.collection('operations')
@@ -95,6 +145,9 @@ export class SendStockDialogComponent implements OnInit {
         }
     }
 
+    /**
+     * gets max id and returns the next one
+     */
     private getId = () => {
         let maxid = 0;
         this.awbs.map(awb => {

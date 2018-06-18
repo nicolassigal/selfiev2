@@ -1,5 +1,5 @@
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MAT_AUTOCOMPLETE_VALUE_ACCESSOR } from '@angular/material';
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { WorkersService } from '../workers.service';
@@ -11,13 +11,14 @@ import { saveAs } from 'file-saver';
 import { SendStockDialogComponent } from './dialogs/send-stock/send-stock.component';
 import { EditStockDialogComponent } from './dialogs/edit-stock/edit-stock.component';
 import * as _moment from 'moment';
+import { DeleteStockDialogComponent } from './dialogs/delete/delete.component';
 
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
   styleUrls: ['./stock.component.scss']
 })
-export class StockComponent implements OnInit {
+export class StockComponent implements OnInit, OnDestroy {
   loadingData = false;
   data;
   fileUploader = '';
@@ -34,7 +35,7 @@ export class StockComponent implements OnInit {
     { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
     { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
     { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
+    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
   ];
 
   constructor(
@@ -52,6 +53,7 @@ export class StockComponent implements OnInit {
       .valueChanges()
       .subscribe(data => {
         this.loadingData = false;
+        data.map(row => row.feature = 'stock');
         this.data = data;
         if (!this.isMakingChangesOnData) {
           this._tableService.dataSubject.next(this.data);
@@ -60,6 +62,9 @@ export class StockComponent implements OnInit {
     this._tableService.editRowSubject.subscribe(row => this.editRow(row));
     this._tableService.deleteRowSubject.subscribe(row => this.deleteRow(row));
     this._tableService.sendBoxesSubject.subscribe(row => this.sendStock(row));
+  }
+
+  ngOnDestroy() {
   }
 
   parseXLS = (evt: any) => {
@@ -138,9 +143,9 @@ export class StockComponent implements OnInit {
         if (rowCourier && rowCourier.length) {
           let id = this.getId(this.couriers);
           let courierToAdd = {
-             id: id, 
-             name: rowCourier.toUpperCase()
-             };
+            id: id,
+            name: rowCourier.toUpperCase()
+          };
           if (!newCouriers.some(e => e.id === courierToAdd.id)) {
             row.courier_id = courierToAdd.id;
             newCouriers.push(courierToAdd);
@@ -155,20 +160,20 @@ export class StockComponent implements OnInit {
         if (rowCustomer && rowCustomer.length) {
           let id = this.getId(this.customers);
           let customerToAdd = {
-             id: id, 
-             name: this.capitalizeText(rowCustomer),
-             products: null,
-             cuit: null,
-             tel: null,
-             email: null,
-             address: null,
-             contact_name: null,
-             country: null,
-             city: null,
-             username: null,
-             password: null,
-             deleted: null
-             };
+            id: id,
+            name: this.capitalizeText(rowCustomer),
+            products: null,
+            cuit: null,
+            tel: null,
+            email: null,
+            address: null,
+            contact_name: null,
+            country: null,
+            city: null,
+            username: null,
+            password: null,
+            deleted: null
+          };
           if (!newCustomers.some(e => e.id === customerToAdd.id)) {
             row.customer_id = customerToAdd.id;
             newCustomers.push(customerToAdd);
@@ -1835,35 +1840,41 @@ export class StockComponent implements OnInit {
   }
 
   editRow = (row) => {
-    this._dialog.open(EditStockDialogComponent, {
-      data: {
-        row: row,
-        title: 'Edit Operation',
-        confirmBtn: 'Save',
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
+    if (row.feature === 'stock') {
+      this._dialog.open(EditStockDialogComponent, {
+        data: {
+          row: row,
+          title: 'Edit Operation',
+          confirmBtn: 'Save',
+          cancelBtn: 'Cancel'
+        }, width: '500px'
+      })
+    }
   }
 
   deleteRow = (row) => {
-    this._dialog.open(EditStockDialogComponent, {
-      data: {
-        row: row,
-        title: 'Delete Operation',
-        confirmBtn: 'Delete',
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
+    if (row.feature === 'stock') {
+      this._dialog.open(DeleteStockDialogComponent, {
+        data: {
+          row: row,
+          title: 'Delete Operation',
+          confirmBtn: 'Delete',
+          cancelBtn: 'Cancel'
+        }, width: '500px'
+      })
+    }
   }
 
   sendStock = (row) => {
-    this._dialog.open(SendStockDialogComponent, {
-      data: {
-        row: row,
-        title: 'Send Boxes',
-        confirmBtn: 'Send',
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
+    if (row.feature === 'stock') {
+      this._dialog.open(SendStockDialogComponent, {
+        data: {
+          row: row,
+          title: 'Send Boxes',
+          confirmBtn: 'Send',
+          cancelBtn: 'Cancel'
+        }, width: '500px'
+      })
+    }
   }
 }
