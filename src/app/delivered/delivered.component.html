@@ -1,9 +1,14 @@
 <div class="delivered" *ngIf="!loadingData">
-  <form>
-      <mat-form-field>
-          <input matInput (keyup)="setFilterData($event.target.value)" placeholder="Search" autocomplete="off">
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">Download</button>
-  </form>
-  <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
+    <form>
+        <div class="btn-container">
+            <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">
+                <mat-icon>cloud_download</mat-icon>
+                Download
+            </button>
+        </div>
+    </form>
+    <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
 </div>
+<div *ngIf="loadingData" class="spinner-container">
+        <app-spinner></app-spinner>
+    </div>

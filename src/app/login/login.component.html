@@ -1,0 +1,13 @@
+<mat-toolbar color="primary">HBR Selfie</mat-toolbar>
+<div class="login-container">
+  <img src="./../../assets/bg.jpg" />
+  <form>
+    <mat-form-field>
+      <input matInput type="email" placeholder="Username" name="username" [(ngModel)]="user.username" autocomplete="off" required>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="password" placeholder="Password" name="username" [(ngModel)]="user.password" autocomplete="off" required>
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="login()"> Log In</button>
+  </form>
+</div>

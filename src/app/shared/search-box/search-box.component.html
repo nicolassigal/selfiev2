@@ -1,0 +1,5 @@
+<div class="search-box">
+  <input type="text" placeholder="Search" [(ngModel)]="query" (keyup)="filterData($event.target.value)">
+  <mat-icon *ngIf="!isFiltering">search</mat-icon>
+  <mat-icon *ngIf="isFiltering" (click)="clear()">close</mat-icon>
+</div>

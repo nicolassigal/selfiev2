@@ -29,6 +29,11 @@ import { ReceivedStockDialogComponent } from './transit/dialogs/received/receive
 import { EditTransitDialogComponent } from './transit/dialogs/edit/edit.component';
 import { DeleteStockDialogComponent } from './stock/dialogs/delete/delete.component';
 import { ExpandTransitDialogComponent } from './transit/dialogs/expand/expand.component';
+import { SearchBoxComponent } from './shared/search-box/search-box.component';
+import { SpinnerComponent } from './shared/spinner/spinner.component';
+import { LoginComponent } from './login/login.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { AuthGuard } from './shared/auth.guard';
 
 @NgModule({
   declarations: [
@@ -45,26 +50,31 @@ import { ExpandTransitDialogComponent } from './transit/dialogs/expand/expand.co
     EditTransitDialogComponent,
     DeleteStockDialogComponent,
     DeleteTransitDialogComponent,
-    ExpandTransitDialogComponent
+    ExpandTransitDialogComponent,
+    SearchBoxComponent,
+    SpinnerComponent,
+    LoginComponent,
+    DashboardComponent
   ],
   imports: [
   BrowserModule,
     AppRoutingModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule.enablePersistence(),
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
     BrowserAnimationsModule,
     HttpModule,
     FormsModule,
     ReactiveFormsModule,
     MaterialModule,
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule.enablePersistence(),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     LayoutModule
   ],
   providers: [
     InfoService,
-    TableService
+    TableService,
+    AuthGuard
   ],
   entryComponents: [
     EditStockDialogComponent,

@@ -187,7 +187,12 @@ export class StockComponent implements OnInit, OnDestroy {
     let courierPromise = [];
     newCustomers.map(customer => {
       if (customer) {
-        customerPromise.push(this._db.collection('users').doc(`${this.getId(this.customers)}`).set(customer))
+        customer.username = `username_${customer.id}@tucourier.com.ar`;
+        customer.password = `password_${customer.id}`;
+        customer.changed_pwd = false;
+        customer.id = this.getId(this.customers);
+        firebase.auth().createUserWithEmailAndPassword(customer.username, customer.password);
+        customerPromise.push(this._db.collection('users').doc(`${customer.id}`).set(customer))
       }
     });
     newCouriers.map(courier => {
@@ -231,10 +236,6 @@ export class StockComponent implements OnInit, OnDestroy {
   finishProccesing = () => {
     this.fileUploader = '';
     setTimeout(this.infoService.hideMessage, 3000);
-  }
-
-  setFilterData = (data) => {
-    this._tableService.filterSubject.next(data);
   }
 
   capitalizeText = (text) => {
@@ -1791,12 +1792,15 @@ export class StockComponent implements OnInit, OnDestroy {
     .subscribe(u => {
       let users = JSON.parse(JSON.stringify(u));
       users.map(user => {
-        user.username = `username_${user.id}@tucourier.com.ar`;
-        user.password = `password_${user.id}`;
-        // p.push(this._db.collection('users').doc(`${user.id}`).set(user));
-        firebase.auth().createUserWithEmailAndPassword(user.username, user.password);
+        if (user.username !== `username_${user.id}@tucourier.com.ar`){
+          user.username = `username_${user.id}@tucourier.com.ar`;
+          user.password = `password_${user.id}`;
+          user.changed_pwd = false;
+          firebase.auth().createUserWithEmailAndPassword(user.username, user.password);
+          p.push(this._db.collection('users').doc(`${user.id}`).set(user));
+        }
       });
-     // Promise.all(p).then(res => console.log(res));
+     Promise.all(p).then(res => console.log(res));
     })
   }
 

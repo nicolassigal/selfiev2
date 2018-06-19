@@ -1,0 +1,28 @@
+.search-box {
+    background: lighten(#3f51b5, 5%);
+    width: 300px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    .mat-icon {
+        padding: 8px;
+    }
+    input {
+        color: white;
+        font-weight: 500;
+        width: 100%;
+        border: none;
+        padding: 5px;
+        padding-left: 15px;
+        background: lighten(#3f51b5, 5%);
+        &::placeholder {
+            color: white;
+        }
+        &:focus, &:active, &:active:focus {
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+    }
+}
