@@ -1,0 +1,20 @@
+.mat-toolbar {
+    margin: -24px;
+    margin-bottom: 0;
+    width: auto;
+}
+.form-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 30px;
+  }
+
+  .form-container > * {
+    width: calc(50% - 10px);
+  }
+.error {
+  font-size: 12px;
+  color: red;
+}

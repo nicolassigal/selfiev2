@@ -15,6 +15,7 @@ export class HbrTableComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input('datasrc') datasrc;
   @Input('cols') cols;
+  @Input('noTotal') noTotal;
   @Output() editRowEvent = new EventEmitter<{}>();
   @Output() deleteRowEvent = new EventEmitter<{}>();
   @Output() sendRowEvent = new EventEmitter<{}>();

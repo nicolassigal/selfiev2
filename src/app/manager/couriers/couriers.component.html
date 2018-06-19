@@ -1,0 +1,14 @@
+<div class="couriers" *ngIf="!loadingData">
+    <form>
+        <div class="btn-container">
+            <button mat-raised-button color="primary" (click)="add()" class="btn-desktop">
+                <mat-icon>add</mat-icon>
+                Add
+            </button>
+        </div>
+    </form>
+    <app-hbr-table [datasrc]="data" [cols]="cols" [noTotal]="true"></app-hbr-table>
+</div>
+<div *ngIf="loadingData" class="spinner-container">
+        <app-spinner></app-spinner>
+    </div>

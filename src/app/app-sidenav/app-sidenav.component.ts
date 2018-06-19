@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
 import { ActivatedRoute, Router, ChildActivationEnd, NavigationEnd, ActivationEnd, RouterEvent } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { AuthService } from '../shared/auth.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -22,14 +23,22 @@ export class AppSidenavComponent implements OnInit {
   constructor(
     private breakpointObserver: BreakpointObserver,
     private router: Router,
-    private titleService: Title) {}
+    private titleService: Title,
+    private authService: AuthService) {}
 
-    ngOnInit(){
+    ngOnInit() {
       this.router.events
       .pipe(filter(e => e instanceof ActivationEnd))
-      .subscribe((event: ActivationEnd) =>{ 
+      .subscribe((event: ActivationEnd) =>{
         this.title = event.snapshot.data.title;
         this.titleService.setTitle(`HBR Selfie | ${this.title}`);
+      });
+    }
+
+    logOut = () => {
+      this.authService._logOut().then(res => {
+        this.authService._clear();
+        this.router.navigate(['login']);
       });
     }
   }

@@ -1792,13 +1792,8 @@ export class StockComponent implements OnInit, OnDestroy {
     .subscribe(u => {
       let users = JSON.parse(JSON.stringify(u));
       users.map(user => {
-        if (user.username !== `username_${user.id}@tucourier.com.ar`){
-          user.username = `username_${user.id}@tucourier.com.ar`;
-          user.password = `password_${user.id}`;
-          user.changed_pwd = false;
-          firebase.auth().createUserWithEmailAndPassword(user.username, user.password);
+          user.role = 0;
           p.push(this._db.collection('users').doc(`${user.id}`).set(user));
-        }
       });
      Promise.all(p).then(res => console.log(res));
     })

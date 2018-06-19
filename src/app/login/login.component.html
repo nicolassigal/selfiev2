@@ -1,13 +1,87 @@
 <mat-toolbar color="primary">HBR Selfie</mat-toolbar>
 <div class="login-container">
   <img src="./../../assets/bg.jpg" />
-  <form>
+  <form #logForm *ngIf="loginFormActive" class="login">
+    <mat-toolbar mat-dialog-title color="primary">
+      <mat-toolbar-row>
+        <span> Login</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
     <mat-form-field>
-      <input matInput type="email" placeholder="Username" name="username" [(ngModel)]="user.username" autocomplete="off" required>
+      <input type="email" required autocomplete="off" matInput placeholder="E-mail" [(ngModel)]="email" name="email" class="example-right-align"
+        [disabled]="loggingin">
     </mat-form-field>
     <mat-form-field>
-      <input matInput type="password" placeholder="Password" name="username" [(ngModel)]="user.password" autocomplete="off" required>
+      <input type="password" required autocomplete="off" matInput placeholder="Password" [(ngModel)]="password" name="password"
+        class="example-right-align" [disabled]="loggingin">
     </mat-form-field>
-    <button mat-raised-button color="primary" (click)="login()"> Log In</button>
+    <div class="action-buttons">
+      <button class="raised" mat-raised-button color="primary" (click)="login()" [disabled]="loggingin">
+        <span *ngIf="!loggingin">Log In</span>
+        <span *ngIf="loggingin">Please Wait...</span>
+      </button>
+      <button mat-button color="primary" (click)="switchTo()">Don't have an account? register</button>
+    </div>
+    <div *ngIf="error && error.length" class="error-logs">
+      <p>{{error}}</p>
+    </div>
+  </form>
+
+  <form #regForm *ngIf="!loginFormActive" class="register">
+    <mat-toolbar mat-dialog-title color="primary">
+      <mat-toolbar-row>
+        <span> Register</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+    <div class="form-container">
+      <mat-form-field>
+        <input type="email" required autocomplete="off" matInput placeholder="E-mail" [(ngModel)]="email" name="email" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="Name" [(ngModel)]="user.name" name="name" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" autocomplete="off" matInput placeholder="Cuit" [(ngModel)]="user.cuit" name="cuit" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="Tel" [(ngModel)]="user.tel" name="tel" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="Address" [(ngModel)]="user.address" name="address" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="City" [(ngModel)]="user.city" name="city" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="Country" [(ngModel)]="user.country" name="country" class="example-right-align"
+          [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="password" required autocomplete="off" matInput placeholder="Password" [(ngModel)]="password" name="password"
+          class="example-right-align" [disabled]="registered || registering">
+      </mat-form-field>
+      <mat-form-field>
+        <input type="password" required autocomplete="off" matInput placeholder="Repeat password" [(ngModel)]="password2" name="password2"
+          class="example-right-align" [disabled]="registered || registering">
+      </mat-form-field>
+    </div>
+
+    <div class="action-buttons">
+      <button class="raised" mat-raised-button color="primary" (click)="register()" [disabled]="registering || registered">
+        <span *ngIf="!registering && !registered">Register</span>
+        <span *ngIf="registering">Please Wait...</span>
+        <span *ngIf="registered">Success</span>
+      </button>
+      <button mat-button color="primary" (click)="switchTo()">Back to login</button>
+    </div>
+    <div *ngIf="error && error.length" class="error-logs">
+      <p>{{error}}</p>
+    </div>
   </form>
 </div>

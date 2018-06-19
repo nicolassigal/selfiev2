@@ -37,7 +37,7 @@
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 </mat-table>
-<div class="totalizer">
+<div class="totalizer" *ngIf="!noTotal">
   <span class="totalizer-title">Total Value: </span><span class="totalizer-value"> U$D{{ totalizer.value }}</span>
   <span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight }} Kg</span>
   <span class="totalizer-title">Total Quantity: </span><span class="totalizer-value">{{ totalizer.quantity }}</span>

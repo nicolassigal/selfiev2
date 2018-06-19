@@ -5,7 +5,10 @@
             <a mat-list-item routerLink="/dashboard/stock">Stock</a>
             <a mat-list-item routerLink="/dashboard/delivered">Delivered</a>
             <a mat-list-item routerLink="/dashboard/transit">Transit</a>
-            <a mat-list-item href="#">Log Out</a>
+            <a mat-list-item routerLink="/dashboard/users">Users</a>
+            <a mat-list-item routerLink="/dashboard/wh">Warehouses</a>
+            <a mat-list-item routerLink="/dashboard/couriers">Couriers</a>
+            <a mat-list-item (click)="logOut()">Log Out</a>
         </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>

@@ -1,0 +1,59 @@
+.ng-hide {
+  display: none;
+}
+.spinner-container {
+  height: calc(100% - 64px);
+}
+.users {
+  form {
+      background: white;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-content: center;
+      align-items: center;
+      height: 64px;
+      padding: 10px 15px;
+      .btn-container {
+        min-height: 64px;
+          button {
+              &:first-child {
+                  margin-right: 5px;
+              }
+              background: #fcfcfc;
+              color: #3f51b5;
+              border: 2px solid #3f51b5;
+          }
+      }
+      .mat-form-field {
+          width: 70%;
+      }
+      input {
+          width: 70%;
+      }
+      button.btn-desktop {
+          height: 60%;
+      }
+      button.btn-mobile {
+          display: none;
+      }
+      @media(max-width: 600px) {
+          input {
+              width: 100%;
+          }
+          .mat-form-field {
+              width: 100%;
+          }
+          button.btn-desktop {
+              display: none;
+          }
+          button.btn-mobile {
+              display: inline-block;
+              position: fixed;
+              bottom: 2%;
+              right: 3%;
+              z-index: 1;
+          }
+      }
+  }
+}

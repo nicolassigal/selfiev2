@@ -34,6 +34,12 @@ import { SpinnerComponent } from './shared/spinner/spinner.component';
 import { LoginComponent } from './login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuard } from './shared/auth.guard';
+import { AuthService } from './shared/auth.service';
+import { UsersComponent } from './manager/users/users.component';
+import { UserDialogComponent } from './manager/users/dialogs/edit/edit.component';
+import { WarehousesComponent } from './manager/warehouses/warehouses.component';
+import { CouriersComponent } from './manager/couriers/couriers.component';
+import { UtilsService } from './shared/utils.service';
 
 @NgModule({
   declarations: [
@@ -54,7 +60,11 @@ import { AuthGuard } from './shared/auth.guard';
     SearchBoxComponent,
     SpinnerComponent,
     LoginComponent,
-    DashboardComponent
+    DashboardComponent,
+    UsersComponent,
+    WarehousesComponent,
+    CouriersComponent,
+    UserDialogComponent
   ],
   imports: [
   BrowserModule,
@@ -74,7 +84,9 @@ import { AuthGuard } from './shared/auth.guard';
   providers: [
     InfoService,
     TableService,
-    AuthGuard
+    AuthGuard,
+    AuthService,
+    UtilsService
   ],
   entryComponents: [
     EditStockDialogComponent,
@@ -83,7 +95,8 @@ import { AuthGuard } from './shared/auth.guard';
     EditTransitDialogComponent,
     DeleteStockDialogComponent,
     DeleteTransitDialogComponent,
-    ExpandTransitDialogComponent
+    ExpandTransitDialogComponent,
+    UserDialogComponent
   ],
   bootstrap: [AppComponent]
 })
