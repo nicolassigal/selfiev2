@@ -7,6 +7,9 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
 import { TableService } from '../shared/hbr-table/table.service';
 import { saveAs } from 'file-saver';
+import { take } from 'rxjs/operators';
+import { AngularFireAuth } from 'angularfire2/auth';
+import * as _moment from 'moment';
 @Component({
   selector: 'app-delivered',
   templateUrl: './delivered.component.html',
@@ -14,8 +17,10 @@ import { saveAs } from 'file-saver';
 })
 export class DeliveredComponent implements OnInit {
   loadingData = false;
+  moment = _moment;
   data;
   fileUploader = '';
+  role = 0;
   cols = [
     { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
     { columnDef: 'warehouse', header: 'Origin', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
@@ -34,6 +39,7 @@ export class DeliveredComponent implements OnInit {
     private _worker: WorkersService,
     private infoService: InfoService,
     private _db: AngularFirestore,
+    private _auth: AngularFireAuth,
     private _tableService: TableService) {}
 
   ngOnInit() {
@@ -41,9 +47,27 @@ export class DeliveredComponent implements OnInit {
     this._db.collection('delivered', ref => ref.orderBy('hbr_id', 'desc'))
     .valueChanges()
     .subscribe(data =>  {
+      this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe((user: {}) => {
+        user = user[0];
+        let role = user['role']  || 0;
+        let id = user['id'];
+        let wh_id = user['wh_id'] || null;
+        this.role = role;
+        switch (role) {
+          case 0: this.data = data.filter(row => row['customer_id'] === id);
+            break;
+          case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+            break;
+          case 2: this.data = data;
+            break;
+          default: this.data = [];
+        }
       this.loadingData = false;
-      this.data = data;
     });
+  });
   }
 
   parseXLS = (evt: any) => {
@@ -158,32 +182,37 @@ export class DeliveredComponent implements OnInit {
   }
 
   download = () => {
-    const ordered = [...this.data];
+    const ordered = JSON.parse(JSON.stringify(this.data));
+    ordered.map(row => {
+      row.wh_in_date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
+      row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
+
+      delete row.shipping_date;
+      delete row.doc_id;
+      delete row.deleted;
+      delete row.proforma;
+      delete row.tracking;
+      delete row.courier;
+      delete row.feature;
+      delete row.date;
+    });
     const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), { header: [
       'hbr_id',
+      'wh_id',
       'warehouse',
-      'courier',
-      'customer',
-      'contact_name',
-      'cuit',
-      'email',
-      'tel',
-      'address',
-      'city',
-      'country',
-      'date',
-      'description',
-      'destination',
-      'proforma',
-      'shipping_date',
       'box_qty',
-      'total_value',
       'total_weight',
-      'tracking'
+      'total_value',
+      'description',
+      'customer_id',
+      'customer',
+      'wh_in_date',
+      'received_date',
+      'destination'
     ]});
-    const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
+    const workbook: any = { Sheets: { 'delivered': worksheet }, SheetNames: ['delivered'] };
     const excelBuffer: any = XLSX.write(workbook, {bookType: 'xlsx', bookSST: true, type: 'binary'});
-    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), 'stock.xlsx');
+    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), 'delivered.xlsx');
   }
 
   s2ab = (s) => {

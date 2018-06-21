@@ -1,6 +1,7 @@
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { UtilsService } from './../../../shared/utils.service';
 import * as _moment from 'moment';
 @Component({
     templateUrl: './received.component.html',
@@ -10,6 +11,7 @@ import * as _moment from 'moment';
 export class ReceivedStockDialogComponent implements OnInit {
     status = [];
     warehouses = [];
+    operations = [];
     customers = [];
     box = {
         id: null,
@@ -25,6 +27,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
         private _db: AngularFirestore,
+        private _utils: UtilsService,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit(){
@@ -33,6 +36,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         this._db.collection('status').valueChanges().subscribe(status => this.status = status);
         this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
         this._db.collection('users').valueChanges().subscribe(customers => this.customers = customers);
+        this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc')).valueChanges().subscribe(operations => this.operations = operations);
     }
 
     public closeDialog() {
@@ -56,8 +60,14 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.wh_id = this.box.wh_id;
                 process.customer_id = this.box.customer_id;
                 process.destination = this.getDestination(process);
-                const id = this._db.createId();
-                promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
+                if (process.customer_id) {
+                    promises.push(this._db.collection('delivered').doc(`${process.hbr_id}`).set(process));
+                } else if(process.wh_id){
+                    process.hbr_id = Number(this.operations[0].hbr_id) + 1;
+                    process.date = process.received_date;
+                    process.warehouse = this.warehouses.filter(wh => wh.id === process.wh_id)[0]['name'];
+                    promises.push(this._db.collection('operations').doc(`${process.hbr_id}`).set(process));
+                }
             });
             Promise.all(promises)
                 .then(res => {

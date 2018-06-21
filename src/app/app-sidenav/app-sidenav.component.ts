@@ -30,9 +30,15 @@ export class AppSidenavComponent implements OnInit {
       this.router.events
       .pipe(filter(e => e instanceof ActivationEnd))
       .subscribe((event: ActivationEnd) =>{
-        this.title = event.snapshot.data.title;
+        if(event.snapshot.data.title) {
+          this.title =  event.snapshot.data.title;
+        }
         this.titleService.setTitle(`HBR Selfie | ${this.title}`);
       });
+    }
+
+    checkRole = (roles) => {
+      return this.authService._isAuthorized(roles);
     }
 
     logOut = () => {

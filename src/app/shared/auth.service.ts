@@ -1,19 +1,18 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Router } from '@angular/router';
+import { Router, ActivationEnd } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AuthService {
-
+  token;
   constructor(private router: Router,
     private auth: AngularFireAuth,
     private _db: AngularFirestore) { }
-  token;
-  _setToken = (token) => {
+
+  _setToken = (token, role) => {
+    token = `${token}${role}`;
     localStorage.setItem('token', token);
     this.token = token;
   }
@@ -26,15 +25,15 @@ export class AuthService {
     return this._getToken() !== null;
   }
 
-  _isAuthorized = (state) => {
-    this.auth.user.subscribe(data => {
-      this._db.collection('users').valueChanges()
-      .pipe(take(1))
-      .subscribe(users => {
-        let authLevel = users.filter(user => user.username === data.email)[0].role;
-        console.log(authLevel, state);
-      });
-    });
+  _isAuthorized = (RequiredAuthLevel) => {
+    if (RequiredAuthLevel.some(level => level === this.getRole())) {
+      return true;
+    }
+  }
+
+  getRole = () => {
+    let token = this._getToken();
+    return Number(token.charAt(token.length - 1));
   }
 
   _clear = () => {

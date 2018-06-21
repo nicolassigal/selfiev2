@@ -1,7 +1,7 @@
 <mat-table #table matSort [dataSource]="dataSource">
   <!-- Generic column definition -->
   <div *ngFor="let column of columns">
-    <ng-container *ngIf="column.header === 'Actions'" [matColumnDef]="column.columnDef">
+    <ng-container *ngIf="column.header === 'Actions' && column.columnDef==='actions'" [matColumnDef]="column.columnDef">
       <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
       <mat-cell *matCellDef="let row">
       <button mat-icon-button [matMenuTriggerFor]="appMenu">

@@ -1,3 +1,5 @@
+import { AngularFireAuth } from 'angularfire2/auth';
+import { UtilsService } from './../shared/utils.service';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MAT_AUTOCOMPLETE_VALUE_ACCESSOR } from '@angular/material';
 import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -23,41 +25,67 @@ export class StockComponent implements OnInit, OnDestroy {
   loadingData = false;
   data;
   fileUploader = '';
+  role = 0;
   moment = _moment;
   customers = [];
   couriers = [];
   isMakingChangesOnData = false;
-  cols = [
-    { columnDef: 'actions', header: 'Actions', type: '', showSendStock: true, cell: (element) => '' },
-    { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
+  setCols = false;
+  cols = [];
+
+  constructor(
+    private _worker: WorkersService,
+    private infoService: InfoService,
+    private _db: AngularFirestore,
+    private _auth: AngularFireAuth,
+    private _tableService: TableService,
+    private _dialog: MatDialog,
+    private _utils: UtilsService) { }
+
+  ngOnInit() {
+    this.cols.push({ columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
     { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
     { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
     { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
     { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
-  ];
-
-  constructor(
-    private _worker: WorkersService,
-    private infoService: InfoService,
-    private _db: AngularFirestore,
-    private _tableService: TableService,
-    private _dialog: MatDialog) { }
-
-  ngOnInit() {
+    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` });
     this.loadingData = true;
     this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
     this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
-    this._db.collection('operations', ref => ref.where('deleted','==', 0).orderBy('hbr_id', 'desc'))
+    this._db.collection('operations', ref => ref
+      .where('deleted', '==', 0)
+      .orderBy('hbr_id', 'desc'))
       .valueChanges()
       .subscribe(data => {
         this.loadingData = false;
-        this.data = data;
-        if (!this.isMakingChangesOnData) {
-          this._tableService.dataSubject.next(this.data);
-        }
+        this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
+          .valueChanges()
+          .pipe(take(1))
+          .subscribe((user: {}) => {
+            user = user[0];
+            let role = user['role'] || 0;
+            this.role = role;
+            if (role === 2 && !this.setCols) {
+              this.setCols = true;
+              this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showSendStock: true, cell: (element) => '' });
+            }
+            let id = user['id'];  
+            let wh_id = user['wh_id'] || null;
+            switch (role) {
+              case 0: this.data = data.filter(row => row['customer_id'] === id);
+                break;
+              case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+                break;
+              case 2: this.data = data;
+                break;
+              default: this.data = [];
+            }
+            if (!this.isMakingChangesOnData) {
+              this._tableService.dataSubject.next(this.data);
+            }
+          })
       });
   }
 
@@ -138,7 +166,7 @@ export class StockComponent implements OnInit, OnDestroy {
       let rowCourier = row.courier ? row.courier.toLowerCase().trim() : null;
       if (!this.couriers.some(courier => courier.name.toLowerCase().trim() === rowCourier)) {
         if (rowCourier && rowCourier.length) {
-          let id = this.getId(this.couriers);
+          let id = this._utils.getId(this.couriers);
           let courierToAdd = {
             id: id,
             name: rowCourier.toUpperCase()
@@ -155,7 +183,7 @@ export class StockComponent implements OnInit, OnDestroy {
       }
       if (!this.customers.some(customer => customer.name.toLowerCase().trim() === rowCustomer)) {
         if (rowCustomer && rowCustomer.length) {
-          let id = this.getId(this.customers);
+          let id = this._utils.getId(this.customers);
           let customerToAdd = {
             id: id,
             name: this.capitalizeText(rowCustomer),
@@ -188,16 +216,17 @@ export class StockComponent implements OnInit, OnDestroy {
     newCustomers.map(customer => {
       if (customer) {
         customer.username = `username_${customer.id}@tucourier.com.ar`;
+        customer.email = customer.username;
         customer.password = `password_${customer.id}`;
         customer.changed_pwd = false;
-        customer.id = this.getId(this.customers);
+        customer.id = this._utils.getId(this.customers);
         firebase.auth().createUserWithEmailAndPassword(customer.username, customer.password);
         customerPromise.push(this._db.collection('users').doc(`${customer.id}`).set(customer))
       }
     });
     newCouriers.map(courier => {
       if (courier) {
-        courierPromise.push(this._db.collection('couriers').doc(`${this.getId(this.couriers)}`).set(courier))
+        courierPromise.push(this._db.collection('couriers').doc(`${this._utils.getId(this.couriers)}`).set(courier))
       }
     });
     Promise.all(customerPromise).then(res => console.log(res)).catch(err => console.log(err));
@@ -1787,21 +1816,25 @@ export class StockComponent implements OnInit, OnDestroy {
   updateUserPass = () => {
     let p = [];
     this._db.collection('users')
-    .valueChanges()
-    .pipe(take(1))
-    .subscribe(u => {
-      let users = JSON.parse(JSON.stringify(u));
-      users.map(user => {
+      .valueChanges()
+      .pipe(take(1))
+      .subscribe(u => {
+        let users = JSON.parse(JSON.stringify(u));
+        users.map(user => {
           user.role = 0;
           p.push(this._db.collection('users').doc(`${user.id}`).set(user));
-      });
-     Promise.all(p).then(res => console.log(res));
-    })
+        });
+        Promise.all(p).then(res => console.log(res));
+      })
   }
 
   download = () => {
     let ordered = JSON.parse(JSON.stringify(this.data));
-    ordered.map(row => row.date = row.date ? this.moment.unix(row.date).format("DD-MM-YYYY") : null);
+    ordered.map(row => {
+      row.date = row.date ? this.moment.unix(row.date).format("DD-MM-YYYY") : null;
+      row.received_date = row.received_date ? this.moment.unix(row.received_date).format("DD-MM-YYYY") : null;
+    });
+    ordered = ordered.filter(row => row.deleted == 0);
     const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
       header: [
         'hbr_id',
@@ -1843,46 +1876,36 @@ export class StockComponent implements OnInit, OnDestroy {
     return buf;
   }
 
-  private getId = (data) => {
-    let maxid = 0;
-    data.map(e => {
-      if (e.id > maxid) {
-        maxid = e.id;
-      }
+  onEditRow = (row = {}, title = 'Edit') => {
+    this._dialog.open(EditStockDialogComponent, {
+      data: {
+        row: row,
+        title: `${title} Operation`,
+        confirmBtn: title,
+        cancelBtn: 'Cancel'
+      }, width: '500px'
     })
-    return maxid + 1;
-  }
-
-  onEditRow = (row) => {
-      this._dialog.open(EditStockDialogComponent, {
-        data: {
-          row: row,
-          title: 'Edit Operation',
-          confirmBtn: 'Save',
-          cancelBtn: 'Cancel'
-        }, width: '500px'
-      })
   }
 
   onDeleteRow = (row) => {
-      this._dialog.open(DeleteStockDialogComponent, {
-        data: {
-          row: row,
-          title: 'Delete Operation',
-          confirmBtn: 'Delete',
-          cancelBtn: 'Cancel'
-        }, width: '500px'
-      })
+    this._dialog.open(DeleteStockDialogComponent, {
+      data: {
+        row: row,
+        title: 'Delete Operation',
+        confirmBtn: 'Delete',
+        cancelBtn: 'Cancel'
+      }, width: '500px'
+    })
   }
 
   onSendRow = (row) => {
-      this._dialog.open(SendStockDialogComponent, {
-        data: {
-          row: row,
-          title: 'Send Boxes',
-          confirmBtn: 'Send',
-          cancelBtn: 'Cancel'
-        }, width: '500px'
-      })
+    this._dialog.open(SendStockDialogComponent, {
+      data: {
+        row: row,
+        title: 'Send Boxes',
+        confirmBtn: 'Send',
+        cancelBtn: 'Cancel'
+      }, width: '500px'
+    })
   }
 }

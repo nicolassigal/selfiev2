@@ -1,3 +1,4 @@
+import { AngularFireAuth } from 'angularfire2/auth';
 import { DeleteTransitDialogComponent } from './dialogs/delete/delete.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -13,6 +14,7 @@ import { MatDialog } from '@angular/material';
 import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
 import { ExpandTransitDialogComponent } from './dialogs/expand/expand.component';
 import * as _moment from 'moment';
+import { take } from 'rxjs/operators';
 @Component({
   selector: 'app-transit',
   templateUrl: './transit.component.html',
@@ -24,13 +26,25 @@ export class TransitComponent implements OnInit, OnDestroy {
   moment = _moment;
   data;
   fileUploader = '';
+  role = 0;
   couriers = [];
   customers = [];
   warehouses = [];
   status = [];
-  cols = [
-    { columnDef: 'actions', header: 'Actions', type: '', showReceived: true, showExpand: true, cell: (element) => '' },
-    { columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
+  setCols = false;
+  cols = [];
+
+  constructor(
+    private _worker: WorkersService,
+    private infoService: InfoService,
+    private _db: AngularFirestore,
+    private _auth: AngularFireAuth,
+    private _tableService: TableService,
+    private _dialog: MatDialog) { }
+
+  ngOnInit() {
+    this.loadingData = true;
+    this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
     { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : ''}` },
@@ -38,18 +52,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     { columnDef: 'courier', header: 'Courier', type: '', cell: (element) => `${element.courier ? element.courier : ''}` },
     { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
     { columnDef: 'destination', header: 'Destination', type: '', cell: (element) => `${element.destination ? element.destination : ''}` },
-    { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.status ? element.status : ''}` }
-  ];
-
-  constructor(
-    private _worker: WorkersService,
-    private infoService: InfoService,
-    private _db: AngularFirestore,
-    private _tableService: TableService,
-    private _dialog: MatDialog) { }
-
-  ngOnInit() {
-    this.loadingData = true;
+    { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.status ? element.status : ''}` });
     this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
     this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
     this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
@@ -57,9 +60,31 @@ export class TransitComponent implements OnInit, OnDestroy {
     this._db.collection('awbs', ref => ref.orderBy('id', 'desc'))
       .valueChanges()
       .subscribe(data => {
-        this.loadingData = false;
-        this.data = data.filter(row => row['status_id'] !== 3);
+        this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe((user: {}) => {
+          user = user[0];
+          let role = user['role']  || 0;
+          this.role = role;
+          if (role === 2 && !this.setCols) {
+            this.setCols = true;
+            this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showReceived: true, showExpand: true, cell: (element) => '' });
+          }
+          let id = user['id'];
+          let wh_id = user['wh_id'] || null;
+          switch (role) {
+            case 0: this.data = data.filter(row => row['customer_id'] === id);
+              break;
+            case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+              break;
+            case 2: this.data = data;
+              break;
+            default: this.data = [];
+          }
 
+        this.data = data.filter(row => row['status_id'] !== 3);        
+        this.loadingData = false;
         this.data.map(row => {
           row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
           row.status = this.status.filter(e => e.id === row.status_id)[0];
@@ -70,6 +95,7 @@ export class TransitComponent implements OnInit, OnDestroy {
         if (!this.isMakingChangesOnData) {
           this._tableService.dataSubject.next(this.data);
         }
+      });
       });
   }
 

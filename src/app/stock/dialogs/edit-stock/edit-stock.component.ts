@@ -10,6 +10,7 @@ import * as _moment from 'moment';
   export class EditStockDialogComponent implements OnInit {
     warehouses = [];
     customers = [];
+    operations = [];
     box = {
       date: null,
       hbr_id: null,
@@ -20,7 +21,8 @@ import * as _moment from 'moment';
       box_qty: null,
       total_weight: null,
       total_value: null,
-      description: null
+      description: null,
+      deleted: 0
      };
     moment = _moment;
     constructor(
@@ -36,6 +38,7 @@ import * as _moment from 'moment';
       this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
       .valueChanges()
       .subscribe(warehouses => this.warehouses = warehouses);
+      this._db.collection('operations', ref => ref.orderBy('hbr_id','desc')).valueChanges().subscribe(operations => this.operations = operations);
       this._db.collection('users', ref => ref.orderBy('name', 'asc'))
       .valueChanges()
       .subscribe(customers => this.customers = customers);
@@ -45,6 +48,10 @@ import * as _moment from 'moment';
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh =>wh.id === this.box.wh_id)[0].name : null;
       this.box.customer = this.box.customer_id ? this.customers.filter(customer =>customer.id === this.box.customer_id)[0].name : null;
+      if(!this.box.hbr_id) {
+        this.box.hbr_id = Number(this.operations[0].hbr_id) + 1;
+        this.box.deleted = 0;
+      }
       this._db.collection('operations')
       .doc(`${this.box.hbr_id}`)
       .set(this.box)

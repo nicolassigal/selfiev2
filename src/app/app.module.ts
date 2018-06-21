@@ -1,7 +1,6 @@
 import { DeleteTransitDialogComponent } from './transit/dialogs/delete/delete.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -40,6 +39,11 @@ import { UserDialogComponent } from './manager/users/dialogs/edit/edit.component
 import { WarehousesComponent } from './manager/warehouses/warehouses.component';
 import { CouriersComponent } from './manager/couriers/couriers.component';
 import { UtilsService } from './shared/utils.service';
+import { DeleteUserDialogComponent } from './manager/users/dialogs/delete/delete.component';
+import { CourierDialogComponent } from './manager/couriers/edit/edit.component';
+import { DeleteCourierDialogComponent } from './manager/couriers/delete/delete.component';
+import { WarehouseDialogComponent } from './manager/warehouses/edit/edit.component';
+import { DeleteWarehouseDialogComponent } from './manager/warehouses/delete/delete.component';
 
 @NgModule({
   declarations: [
@@ -64,7 +68,12 @@ import { UtilsService } from './shared/utils.service';
     UsersComponent,
     WarehousesComponent,
     CouriersComponent,
-    UserDialogComponent
+    UserDialogComponent,
+    DeleteUserDialogComponent,
+    CourierDialogComponent,
+    DeleteCourierDialogComponent,
+    WarehouseDialogComponent,
+    DeleteWarehouseDialogComponent
   ],
   imports: [
   BrowserModule,
@@ -96,7 +105,12 @@ import { UtilsService } from './shared/utils.service';
     DeleteStockDialogComponent,
     DeleteTransitDialogComponent,
     ExpandTransitDialogComponent,
-    UserDialogComponent
+    UserDialogComponent,
+    DeleteUserDialogComponent,
+    CourierDialogComponent,
+    DeleteCourierDialogComponent,
+    WarehouseDialogComponent,
+    DeleteWarehouseDialogComponent
   ],
   bootstrap: [AppComponent]
 })

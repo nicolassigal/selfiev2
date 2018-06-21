@@ -44,25 +44,35 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.error = '';
     this._db.collection('users').valueChanges()
-    .pipe(take(1)).subscribe(users => this.users = users);
+      .pipe(take(1)).subscribe(users => this.users = users);
     if (this.authService._isAuthenticated()) {
       this.router.navigate(['dashboard']);
     }
   }
 
-  login  = () => {
+  login = () => {
     if (this.email && this.password) {
       this.loggingin = true;
-      this.auth.auth.signInWithEmailAndPassword(this.email, this.password)
-      .then(res => {
-        this.loggingin = false;
-        this.error = '';
-        firebase.auth().currentUser.getIdToken().then(token => {
-          this.authService._setToken(token);
+      this._db.collection('users', ref => ref.where('username', '==', this.email))
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe((dbUser) => {
+          if (dbUser[0]  && (dbUser[0]['deleted'] === 0 || !dbUser[0]['deleted'])) {
+            this.auth.auth.signInWithEmailAndPassword(this.email, this.password)
+              .then(res => {
+                this.auth.auth.currentUser.getIdToken().then(token => {
+                  let role = dbUser[0]['role'] || 0;
+                  this.authService._setToken(token, role);
+                  this.router.navigate(['dashboard']);
+                  this.loggingin = false;
+                  this.error = '';
+                });
+              }).catch(err => this.handleErrors(err.code));
+          } else {
+          this.handleErrors('auth/user-not-found');
+          }
         });
-        this.router.navigate(['dashboard']);
-      })
-      .catch(err => this.handleErrors(err.code));
+
     } else {
       this.error = 'You must provide an username/password';
     }
@@ -86,24 +96,29 @@ export class LoginComponent implements OnInit {
     this.password = '';
     this.password2 = '';
     this.error = '';
+    this.registering = false;
+    this.registered = false;
+    this.loggingin = false;
   }
 
-  register  = () => {
+  register = () => {
     if (this.email && this.password && this.password2) {
       if (this.password === this.password2) {
         this.registering = true;
         this.auth.auth.createUserWithEmailAndPassword(this.email, this.password)
-        .then(res => {
+          .then(res => {
             this.user.email = this.email;
+            this.user.username = this.email;
+            this.user.role = 0;
             this.user.id = this._utils.getId(this.users);
             this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-            .then(() => {
-              this.loggingin = false;
-              this.error = '';
-              this.registering = false;
-              this.registered = true;
-            }).catch(err => console.log(err));
-        }).catch(err => this.handleErrors(err));
+              .then(() => {
+                this.loggingin = false;
+                this.error = '';
+                this.registering = false;
+                this.registered = true;
+              }).catch(err => console.log(err));
+          }).catch(err => this.handleErrors(err));
       } else {
         this.error = 'Passwords doesnt match';
       }

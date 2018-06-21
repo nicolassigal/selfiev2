@@ -1,7 +1,7 @@
 <div class="delivered" *ngIf="!loadingData">
     <form>
         <div class="btn-container">
-            <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">
+            <button mat-raised-button color="primary" (click)="download()" class="btn-desktop" *ngIf="role == 2">
                 <mat-icon>cloud_download</mat-icon>
                 Download
             </button>
@@ -10,5 +10,5 @@
     <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
-        <app-spinner></app-spinner>
-    </div>
+    <app-spinner></app-spinner>
+</div>

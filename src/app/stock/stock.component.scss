@@ -22,8 +22,9 @@
         }
         .btn-container {
             button {
+                margin-left: 5px;
                 &:first-child {
-                    margin-right: 5px;
+                    margin-left: 0px;
                 }
                 background: #fcfcfc;
                 color: #3f51b5;

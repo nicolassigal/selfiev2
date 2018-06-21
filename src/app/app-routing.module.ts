@@ -12,7 +12,7 @@ import { CouriersComponent } from './manager/couriers/couriers.component';
 const routes: Routes = [
   {path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent, data: { title: 'Hbr Selfie' }},
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard],
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { authLevel: [0, 1, 2] },
     children: [
       { path: 'stock', component: StockComponent, data: { title: 'Stock', authLevel: [0, 1, 2] }},
       { path: 'delivered', component: DeliveredComponent, data: { title: 'Delivered',  authLevel: [0, 1, 2] }},
@@ -20,8 +20,10 @@ const routes: Routes = [
       { path: 'users', component: UsersComponent, data: { title: 'Manage Users', authLevel: [1] }},
       { path: 'wh', component: WarehousesComponent, data: { title: 'Manage Warehouses', authLevel: [1] }},
       { path: 'couriers', component: CouriersComponent, data: { title: 'Manage Couriers', authLevel: [1] }},
+      { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
     ]
-  }
+  },
+  { path: '**', redirectTo: '/', pathMatch: 'full' },
 ];
 
 @NgModule({

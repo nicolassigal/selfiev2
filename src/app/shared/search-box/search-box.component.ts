@@ -11,14 +11,15 @@ import { filter } from 'rxjs/operators';
 export class SearchBoxComponent implements OnInit {
   query = '';
   isFiltering = false;
-  constructor(private _tableService: TableService, private router: Router) { }
+  constructor(private _tableService: TableService,
+  private router: Router) { }
 
   ngOnInit() {
     this.router.events
     .pipe(filter(e => e instanceof ActivationEnd))
-    .subscribe(e =>{ 
-      this.clear();
-    });
+    .subscribe(e => this.clear());
+
+    this._tableService.dataSubject.subscribe(() => this.clear());
   }
 
   clear = () => {
@@ -28,6 +29,7 @@ export class SearchBoxComponent implements OnInit {
   }
 
   filterData = (query) => {
+    this.query = query;
     if (query.length) {
       this.isFiltering = true;
       this._tableService.filterSubject.next(query);

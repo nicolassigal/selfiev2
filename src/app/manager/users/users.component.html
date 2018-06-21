@@ -1,13 +1,18 @@
 <div class="users" *ngIf="!loadingData">
     <form>
         <div class="btn-container">
-            <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add user')" class="btn-desktop">
+            <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add')" class="btn-desktop">
                 <mat-icon>add</mat-icon>
                 Add
             </button>
         </div>
     </form>
-    <app-hbr-table [datasrc]="data" [cols]="cols" [noTotal]="true" (editRowEvent)="onEditRow($event)"></app-hbr-table>
+    <app-hbr-table 
+    [datasrc]="data"
+    [cols]="cols"
+    [noTotal]="true"
+    (editRowEvent)="onEditRow($event)"
+    (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
         <app-spinner></app-spinner>
