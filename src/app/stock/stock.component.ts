@@ -43,49 +43,61 @@ export class StockComponent implements OnInit, OnDestroy {
     private _utils: UtilsService) { }
 
   ngOnInit() {
-    this.cols.push({ columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
-    { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
-    { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
-    { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
-    { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
-    { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
-    { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-    { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` });
+    this.cols.push(
+      { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
+      { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
+      { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
+      { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
+        return `${element.total_weight ? element.total_weight : 0}`;
+      }},
+      { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => {
+        return `${element.total_value ? element.total_value : 0}`;
+      }},
+      { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
+      { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
+      { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
+    );
     this.loadingData = true;
-    this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
-    this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
+
+    this._db.collection('couriers')
+    .valueChanges()
+    .pipe(take(1))
+    .subscribe(couriers => this.couriers = couriers);
+
     this._db.collection('operations', ref => ref
       .where('deleted', '==', 0)
+      .where('delivered', '==', 0)
       .orderBy('hbr_id', 'desc'))
       .valueChanges()
       .subscribe(data => {
         this.loadingData = false;
-        this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
-          .valueChanges()
-          .pipe(take(1))
-          .subscribe((user: {}) => {
-            user = user[0];
-            let role = user['role'] || 0;
-            this.role = role;
-            if (role === 2 && !this.setCols) {
-              this.setCols = true;
-              this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showSendStock: true, cell: (element) => '' });
-            }
-            let id = user['id'];  
-            let wh_id = user['wh_id'] || null;
-            switch (role) {
-              case 0: this.data = data.filter(row => row['customer_id'] === id);
-                break;
-              case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
-                break;
-              case 2: this.data = data;
-                break;
-              default: this.data = [];
-            }
-            if (!this.isMakingChangesOnData) {
-              this._tableService.dataSubject.next(this.data);
-            }
-          })
+        this._db.collection('users')
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(users => {
+          this.customers = users;
+          const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+          const role = user.role || 0;
+          this.role = role;
+          if (role === 2 && !this.setCols) {
+            this.setCols = true;
+            this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showSendStock: true, cell: (element) => '' });
+          }
+          const id = user['id'];
+          const wh_id = user['wh_id'] || null;
+          switch (role) {
+            case 0: this.data = data.filter(row => row['customer_id'] === id);
+              break;
+            case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+              break;
+            case 2: this.data = data;
+              break;
+            default: this.data = [];
+          }
+          if (!this.isMakingChangesOnData) {
+            this._tableService.dataSubject.next(this.data);
+          }
+        });
       });
   }
 
@@ -151,6 +163,9 @@ export class StockComponent implements OnInit, OnDestroy {
 
   addEntry = (data) => {
     const promiseArr = [];
+    const courierBatch = this._db.firestore.batch();
+    const customerBatch = this._db.firestore.batch();
+    const chunk_size = 250;
     this.infoService.showMessage(`
     <ul>
       <li><p>Getting data... Finished </p></li>
@@ -159,18 +174,15 @@ export class StockComponent implements OnInit, OnDestroy {
     </ul>
     `);
 
-    let newCustomers = [];
-    let newCouriers = [];
+    const newCustomers = [];
+    const newCouriers = [];
     data.map(row => {
-      let rowCustomer = row.customer ? row.customer.toLowerCase().trim() : null;
-      let rowCourier = row.courier ? row.courier.toLowerCase().trim() : null;
+      const rowCustomer = row.customer ? row.customer.toLowerCase().trim() : null;
+      const rowCourier = row.courier ? row.courier.toLowerCase().trim() : null;
       if (!this.couriers.some(courier => courier.name.toLowerCase().trim() === rowCourier)) {
         if (rowCourier && rowCourier.length) {
-          let id = this._utils.getId(this.couriers);
-          let courierToAdd = {
-            id: id,
-            name: rowCourier.toUpperCase()
-          };
+          const id = this._utils.getId(this.couriers);
+          const courierToAdd = { id: id, name: rowCourier.toUpperCase() };
           if (!newCouriers.some(e => e.id === courierToAdd.id)) {
             row.courier_id = courierToAdd.id;
             newCouriers.push(courierToAdd);
@@ -183,8 +195,8 @@ export class StockComponent implements OnInit, OnDestroy {
       }
       if (!this.customers.some(customer => customer.name.toLowerCase().trim() === rowCustomer)) {
         if (rowCustomer && rowCustomer.length) {
-          let id = this._utils.getId(this.customers);
-          let customerToAdd = {
+          const id = this._utils.getId(this.customers);
+          const customerToAdd = {
             id: id,
             name: this.capitalizeText(rowCustomer),
             products: null,
@@ -211,8 +223,6 @@ export class StockComponent implements OnInit, OnDestroy {
       }
     });
 
-    let customerPromise = [];
-    let courierPromise = [];
     newCustomers.map(customer => {
       if (customer) {
         customer.username = `username_${customer.id}@tucourier.com.ar`;
@@ -221,33 +231,55 @@ export class StockComponent implements OnInit, OnDestroy {
         customer.changed_pwd = false;
         customer.id = this._utils.getId(this.customers);
         firebase.auth().createUserWithEmailAndPassword(customer.username, customer.password);
-        customerPromise.push(this._db.collection('users').doc(`${customer.id}`).set(customer))
+        const ref = this._db.collection('users').doc(`${customer.id}`).ref;
+        customerBatch.set(ref, customer);
       }
     });
+
     newCouriers.map(courier => {
       if (courier) {
-        courierPromise.push(this._db.collection('couriers').doc(`${this._utils.getId(this.couriers)}`).set(courier))
+        const ref = this._db.collection('couriers').doc(`${this._utils.getId(this.couriers)}`).ref;
+        courierBatch.set(ref, courier);
       }
     });
-    Promise.all(customerPromise).then(res => console.log(res)).catch(err => console.log(err));
+
+    courierBatch.commit()
+      .then(res => console.log('added couriers'))
+      .catch(err => console.log('error on adding couriers', err));
+
+    customerBatch.commit()
+      .then(res => console.log('added customers'))
+      .catch(err => console.log('error on adding customers', err));
+
     data.map(entry => {
+
       entry.deleted = 0;
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
+      entry.delivered = !isNaN(entry.box_qty) && entry.box_qty > 0 ? 0 : 1;
       entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
       entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
       entry.customer = entry.customer && entry.customer.length ? this.capitalizeText(entry.customer) : null;
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
       entry.courier = entry.courier && entry.courier.length ? this.capitalizeText(entry.courier) : null;
-      entry.date = entry.date && this.moment(entry.date, "DD-MM-YYYY").isValid() ? this.moment(entry.date).unix() : null;
-      if (entry.hbr_id) {
-        promiseArr.push(this._db.collection('operations').doc(`${entry.hbr_id}`).set(entry));
+      entry.date = entry.date && this.moment(entry.date, 'DD-MM-YYYY').isValid() ? this.moment(entry.date).unix() : null;
+
+      if (!entry.hbr_id) {
+        entry.hbr_id = Number(this.data[0].hbr_id) + 1;
       }
     });
+    const chunks = data.map((e, i) => i % chunk_size === 0 ? data.slice(i, i + chunk_size) : null).filter(e => e);
+    chunks.map(chunk => {
+      const batch = this._db.firestore.batch();
+      chunk.map(row => {
+        const ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
+        batch.set(ref, row);
+      });
+      promiseArr.push(batch.commit());
+    });
     this.isMakingChangesOnData = true;
-    Promise.all(promiseArr)
-      .then(res => console.log(res))
-      .then(() => {
+
+    Promise.all(promiseArr).then(() => {
         this.infoService.showMessage(`
         <ul>
           <li><p>Getting data... Finished </p></li>
@@ -275,7 +307,72 @@ export class StockComponent implements OnInit, OnDestroy {
     }
   }
 
-  users = () => {
+
+  download = () => {
+    let ordered = JSON.parse(JSON.stringify(this.data));
+
+    ordered.map(row => {
+      row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
+      row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
+    });
+
+    ordered = ordered.filter(row => row.deleted === 0 && row.delivered === 0);
+
+    const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
+      header: [ 'hbr_id', 'wh_id', 'warehouse', 'courier_id', 'courier', 'customer_id', 'customer', 'contact_name', 'cuit', 'email',
+        'tel', 'address', 'city', 'country', 'date', 'description', 'destination', 'proforma', 'shipping_date', 'box_qty', 'total_value',
+        'total_weight', 'tracking' ]
+    });
+
+    const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', bookSST: true, type: 'binary' });
+
+    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'stock.xlsx');
+  }
+
+  s2ab = (s) => {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i != s.length; ++i) {
+      view[i] = s.charCodeAt(i) & 0xFF;
+    }
+    return buf;
+  }
+
+  onEditRow = (row = {}, title = 'Edit') => {
+    this._dialog.open(EditStockDialogComponent, {
+      data: {
+        row: row,
+        title: `${title} Operation`,
+        confirmBtn: title,
+        cancelBtn: 'Cancel'
+      }, width: '500px'
+    })
+  }
+
+  onDeleteRow = (row) => {
+    this._dialog.open(DeleteStockDialogComponent, {
+      data: {
+        row: row,
+        title: 'Delete Operation',
+        confirmBtn: 'Delete',
+        cancelBtn: 'Cancel'
+      }, width: '500px'
+    })
+  }
+
+  onSendRow = (row) => {
+    this._dialog.open(SendStockDialogComponent, {
+      data: {
+        row: row,
+        title: 'Send Boxes',
+        confirmBtn: 'Send',
+        cancelBtn: 'Cancel'
+      }, width: '500px'
+    })
+  }
+
+  /*users = () => {
     let users = [
       {
         "id": 5,
@@ -1811,9 +1908,9 @@ export class StockComponent implements OnInit, OnDestroy {
     let p = [];
     users.map(user => p.push(this._db.collection('users').doc(`${user.id}`).set(user)));
     Promise.all(p).then(res => console.log(res));
-  }
+  }*/
 
-  updateUserPass = () => {
+/*  updateUserPass = () => {
     let p = [];
     this._db.collection('users')
       .valueChanges()
@@ -1826,86 +1923,6 @@ export class StockComponent implements OnInit, OnDestroy {
         });
         Promise.all(p).then(res => console.log(res));
       })
-  }
+  }*/
 
-  download = () => {
-    let ordered = JSON.parse(JSON.stringify(this.data));
-    ordered.map(row => {
-      row.date = row.date ? this.moment.unix(row.date).format("DD-MM-YYYY") : null;
-      row.received_date = row.received_date ? this.moment.unix(row.received_date).format("DD-MM-YYYY") : null;
-    });
-    ordered = ordered.filter(row => row.deleted == 0);
-    const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
-      header: [
-        'hbr_id',
-        'wh_id',
-        'warehouse',
-        'courier_id',
-        'courier',
-        'customer_id',
-        'customer',
-        'contact_name',
-        'cuit',
-        'email',
-        'tel',
-        'address',
-        'city',
-        'country',
-        'date',
-        'description',
-        'destination',
-        'proforma',
-        'shipping_date',
-        'box_qty',
-        'total_value',
-        'total_weight',
-        'tracking'
-      ]
-    });
-    const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', bookSST: true, type: 'binary' });
-    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'stock.xlsx');
-  }
-
-  s2ab = (s) => {
-    const buf = new ArrayBuffer(s.length);
-    const view = new Uint8Array(buf);
-    for (let i = 0; i != s.length; ++i) {
-      view[i] = s.charCodeAt(i) & 0xFF;
-    }
-    return buf;
-  }
-
-  onEditRow = (row = {}, title = 'Edit') => {
-    this._dialog.open(EditStockDialogComponent, {
-      data: {
-        row: row,
-        title: `${title} Operation`,
-        confirmBtn: title,
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
-  }
-
-  onDeleteRow = (row) => {
-    this._dialog.open(DeleteStockDialogComponent, {
-      data: {
-        row: row,
-        title: 'Delete Operation',
-        confirmBtn: 'Delete',
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
-  }
-
-  onSendRow = (row) => {
-    this._dialog.open(SendStockDialogComponent, {
-      data: {
-        row: row,
-        title: 'Send Boxes',
-        confirmBtn: 'Send',
-        cancelBtn: 'Cancel'
-      }, width: '500px'
-    })
-  }
 }

@@ -28,13 +28,11 @@ private checkDBWorker = `
         let toStorage;
         let xls = e.data.xlsData;
         let db = e.data.dbData;
-        console.log('db length', db.length);
         if (db.length) {
           toStorage = xls.filter(row => !db.some(entry => +row.hbr_id === +entry.hbr_id));
         } else {
           toStorage = xls;
         }
-        console.log('to storage', toStorage);
         self.postMessage(JSON.stringify(toStorage));
     }
     if(e.data.msg === "Stop Worker") {

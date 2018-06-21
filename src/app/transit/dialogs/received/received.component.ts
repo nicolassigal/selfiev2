@@ -3,6 +3,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { UtilsService } from './../../../shared/utils.service';
 import * as _moment from 'moment';
+import { take } from 'rxjs/operators';
 @Component({
     templateUrl: './received.component.html',
     styleUrls: ['./received.component.scss']
@@ -13,6 +14,7 @@ export class ReceivedStockDialogComponent implements OnInit {
     warehouses = [];
     operations = [];
     customers = [];
+    moment = _moment;
     box = {
         id: null,
         status_id: null,
@@ -22,7 +24,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         customer_id: null,
         wh_id: null
     };
-    moment = _moment;
+
     constructor(
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
@@ -30,13 +32,29 @@ export class ReceivedStockDialogComponent implements OnInit {
         private _utils: UtilsService,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
-    ngOnInit(){
+    ngOnInit() {
         this.box = { ...this.data.row };
         console.log(this.box);
-        this._db.collection('status').valueChanges().subscribe(status => this.status = status);
-        this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
-        this._db.collection('users').valueChanges().subscribe(customers => this.customers = customers);
-        this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc')).valueChanges().subscribe(operations => this.operations = operations);
+
+        this._db.collection('status')
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(status => this.status = status);
+
+        this._db.collection('warehouses')
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(warehouses => this.warehouses = warehouses);
+
+        this._db.collection('users')
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(customers => this.customers = customers);
+
+        this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(operations => this.operations = operations);
     }
 
     public closeDialog() {
@@ -52,7 +70,7 @@ export class ReceivedStockDialogComponent implements OnInit {
             .then(res => this._dialogRef.close())
             .catch(err => console.log(err));
         } else {
-            let promises = [];
+            const promises = [];
             this.box.received_date = this.box.received_date ? this.moment(this.box.received_date).unix() : null;
 
             this.box.processes.map(process => {
@@ -62,7 +80,7 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.destination = this.getDestination(process);
                 if (process.customer_id) {
                     promises.push(this._db.collection('delivered').doc(`${process.hbr_id}`).set(process));
-                } else if(process.wh_id){
+                } else if (process.wh_id) {
                     process.hbr_id = Number(this.operations[0].hbr_id) + 1;
                     process.date = process.received_date;
                     process.warehouse = this.warehouses.filter(wh => wh.id === process.wh_id)[0]['name'];
@@ -74,7 +92,7 @@ export class ReceivedStockDialogComponent implements OnInit {
                   this._db.collection('awbs')
                   .doc(`${this.box.id}`)
                   .delete()
-                  .then(res => this._dialogRef.close())
+                  .then(() => this._dialogRef.close())
                   .catch(err => console.log(err));
                 })
                 .catch(err => console.log(err));
@@ -82,12 +100,12 @@ export class ReceivedStockDialogComponent implements OnInit {
     }
 
     getDestination = (row) => {
-        let destination = null;
+      let destination = null;
         if (row.wh_id) {
-          let warehouse = this.warehouses.filter(wh => wh.id === row.wh_id)[0];
+          const warehouse = this.warehouses.filter(wh => wh.id === row.wh_id)[0];
           destination = warehouse.name ? `WH: ${warehouse.name}` : null;
         } else if (row.customer_id) {
-          let customer = this.customers.filter(customer => customer.id === row.customer_id)[0];
+          const customer = this.customers.filter(user => user.id === row.customer_id)[0];
           destination = customer.name ? `${customer.name}` : null;
         }
         return destination;
