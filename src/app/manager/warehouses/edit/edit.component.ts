@@ -23,7 +23,7 @@ export class WarehouseDialogComponent implements OnInit {
 
   ngOnInit() {
     this.warehouse = { ...this.data.row };
-    this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
+    this.warehouses = this.data.warehouses;
   }
 
 

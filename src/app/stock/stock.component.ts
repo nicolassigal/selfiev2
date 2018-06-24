@@ -25,7 +25,7 @@ import * as firebase from 'firebase';
 })
 export class StockComponent implements OnInit, OnDestroy {
   loadingData = false;
-  data;
+  data = [];
   fileUploader = '';
   role = 0;
   moment = _moment;
@@ -50,6 +50,7 @@ export class StockComponent implements OnInit, OnDestroy {
     private _dataService: DataService) { }
 
   ngOnInit() {
+    this.loadingData = true;
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
@@ -73,10 +74,11 @@ export class StockComponent implements OnInit, OnDestroy {
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
     this._dataService.stockSubject.subscribe(data => {
-      if (!this.data.length) {
-        this.loadingData = true;
+      if(!data.length) {
+        this.loadingData = false;
+      } else {
+        this.filterData(data);
       }
-      this.filterData(data);
     });
     
     if(!this.customers.length) {
@@ -279,6 +281,7 @@ export class StockComponent implements OnInit, OnDestroy {
 
     data.map(entry => {
       entry.deleted = 0;
+      entry.initial_qty = Number(entry.initial_qty);
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
       entry.delivered = !isNaN(entry.box_qty) && entry.box_qty > 0 ? 0 : 1;
@@ -303,7 +306,6 @@ export class StockComponent implements OnInit, OnDestroy {
         console.log('row', row.delivered, row.delivered == 1);
         if (row.delivered == 1) { 
           let id = this._db.createId();
-          row.box_qty = row.initial_qty;
           const ref = this._db.collection('delivered').doc(`${id}`).ref;
           batch.set(ref, row);
         } else {

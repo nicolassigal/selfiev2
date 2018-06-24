@@ -15,9 +15,11 @@
                     Add
                 </button>
         </div>
-        <button (click)="file.click()" mat-mini-fab color="primary" class="btn-mobile">
-            <mat-icon aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
-        </button>
+        <div class="btn-container-mobile">
+            <mat-icon  (click)="file.click()" aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
+            <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
+            <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
+        </div>
     </form>
     <app-hbr-table
       [datasrc]="data"

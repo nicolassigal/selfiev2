@@ -6,11 +6,14 @@
                 Add
             </button>
         </div>
+        <div class="btn-container-mobile">
+                <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
+            </div>
     </form>
     <app-hbr-table 
     [datasrc]="data"
     [cols]="cols"
-    [noTotal]="true"
+    [noTotalOperation]="true"
     (editRowEvent)="onEditRow($event)"
     (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
 </div>

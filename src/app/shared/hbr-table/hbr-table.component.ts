@@ -3,6 +3,8 @@ import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Observable, of } from 'rxjs';
 import { TableService } from './table.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-hbr-table',
@@ -11,11 +13,18 @@ import { TableService } from './table.service';
 })
 
 export class HbrTableComponent implements OnInit {
+  isHandset$: Observable<boolean> = this.breakpointObserver.observe([
+    Breakpoints.Handset,
+    Breakpoints.Tablet,
+    Breakpoints.Small,
+    Breakpoints.Medium
+  ]).pipe(map(result => result.matches));
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Input('datasrc') datasrc;
   @Input('cols') cols;
   @Input('noTotal') noTotal;
+  @Input('noTotalOperation') noTotalOperation;
   @Output() editRowEvent = new EventEmitter<{}>();
   @Output() deleteRowEvent = new EventEmitter<{}>();
   @Output() sendRowEvent = new EventEmitter<{}>();
@@ -28,7 +37,7 @@ export class HbrTableComponent implements OnInit {
   dataSource: MatTableDataSource<any>;
   displayedColumns;
 
-  constructor(private _tableService: TableService) {}
+  constructor(private _tableService: TableService, private breakpointObserver: BreakpointObserver) {}
 
 
   ngOnInit() {

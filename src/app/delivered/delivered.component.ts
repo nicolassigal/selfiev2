@@ -19,14 +19,14 @@ import { DataService } from '../shared/data.service';
 export class DeliveredComponent implements OnInit {
   loadingData = false;
   moment = _moment;
-  data;
+  data = [];
   customers = [];
   fileUploader = '';
   role = 0;
   cols = [
     { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
     { columnDef: 'warehouse', header: 'Origin', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
-    { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
+    { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty > 0 ? element.box_qty : element.initial_qty}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
     { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
     { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
@@ -46,13 +46,15 @@ export class DeliveredComponent implements OnInit {
     private _tableService: TableService) {}
 
   ngOnInit() {
+    this.loadingData = true;
     this.customers = this._dataService.getCustomers();
     this.data = this._dataService.getDelivered();
     this._dataService.deliveredSubject.subscribe(data => {
-      if(!this.data.length) {
-        this.loadingData = true;
+      if(!data.length) {
+        this.loadingData = false;
+      } else {
+        this.filterData(data);
       }
-      this.filterData(data);
     });
 
     if (!this.customers.length) {
@@ -75,6 +77,7 @@ export class DeliveredComponent implements OnInit {
   filterData = (data) => {
     const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
     let role = user['role']  || 0;
+    this.role = role;
     let id = user['id'];
     let wh_id = user['wh_id'] || null;
     switch (role) {
@@ -86,6 +89,7 @@ export class DeliveredComponent implements OnInit {
       break;
     default: this.data = [];
     }
+    this._tableService.dataSubject.next(this.data);
     this.loadingData = false;
   }
 

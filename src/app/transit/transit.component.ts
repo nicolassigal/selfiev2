@@ -26,7 +26,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   loadingData = false;
   isMakingChangesOnData = false;
   moment = _moment;
-  data;
+  data = [];
   fileUploader = '';
   role = 0;
   couriers = [];
@@ -47,6 +47,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this.loadingData = true;
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
@@ -68,11 +69,12 @@ export class TransitComponent implements OnInit, OnDestroy {
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.statusSubject.subscribe(status => this.status = status);
-    this._dataService.awbsSubject.subscribe(awbs => {
-      if(!this.data.length) {
-        this.loadingData = true;
+    this._dataService.awbsSubject.subscribe(awbs =>  {
+      if(!awbs.length) {
+        this.loadingData = false;
+      } else {
+        this.filterData(awbs);
       }
-      this.filterData(awbs);
     });
     this._dataService.stockSubject.subscribe(stocks => this.operations = stocks);
 
@@ -91,9 +93,10 @@ export class TransitComponent implements OnInit, OnDestroy {
 
   getData = () => {
     if (this.data.length) {
-      this.loadingData = true;
       this.filterData(this.data);
-    } 
+    } else {
+      this.loadingData = false;
+    }
   }
 
   filterData = (data) => {
@@ -135,9 +138,6 @@ export class TransitComponent implements OnInit, OnDestroy {
     }
 
     this.data = data.filter(row => row['status_id'] !== 3);        
-
-    this.loadingData = false;
-
     this.data.map(row => {
       row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
       row.status = this.status.filter(e => e.id === row.status_id)[0];
@@ -146,6 +146,7 @@ export class TransitComponent implements OnInit, OnDestroy {
       row.destination = this.getDestination(row);
     });
 
+    this.loadingData = false;
     this._tableService.dataSubject.next(this.data);
   }
 

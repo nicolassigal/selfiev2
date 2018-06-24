@@ -23,7 +23,7 @@ export class CourierDialogComponent implements OnInit {
 
   ngOnInit() {
     this.courier = { ...this.data.row };
-    this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
+    this.couriers = this.data.couriers;
   }
 
 

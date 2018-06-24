@@ -36,7 +36,25 @@
         button.btn-mobile {
             display: none;
         }
+        .btn-container-mobile {
+            display: none;
+        }
         @media(max-width: 600px) {
+            height: 25px;
+            .btn-container-mobile {
+                .mat-icon {
+                    padding: 0px 10px;
+                    &:last-child {
+                        padding-right: 0px;
+                    }
+                }
+                position: fixed;
+                top: 15px;
+                color: white;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+            }
             input {
                 width: 100%;
             }
@@ -47,11 +65,7 @@
                 display: none;
             }
             button.btn-mobile {
-                display: inline-block;
-                position: fixed;
-                bottom: 2%;
-                right: 3%;
-                z-index: 1;
+
             }
         }
     }

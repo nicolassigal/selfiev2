@@ -35,16 +35,18 @@ export class UsersComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this.loadingData = true;
     this.data = this._dataService.getCustomers();
     this.warehouses = this._dataService.getWarehouses();
     this.roles = this._dataService.getRoles();
 
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.customerSubject.subscribe(customers => {
-      if(!this.data.length) {
-        this.loadingData = true;
+      if(!customers.length) {
+        this.loadingData = false;
+      } else {
+        this.filterData(customers);
       }
-      this.filterData(customers);
     });
 
     if(!this.roles.length) {
@@ -58,8 +60,9 @@ export class UsersComponent implements OnInit {
   }
 
   getData = () => {
-    if (this.data.length) {
-      this.loadingData = true;
+    if (!this.data.length) {
+      this.loadingData = false;
+    } else {
       this.filterData(this.data);
     } 
   }

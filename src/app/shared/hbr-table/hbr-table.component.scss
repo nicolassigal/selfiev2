@@ -133,6 +133,18 @@
         text-align: left;
         margin-right: 10px;
     }
+    .totalizer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        background: white;
+        padding: 10px 50px;
+        position: absolute;
+        bottom: 0;
+        width: auto;
+        flex-direction: initial;
+        min-height: auto;
+    }
     .mat-cell:first-child,
     .mat-footer-cell:first-child,
     .-header-cell:first-child {
@@ -141,7 +153,12 @@
     .mat-header-row {
         display: none;
     }
+    .mat-column-actions {
+        position: absolute;
+        right: 0;
+    }
     .mat-row {
+        position: relative; 
         flex-direction: column;
         align-items: start;
         padding: 8px 24px;

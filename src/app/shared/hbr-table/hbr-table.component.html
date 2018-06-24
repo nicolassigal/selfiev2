@@ -4,8 +4,8 @@
     <ng-container *ngIf="column.header === 'Actions' && column.columnDef==='actions'" [matColumnDef]="column.columnDef">
       <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
       <mat-cell *matCellDef="let row">
-      <button mat-icon-button [matMenuTriggerFor]="appMenu">
-          <mat-icon>more_vert</mat-icon>
+      <button  class="mobile-label" mat-icon-button [matMenuTriggerFor]="appMenu">
+          <mat-icon class="more-mobile">more_vert</mat-icon>
         </button>
         <mat-menu #appMenu="matMenu">
           <button *ngIf="column.showEdit" mat-menu-item (click)="editRow(row)">Edit</button>
@@ -41,7 +41,7 @@
   <span class="totalizer-title">Total Value: </span><span class="totalizer-value"> U$D{{ totalizer.value }}</span>
   <span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight }} Kg</span>
   <span class="totalizer-title">Total Quantity: </span><span class="totalizer-value">{{ totalizer.quantity }}</span>
-  <span class="totalizer-title">Total Operations: </span><span class="totalizer-value">{{ totalizer.operations }}</span>
+  <span *ngIf="!noTotalOperation" class="totalizer-title">Total Operations: </span><span  *ngIf="!noTotalOperation" class="totalizer-value">{{ totalizer.operations }}</span>
 </div>
 <mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]"
   showFirstLastButtons>

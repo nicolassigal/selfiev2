@@ -1,3 +1,4 @@
+import { DataService } from './../../shared/data.service';
 import { DeleteWarehouseDialogComponent } from './delete/delete.component';
 import { WarehouseDialogComponent } from './edit/edit.component';
 import { Component, OnInit } from '@angular/core';
@@ -12,28 +13,78 @@ import { MatDialog } from '@angular/material';
 })
 export class WarehousesComponent implements OnInit {
   loadingData = false;
-  data;
+  data = [];
+  operations = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
-    { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` }
+    { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
+    { columnDef: 'box_qty', header: 'Total Qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
+    { columnDef: 'total_value', header: 'Total Val', type: 'value', cell: (element) => `${element.total_value ? element.total_value : ''}` },
+    { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` }
   ];
-  constructor(private _db: AngularFirestore, private tbService: TableService, private _dialog: MatDialog) { }
+  constructor(private _db: AngularFirestore,
+    private tbService: TableService,
+    private _dataService: DataService,
+    private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this._db.collection('warehouses', ref => ref.orderBy('id', 'asc'))
-      .valueChanges()
-      .subscribe(data => {
-        this.data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
-        this.data.map(row => row.name = this.capitalizeText(row.name));
-        this.tbService.dataSubject.next(this.data);
+    this.loadingData = true;
+    this.data = this._dataService.getWarehouses();
+    this.operations = this._dataService.getStock();
+    this._dataService.warehouseSubject.subscribe(data => {
+      if(!data.length) {
+        this.loadingData = false;
+      } else {
+        this.filterData(data);
+      }
+    });
+
+    if(!this.operations.length) {
+      this._dataService.stockSubject.subscribe(operations => {
+        this.operations = operations;
+        this.getData();
       });
+    } else {
+      this.getData();
+    }
+  }
+
+  getData = () => {
+    if (!this.data.length) {
+      this.loadingData = false;
+    } else {
+      this.filterData(this.data);
+    } 
+  }
+
+  filterData = (data) => {
+    this.data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
+    this.data.map(row => {
+      row.box_qty = 0;
+      row.total_value = 0;
+      row.total_weight = 0;
+      row.name = this.capitalizeText(row.name);
+      let whOperations = this.operations.filter(op => op.wh_id === row.id);
+      if (whOperations.length) {
+        whOperations.map(whOp => {
+          if (whOp.box_qty > 0 && whOp.delivered == 0 && whOp.deleted == 0) {
+            row.box_qty = Number(row.box_qty) + Number(whOp.box_qty);
+            row.total_value = Number(row.total_value) + Number(whOp.total_value);
+            row.total_weight = Number(row.total_weight) + Number(whOp.total_weight);
+          }
+        })
+      }
+    });
+    this.loadingData = false;
+    this.tbService.dataSubject.next(this.data);
   }
 
   onEditRow = (row = {}, title = 'Edit') => {
     this._dialog.open(WarehouseDialogComponent, {
       data: {
         row: row,
+        warehouses: this.data,
         title: `${title} Warehouse`,
         confirmBtn: title,
         cancelBtn: 'Cancel'
