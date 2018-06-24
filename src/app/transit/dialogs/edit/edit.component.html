@@ -1,44 +1,47 @@
 <mat-toolbar mat-dialog-title color="primary">
-        <mat-toolbar-row>
-          <span> {{ data.title }}</span>
-        </mat-toolbar-row>
-      </mat-toolbar>
-      <mat-dialog-content>
-            <div class="form-container">
-                    <mat-form-field>
-                      <mat-select placeholder="Send to Warehouse" (ngModelChange)="clearSelect('wh')"  [(ngModel)]="box.wh_id">
-                          <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field>
-                        <mat-select placeholder="Send to customer" (ngModelChange)="clearSelect('customer')"  [(ngModel)]="box.customer_id">
-                            <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field>
-                        <input matInput [disabled]="box.id" type="number" min="0" (change)="changeQty($event.target.value)" max="maxQty" placeholder="Box Quantity" [(ngModel)]="box.box_qty">
-                    </mat-form-field>
-                    <mat-form-field>
-                        <mat-select placeholder="Courier"  [(ngModel)]="box.courier_id">
-                            <mat-option *ngFor="let courier of couriers" [value]="courier.id"> {{ courier.name }} </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field>
-                        <input matInput placeholder="Tracking" [(ngModel)]="box.tracking">
-                    </mat-form-field>
-                    <mat-form-field>
-                        <mat-select placeholder="AWB N°"  [disabled]="box.id" [(ngModel)]="box.id">
-                            <mat-option [value]="''"> Select </mat-option>
-                            <mat-option *ngFor="let awb of awbs" [value]="awb.id"> {{ awb.id }} </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field>
-                      <input type="date" matInput [(ngModel)]="box.shipping_date" placeholder="Shipping date">
-                    </mat-form-field>
+    <mat-toolbar-row>
+        <span> {{ data.title }}</span>
+    </mat-toolbar-row>
+</mat-toolbar>
+<form ngNativeValidate (ngSubmit)="update()">
+    <mat-dialog-content>
+        <div class="form-container">
+            <mat-form-field>
+                <mat-select placeholder="Send to Warehouse" name="wh_id" (ngModelChange)="clearSelect('wh')" [(ngModel)]="box.wh_id">
+                    <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-select placeholder="Send to customer" name="customer_id" (ngModelChange)="clearSelect('customer')" [(ngModel)]="box.customer_id">
+                    <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <input matInput [disabled]="box.id" type="number" name="box_qty" min="0" (change)="changeQty($event.target.value)" max="maxQty" placeholder="Box Quantity"
+                    [(ngModel)]="box.box_qty">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-select placeholder="Courier" name="courier_id" [(ngModel)]="box.courier_id">
+                    <mat-option *ngFor="let courier of couriers" [value]="courier.id"> {{ courier.name }} </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <input matInput placeholder="Tracking" name="tracking" [(ngModel)]="box.tracking">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-select placeholder="AWB N°" [disabled]="box.id" name="awb_id" [(ngModel)]="box.id">
+                    <mat-option [value]="''"> Select </mat-option>
+                    <mat-option *ngFor="let awb of awbs" [value]="awb.id"> {{ awb.id }} </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <input type="date" matInput [(ngModel)]="box.shipping_date" name="shipping_date" placeholder="Shipping date">
+            </mat-form-field>
 
-                  </div>
-      </mat-dialog-content>
-      <mat-dialog-actions>
-        <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-button type="submit">{{ data.confirmBtn }}</button>
         <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
-      </mat-dialog-actions>
+    </mat-dialog-actions>
+</form>

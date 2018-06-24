@@ -44,6 +44,7 @@ import { CourierDialogComponent } from './manager/couriers/edit/edit.component';
 import { DeleteCourierDialogComponent } from './manager/couriers/delete/delete.component';
 import { WarehouseDialogComponent } from './manager/warehouses/edit/edit.component';
 import { DeleteWarehouseDialogComponent } from './manager/warehouses/delete/delete.component';
+import { DataService } from './shared/data.service';
 
 @NgModule({
   declarations: [
@@ -95,7 +96,8 @@ import { DeleteWarehouseDialogComponent } from './manager/warehouses/delete/dele
     TableService,
     AuthGuard,
     AuthService,
-    UtilsService
+    UtilsService,
+    DataService
   ],
   entryComponents: [
     EditStockDialogComponent,

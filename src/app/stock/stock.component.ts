@@ -1,8 +1,10 @@
+import { DataService } from './../shared/data.service';
+import { AuthService } from './../shared/auth.service';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { UtilsService } from './../shared/utils.service';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MAT_AUTOCOMPLETE_VALUE_ACCESSOR } from '@angular/material';
 import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { WorkersService } from '../workers.service';
 import { InfoService } from '../info/info.service';
@@ -29,9 +31,12 @@ export class StockComponent implements OnInit, OnDestroy {
   moment = _moment;
   customers = [];
   couriers = [];
+  warehouses = [];
   isMakingChangesOnData = false;
   setCols = false;
   cols = [];
+
+  stockSubscription = new Subscription();
 
   constructor(
     private _worker: WorkersService,
@@ -40,13 +45,15 @@ export class StockComponent implements OnInit, OnDestroy {
     private _auth: AngularFireAuth,
     private _tableService: TableService,
     private _dialog: MatDialog,
-    private _utils: UtilsService) { }
+    private authService: AuthService,
+    private _utils: UtilsService,
+    private _dataService: DataService) { }
 
   ngOnInit() {
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
-      { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : 0}` },
+      { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? `${element.box_qty} / ${element.initial_qty}` : 0}` },
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
         return `${element.total_weight ? element.total_weight : 0}`;
       }},
@@ -57,51 +64,71 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
       { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
     );
-    this.loadingData = true;
 
-    this._db.collection('couriers')
-    .valueChanges()
-    .pipe(take(1))
-    .subscribe(couriers => this.couriers = couriers);
+    this.couriers = this._dataService.getCouriers();
+    this.warehouses = this._dataService.getWarehouses();
+    this.customers = this._dataService.getCustomers();
+    this.data = this._dataService.getStock();
 
-    this._db.collection('operations', ref => ref
-      .where('deleted', '==', 0)
-      .where('delivered', '==', 0)
-      .orderBy('hbr_id', 'desc'))
-      .valueChanges()
-      .subscribe(data => {
-        this.loadingData = false;
-        this._db.collection('users')
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(users => {
-          this.customers = users;
-          const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
-          const role = user.role || 0;
-          this.role = role;
-          if (role === 2 && !this.setCols) {
-            this.setCols = true;
-            this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showSendStock: true, cell: (element) => '' });
-          }
-          const id = user['id'];
-          const wh_id = user['wh_id'] || null;
-          switch (role) {
-            case 0: this.data = data.filter(row => row['customer_id'] === id);
-              break;
-            case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
-              break;
-            case 2: this.data = data;
-              break;
-            default: this.data = [];
-          }
-          if (!this.isMakingChangesOnData) {
-            this._tableService.dataSubject.next(this.data);
-          }
-        });
+    this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
+    this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
+    this._dataService.stockSubject.subscribe(data => {
+      if (!this.data.length) {
+        this.loadingData = true;
+      }
+      this.filterData(data);
+    });
+    
+    if(!this.customers.length) {
+      this._dataService.customerSubject.subscribe(customers => {
+        this.customers = customers;
+        this.getData();
       });
+    } else {
+      this.getData();
+    }
   }
 
   ngOnDestroy() {
+  }
+
+  getData = () => {
+    if (this.data.length) {
+      this.loadingData = true;
+      this.filterData(this.data);
+    }
+  }
+
+  filterData = (data) => {
+    const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+    const role = user.role || 0;
+    this.role = role;
+    if (role === 2 && !this.setCols) {
+      this.setCols = true;
+      this.cols.unshift({ 
+        columnDef: 'actions',
+        header: 'Actions',
+        type: '',
+        showEdit: true,
+        showDelete: true,
+        showSendStock: true,
+        cell: (element) => ''
+      });
+    }
+    const id = user['id'];
+    const wh_id = user['wh_id'] || null;
+    switch (role) {
+      case 0: this.data = this.data.filter(row => row['customer_id'] === id);
+        break;
+      case 1: this.data = this.data.filter(row => row['wh_id'] === wh_id);
+        break;
+      case 2: this.data = data;
+        break;
+      default:;
+    }
+    this.loadingData = false;
+    this.data = this.data.filter(row => row.delivered === 0);
+    this._tableService.dataSubject.next(this.data);
   }
 
   parseXLS = (evt: any) => {
@@ -229,8 +256,9 @@ export class StockComponent implements OnInit, OnDestroy {
         customer.email = customer.username;
         customer.password = `password_${customer.id}`;
         customer.changed_pwd = false;
+        customer.role = 0;
         customer.id = this._utils.getId(this.customers);
-        firebase.auth().createUserWithEmailAndPassword(customer.username, customer.password);
+        this.authService._addUser(customer.username, customer.password).subscribe();
         const ref = this._db.collection('users').doc(`${customer.id}`).ref;
         customerBatch.set(ref, customer);
       }
@@ -244,15 +272,12 @@ export class StockComponent implements OnInit, OnDestroy {
     });
 
     courierBatch.commit()
-      .then(res => console.log('added couriers'))
       .catch(err => console.log('error on adding couriers', err));
 
     customerBatch.commit()
-      .then(res => console.log('added customers'))
       .catch(err => console.log('error on adding customers', err));
 
     data.map(entry => {
-
       entry.deleted = 0;
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
@@ -264,6 +289,9 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.courier = entry.courier && entry.courier.length ? this.capitalizeText(entry.courier) : null;
       entry.date = entry.date && this.moment(entry.date, 'DD-MM-YYYY').isValid() ? this.moment(entry.date).unix() : null;
 
+      entry.received_date = entry.received_date ? this.moment(entry.received_date).unix() : null;
+      entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
+
       if (!entry.hbr_id) {
         entry.hbr_id = Number(this.data[0].hbr_id) + 1;
       }
@@ -272,8 +300,16 @@ export class StockComponent implements OnInit, OnDestroy {
     chunks.map(chunk => {
       const batch = this._db.firestore.batch();
       chunk.map(row => {
-        const ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
-        batch.set(ref, row);
+        console.log('row', row.delivered, row.delivered == 1);
+        if (row.delivered == 1) { 
+          let id = this._db.createId();
+          row.box_qty = row.initial_qty;
+          const ref = this._db.collection('delivered').doc(`${id}`).ref;
+          batch.set(ref, row);
+        } else {
+          const ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
+          batch.set(ref, row);
+        }
       });
       promiseArr.push(batch.commit());
     });
@@ -288,7 +324,7 @@ export class StockComponent implements OnInit, OnDestroy {
         </ul>
         `);
         this.finishProccesing();
-        this._tableService.dataSubject.next(this.data);
+        // this._tableService.dataSubject.next(this.data);
         this.isMakingChangesOnData = true;
       })
       .catch(res => console.log(res));
@@ -343,6 +379,9 @@ export class StockComponent implements OnInit, OnDestroy {
     this._dialog.open(EditStockDialogComponent, {
       data: {
         row: row,
+        warehouses: this.warehouses,
+        customers: this.customers,
+        couriers: this.couriers,
         title: `${title} Operation`,
         confirmBtn: title,
         cancelBtn: 'Cancel'
@@ -365,6 +404,9 @@ export class StockComponent implements OnInit, OnDestroy {
     this._dialog.open(SendStockDialogComponent, {
       data: {
         row: row,
+        warehouses: this.warehouses,
+        customers: this.customers,
+        couriers: this.couriers,
         title: 'Send Boxes',
         confirmBtn: 'Send',
         cancelBtn: 'Cancel'

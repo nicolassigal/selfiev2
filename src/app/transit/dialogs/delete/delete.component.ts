@@ -45,6 +45,7 @@ export class DeleteTransitDialogComponent implements OnInit {
 
   ngOnInit() {
     this.box = { ...this.data.row };
+    this.operations = this.data.op;
   }
 
   public closeDialog() {
@@ -54,10 +55,7 @@ export class DeleteTransitDialogComponent implements OnInit {
   update = () => {
     let operationsPromiseArray = [];
     this.box.processes.forEach(process => {
-      this._db.collection('operations', ref => ref.where('hbr_id', '==', process.hbr_id))
-      .valueChanges()
-      .pipe(take(1))
-      .subscribe((operation: Operation[]) => {
+        let operation = this.operations.filter(row => row.hbr_id === process.hbr_id);
         let op = operation[0];
         if (op.box_qty > 0) {
           const kgPerUnit = Number(op.total_weight) / Number(op.box_qty);
@@ -68,15 +66,14 @@ export class DeleteTransitDialogComponent implements OnInit {
         } else {
           if (op.box_qty === 0) {
             op.deleted = 0;
+            op.delivered = 0;
           }
           op.box_qty = Number(process.box_qty);
           op.total_weight = Number(process.total_weight);
           op.total_value = Number(process.total_value);
-
         }
 
         operationsPromiseArray.push(this._db.collection('operations').doc(`${op.hbr_id}`).set(op));
-      });
     });
 
     Promise.all(operationsPromiseArray).then(res => {

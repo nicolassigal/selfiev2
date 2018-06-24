@@ -1,3 +1,4 @@
+import { DataService } from './../../../shared/data.service';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
@@ -12,6 +13,8 @@ import { take } from 'rxjs/operators';
     warehouses = [];
     customers = [];
     operations = [];
+    couriers = [];
+    isEditing = false;
     box = {
       date: null,
       hbr_id: null,
@@ -20,6 +23,7 @@ import { take } from 'rxjs/operators';
       customer_id: null,
       customer: null,
       box_qty: null,
+      initial_qty: null,
       total_weight: null,
       total_value: null,
       description: null,
@@ -31,29 +35,21 @@ import { take } from 'rxjs/operators';
       private _dialogRef: MatDialogRef<any>,
       private _dialog: MatDialog,
       private _db: AngularFirestore,
-      @Inject(MAT_DIALOG_DATA) public data: any) { }
+      private _dataService: DataService,
+      @Inject(MAT_DIALOG_DATA) public data: any) {}
 
 
     ngOnInit() {
       this.box = { ...this.data.row };
+      this.customers = this.data.customers;
+      this.warehouses = this.data.warehouses;
+      this.couriers = this.data.couriers;
       this.box.date = this.box.date ? this.moment.unix(this.box.date).format('YYYY-MM-DD') : null;
-
-      this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
-      .valueChanges()
-      .pipe(take(1))
-      .subscribe(warehouses => this.warehouses = warehouses);
-
-      this._db.collection('operations', ref => ref.where('deleted', '==', 0).orderBy('hbr_id', 'desc'))
-      .valueChanges()
-      .subscribe(operations => this.operations = operations);
-
-      this._db.collection('users', ref => ref.orderBy('name', 'asc'))
-      .valueChanges()
-      .pipe(take(1))
-      .subscribe(customers => this.customers = customers);
+      this.operations = this._dataService.getStock();
     }
 
     update = () => {
+      this.isEditing = true;
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh => wh.id === this.box.wh_id)[0].name : null;
       this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;
@@ -62,12 +58,16 @@ import { take } from 'rxjs/operators';
         this.box.hbr_id = Number(this.operations[0].hbr_id) + 1;
         this.box.deleted = 0;
         this.box.delivered = 0;
+        this.box.initial_qty = this.box.box_qty;
       }
 
       this._db.collection('operations')
         .doc(`${this.box.hbr_id}`)
         .set(this.box)
-        .then(res => this._dialogRef.close())
+        .then(res => {
+          this.isEditing = false;
+          this._dialogRef.close();
+        })
         .catch(err => console.log(err));
     }
 

@@ -1,20 +1,19 @@
 <mat-toolbar mat-dialog-title color="primary">
-    <mat-toolbar-row>
-      <span> {{ data.title }}</span>
-    </mat-toolbar-row>
-  </mat-toolbar>
-  <form #userForm>
-    <mat-dialog-content>
-      <div class="form-container">
-          <mat-form-field>
-              <input type="text" required autocomplete="off" matInput placeholder="Courier name" [(ngModel)]="courier.name" name="courier" class="example-right-align"
-                [disabled]="editing">
-          </mat-form-field>
-      </div>
-    </mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
-      <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
-    </mat-dialog-actions>
-  
-  </form>
+  <mat-toolbar-row>
+    <span> {{ data.title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+<form #userForm ngNativeValidate (ngSubmit)="update()">
+  <mat-dialog-content>
+    <div class="form-container">
+      <mat-form-field>
+        <input type="text" required autocomplete="off" matInput placeholder="Courier name" [(ngModel)]="courier.name" name="courier"
+          class="example-right-align" [disabled]="editing">
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button type="submit">{{ data.confirmBtn }}</button>
+    <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
+  </mat-dialog-actions>
+</form>

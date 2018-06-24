@@ -34,27 +34,10 @@ export class ReceivedStockDialogComponent implements OnInit {
 
     ngOnInit() {
         this.box = { ...this.data.row };
-        console.log(this.box);
-
-        this._db.collection('status')
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(status => this.status = status);
-
-        this._db.collection('warehouses')
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(warehouses => this.warehouses = warehouses);
-
-        this._db.collection('users')
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(customers => this.customers = customers);
-
-        this._db.collection('operations', ref => ref.orderBy('hbr_id', 'desc'))
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe(operations => this.operations = operations);
+        this.status = this.data.status;
+        this.warehouses = this.data.warehouses;
+        this.customers = this.data.customers;
+        this.operations = this.data.operations;
     }
 
     public closeDialog() {
@@ -79,7 +62,8 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.customer_id = this.box.customer_id;
                 process.destination = this.getDestination(process);
                 if (process.customer_id) {
-                    promises.push(this._db.collection('delivered').doc(`${process.hbr_id}`).set(process));
+                    let id = this._db.createId();
+                    promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
                 } else if (process.wh_id) {
                     process.hbr_id = Number(this.operations[0].hbr_id) + 1;
                     process.date = process.received_date;

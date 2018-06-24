@@ -1,3 +1,4 @@
+import { DataService } from './../shared/data.service';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { DeleteTransitDialogComponent } from './dialogs/delete/delete.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -15,6 +16,7 @@ import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
 import { ExpandTransitDialogComponent } from './dialogs/expand/expand.component';
 import * as _moment from 'moment';
 import { take } from 'rxjs/operators';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 @Component({
   selector: 'app-transit',
   templateUrl: './transit.component.html',
@@ -31,6 +33,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   customers = [];
   warehouses = [];
   status = [];
+  operations = [];
   setCols = false;
   cols = [];
 
@@ -40,10 +43,10 @@ export class TransitComponent implements OnInit, OnDestroy {
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
     private _tableService: TableService,
+    private _dataService: DataService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.loadingData = true;
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
@@ -53,53 +56,97 @@ export class TransitComponent implements OnInit, OnDestroy {
     { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
     { columnDef: 'destination', header: 'Destination', type: '', cell: (element) => `${element.destination ? element.destination : ''}` },
     { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.status ? element.status : ''}` });
-    this._db.collection('users').valueChanges().subscribe(users => this.customers = users);
-    this._db.collection('couriers').valueChanges().subscribe(couriers => this.couriers = couriers);
-    this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
-    this._db.collection('status').valueChanges().subscribe(status => this.status = status);
-    this._db.collection('awbs', ref => ref.orderBy('id', 'desc'))
-      .valueChanges()
-      .subscribe(data => {
-        this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe((user: {}) => {
-          user = user[0];
-          let role = user['role']  || 0;
-          this.role = role;
-          if (role === 2 && !this.setCols) {
-            this.setCols = true;
-            this.cols.unshift({ columnDef: 'actions', header: 'Actions', type: '', showReceived: true, showExpand: true, cell: (element) => '' });
-          }
-          let id = user['id'];
-          let wh_id = user['wh_id'] || null;
-          switch (role) {
-            case 0: this.data = data.filter(row => row['customer_id'] === id);
-              break;
-            case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
-              break;
-            case 2: this.data = data;
-              break;
-            default: this.data = [];
-          }
 
-        this.data = data.filter(row => row['status_id'] !== 3);        
-        this.loadingData = false;
-        this.data.map(row => {
-          row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
-          row.status = this.status.filter(e => e.id === row.status_id)[0];
-          row.status_id = row.status ? row.status.id : 0;
-          row.status =  row.status ? row.status.name : null;
-          row.destination = this.getDestination(row);
-        });
-        if (!this.isMakingChangesOnData) {
-          this._tableService.dataSubject.next(this.data);
-        }
+    this.customers = this._dataService.getCustomers();
+    this.couriers = this._dataService.getCouriers();
+    this.warehouses = this._dataService.getWarehouses();
+    this.customers = this._dataService.getCustomers();
+    this.data = this._dataService.getAwbs();
+    this.status = this._dataService.getStatus();
+    this.operations = this._dataService.getStock();
+
+    this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
+    this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
+    this._dataService.statusSubject.subscribe(status => this.status = status);
+    this._dataService.awbsSubject.subscribe(awbs => {
+      if(!this.data.length) {
+        this.loadingData = true;
+      }
+      this.filterData(awbs);
+    });
+    this._dataService.stockSubject.subscribe(stocks => this.operations = stocks);
+
+    if(!this.customers.length) {
+      this._dataService.customerSubject.subscribe(customers => {
+        this.customers = customers;
+        this.getData();
       });
-      });
+    } else {
+      this.getData();
+    }
   }
 
   ngOnDestroy() {
+  }
+
+  getData = () => {
+    if (this.data.length) {
+      this.loadingData = true;
+      this.filterData(this.data);
+    } 
+  }
+
+  filterData = (data) => {
+    let showEdit = false;
+    let showDelete = false;
+    let showReceived = false;
+    const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+    const role = user.role || 0;
+    this.role = role;
+    if (role === 2 && !this.setCols) {
+      this.setCols = true;
+      showEdit = true;
+      showDelete = true;
+      showReceived = true;
+    }
+    if (!this.cols.some(header => header.columnDef === 'actions')) {
+      this.cols.unshift({ 
+        columnDef: 'actions',
+        header: 'Actions',
+        type: '',
+        showEdit: showEdit,
+        showDelete: showDelete,
+         showReceived: showReceived,
+         showExpand: true,
+         cell: (element) => '' 
+      });
+    }
+
+    let id = user['id'];
+    let wh_id = user['wh_id'] || null;
+    switch (role) {
+      case 0: this.data = this._getData(data, id);
+        break;
+      case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+        break;
+      case 2: this.data = data;
+        break;
+      default: this.data = [];
+    }
+
+    this.data = data.filter(row => row['status_id'] !== 3);        
+
+    this.loadingData = false;
+
+    this.data.map(row => {
+      row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
+      row.status = this.status.filter(e => e.id === row.status_id)[0];
+      row.status_id = row.status ? row.status.id : 0;
+      row.status =  row.status ? row.status.name : null;
+      row.destination = this.getDestination(row);
+    });
+
+    this._tableService.dataSubject.next(this.data);
   }
 
   getDestination = (row) => {
@@ -118,6 +165,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     this._dialog.open(ExpandTransitDialogComponent, {
       data: {
         row: row,
+        op: this.operations,
         title: 'Processes',
         confirmBtn: 'Ok',
       }, width: '500px'
@@ -128,6 +176,12 @@ export class TransitComponent implements OnInit, OnDestroy {
       this._dialog.open(ReceivedStockDialogComponent, {
         data: {
           row: row,
+          operations: this.operations,
+          status: this.status,
+          warehouses: this.warehouses,
+          couriers: this.couriers,
+          customers: this.customers,
+          awbs: this.data,
           title: 'Mark as...',
           confirmBtn: 'Ok',
           cancelBtn: 'Cancel'
@@ -139,6 +193,12 @@ export class TransitComponent implements OnInit, OnDestroy {
       this._dialog.open(EditTransitDialogComponent, {
         data: {
           row: row,
+          operations: this.operations,
+          status: this.status,
+          warehouses: this.warehouses,
+          couriers: this.couriers,
+          customers: this.customers,
+          awbs: this.data,
           title: 'Edit Box in transit',
           confirmBtn: 'Edit',
           cancelBtn: 'Cancel'
@@ -150,6 +210,7 @@ export class TransitComponent implements OnInit, OnDestroy {
       this._dialog.open(DeleteTransitDialogComponent, {
         data: {
           row: row,
+          op: this.operations,
           title: 'Delete Box in transit',
           confirmBtn: 'Delete',
           cancelBtn: 'Cancel'
@@ -311,5 +372,24 @@ export class TransitComponent implements OnInit, OnDestroy {
       view[i] = s.charCodeAt(i) & 0xFF;
     }
     return buf;
+  }
+
+  _getData = (data, id) => {
+    data = data.map(row => {
+      row.box_qty = 0;
+      row.total_weight = 0;
+      row.total_value = 0;
+      row.processes = row.processes.filter(p => {
+        if(p.customer_id === id) {
+          row.box_qty = Number(row.box_qty) +  Number(p.box_qty);
+          row.total_weight = Number(row.total_weight) +  Number(p.total_weight);
+          row.total_value = Number(row.total_value) +  Number(p.total_value);
+          return p;
+        }
+      });
+      return row;
+    });
+    console.log(data);
+    return data;
   }
 }

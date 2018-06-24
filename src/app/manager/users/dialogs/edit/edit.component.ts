@@ -1,9 +1,11 @@
+import { AuthService } from './../../../../shared/auth.service';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { UtilsService } from '../../../../shared/utils.service';
-
+import { Http, RequestOptions, Headers } from '@angular/http';
+import * as firebase from 'firebase';
 @Component({
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.scss']
@@ -14,26 +16,44 @@ export class UserDialogComponent implements OnInit {
   warehouses = [];
   users = [];
   oldPwd;
-  user;
   maxQty;
   password;
   editing = false;
   password2;
   errors;
+  secondaryApp = firebase.app('Secondary');
+  user = { 
+    name: null,
+    address: null,
+    city: null,
+    country: null,
+    cuit: null,
+    email: null,
+    username: null,
+    id: null,
+    password: null,
+    role: 0,
+    role_name: null,
+    tel: null,
+    wh_id: null,
+    wh_name: null
+  }
   constructor(
     private _dialogRef: MatDialogRef<any>,
     private _dialog: MatDialog,
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
     private _utils: UtilsService,
+    private authService: AuthService,
+    private _http: Http,
     @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   ngOnInit() {
     this.user = { ...this.data.row };
     this.oldPwd = this.user.password || null;
-    this._db.collection('roles').valueChanges().subscribe(roles => this.roles = roles);
-    this._db.collection('users').valueChanges().subscribe(users => this.users = users);
-    this._db.collection('warehouses').valueChanges().subscribe(warehouses => this.warehouses = warehouses);
+    this.roles = this.data.roles;
+    this.users = this.data.users;
+    this.warehouses = this.data.warehouses;
   }
 
 
@@ -51,7 +71,42 @@ export class UserDialogComponent implements OnInit {
           this.user.id = this._utils.getId(this.users);
           this.user.email = this.user.username;
           this.user.role = this.user.role || 0;
-          this._auth.auth.createUserWithEmailAndPassword(this.user.username, this.password).then(() => {
+          this.user.password = this.password;
+          this.secondaryApp.auth().createUserWithEmailAndPassword(this.user.username, this.password)
+            .then(res => { 
+              this.secondaryApp.auth().signOut();
+              this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+                .then(res => {
+                  this.editing = false;
+                  this.closeDialog();
+                })
+                .catch(err => {
+                  this.editing = false;
+                  console.log(err);
+                  this.errors = err.message;
+                });
+            })                
+            .catch(err => {
+              this.editing = false;
+              console.log(err);
+              this.errors = err.message;
+            });
+        } else {
+          this.editing = false;
+          this.errors = 'E-mail already exists';
+        }
+      } else {
+        this.editing = false;
+        this.errors = 'Passwords doesnt match';
+      }
+    } else {
+      this.editing = true;
+      this.errors = '';
+      if (this.password && this.password2 && this.password === this.password2) {
+        this.secondaryApp.auth().signInWithEmailAndPassword(this.user.username, this.user.password).then(res => {
+          this.secondaryApp.auth().currentUser.updatePassword(this.password).then(res => {
+            this.secondaryApp.auth().signOut();
+            this.user.password = this.password,
             this._db.collection('users').doc(`${this.user.id}`).set(this.user)
               .then(res => {
                 this.editing = false;
@@ -62,19 +117,20 @@ export class UserDialogComponent implements OnInit {
                 console.log(err);
                 this.errors = err.message;
               });
+          }).catch(err => {
+            this.editing = false;
+            console.log(err);
+            this.errors = err.message;
           });
-        } else {
-          this.editing = false;
-          this.errors = 'E-mail already exists';
-        }
+        })
       } else {
-        this.editing = false;
-        this.errors = 'Passwords doesnt match';
+        this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+          .then(res => {
+            this.editing = false;
+            this.closeDialog();
+          })
+          .catch(err => console.log(err));
       }
-    } else {
-      this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-        .then(res => this.closeDialog())
-        .catch(err => console.log(err));
     }
   }
 }

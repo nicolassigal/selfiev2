@@ -1,3 +1,4 @@
+import { DataService } from './../shared/data.service';
 import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -39,6 +40,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private _db: AngularFirestore,
     private authService: AuthService,
+    private _dataService: DataService,
     private _utils: UtilsService) { }
 
   ngOnInit() {
@@ -53,16 +55,18 @@ export class LoginComponent implements OnInit {
   login = () => {
     if (this.email && this.password) {
       this.loggingin = true;
-      this._db.collection('users', ref => ref.where('username', '==', this.email))
+      this._db.collection('users')
         .valueChanges()
         .pipe(take(1))
-        .subscribe((dbUser) => {
+        .subscribe((users) => {
+          let dbUser = users.filter(user => user['username'] === this.email);
           if (dbUser[0]  && (dbUser[0]['deleted'] === 0 || !dbUser[0]['deleted'])) {
             this.auth.auth.signInWithEmailAndPassword(this.email, this.password)
               .then(res => {
                 this.auth.auth.currentUser.getIdToken().then(token => {
                   let role = dbUser[0]['role'] || 0;
                   this.authService._setToken(token, role);
+                  this._dataService.setCustomers(users);
                   this.router.navigate(['dashboard']);
                   this.loggingin = false;
                   this.error = '';

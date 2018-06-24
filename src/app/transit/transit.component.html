@@ -1,12 +1,12 @@
 <div class="transit" *ngIf="!loadingData">
     <form>
-        <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false"
-            type="file" />
+        <!-- <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false"
+            type="file" /> -->
         <div class="btn-container">
-            <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop" *ngIf="role == 2">
+           <!-- <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop" *ngIf="role == 2">
                 <mat-icon>cloud_upload</mat-icon>
                 Upload File
-            </button>
+            </button> -->
             <button mat-raised-button color="primary" (click)="download()" class="btn-desktop" *ngIf="role == 2">
                 <mat-icon>cloud_download</mat-icon>
                 Download

@@ -14,7 +14,7 @@ export class WarehousesComponent implements OnInit {
   loadingData = false;
   data;
   cols = [
-    { columnDef: 'actions', header: 'Actions', type: '', cell: (element) => `${element.actions}` },
+    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` }
   ];

@@ -4,6 +4,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
 import { UtilsService } from '../../../shared/utils.service';
 import { take } from 'rxjs/operators';
+import { DataService } from '../../../shared/data.service';
 @Component({
     templateUrl: './send-stock.component.html',
     styleUrls: ['./../dialog.component.scss']
@@ -35,32 +36,19 @@ export class SendStockDialogComponent implements OnInit {
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
         private _db: AngularFirestore,
+        private _dataService: DataService,
         private _utils: UtilsService,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit() {
         this.maxQty = Number(this.data.row.box_qty);
-
-        this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .pipe(take(1))
-            .subscribe(warehouses => this.warehouses = warehouses);
-
-        this._db.collection('couriers', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .pipe(take(1))
-            .subscribe(couriers => this.couriers = couriers);
-
-        this._db.collection('users', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .pipe(take(1))
-            .subscribe(users => this.customers = users);
-
-        this._db.collection('awbs', ref => ref.where('id', '<', 3).orderBy('id', 'asc'))
-            .valueChanges()
-            .pipe(take(1))
-            .subscribe(awbs => this.awbs = awbs);
+        this.warehouses = this.data.warehouses;
+        this.couriers = this.data.couriers;
+        this.customers = this.data.customers;
+        this.awbs = this._dataService.getAwbs();
+        this.awbs = this.awbs.filter(row => row.status_id < 3);
     }
+
     public closeDialog() {
         this._dialogRef.close();
     }
@@ -148,7 +136,6 @@ export class SendStockDialogComponent implements OnInit {
 
             // parse date to unix timestamp
             this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
-            console.log(this.box, this.data.row);
 
             // push to database
             this._db.collection('awbs').doc(`${this.box.id}`)

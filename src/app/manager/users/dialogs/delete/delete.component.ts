@@ -2,6 +2,9 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
+import * as firebase from 'firebase';
+import { take } from 'rxjs/operators';
+import { DataService } from '../../../../shared/data.service';
 @Component({
     templateUrl: './delete.component.html',
     styleUrls: ['./delete.component.scss']
@@ -9,14 +12,19 @@ import * as _moment from 'moment';
 
 export class DeleteUserDialogComponent implements OnInit {
     user;
+    operations = [];
+    secondaryApp = firebase.app('Secondary');
     constructor(
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
         private _db: AngularFirestore,
+        private _dataService: DataService,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit(){
         this.user = { ...this.data.row };
+        this.operations = this._dataService.getStock();
+        this._dataService.stockSubject.subscribe(op => this.operations = op);
     }
 
     public closeDialog() {
@@ -24,9 +32,23 @@ export class DeleteUserDialogComponent implements OnInit {
     }
 
     update = () => {
-        this.data.row.deleted = 1;
-        this._db.collection('users').doc(`${this.data.row.id}`).set(this.data.row)
-            .then(res => this.closeDialog())
-            .catch(err => console.log(err));
+        let batch = this._db.firestore.batch();
+        this.secondaryApp.auth().signInWithEmailAndPassword(this.user.username, this.user.password).then(res => {
+            this.secondaryApp.auth().currentUser.delete().then(res => {
+                let customerRows = this.operations.filter(op => op.customer_id == this.user.id);
+                customerRows.map(row => {
+                    row['deleted'] = 1;
+                    let ref = this._db.collection('operations').doc(`${row['hbr_id']}`).ref;
+                    batch.set(ref, row);
+                });
+                batch.commit().then(()=> {
+                    this._db.collection('users').doc(`${this.data.row.id}`).delete()
+                    .then(res => {
+                        this.secondaryApp.auth().signOut();
+                        this.closeDialog();
+                    }).catch(err => console.log(err));
+                }).catch(err => console.log(err));
+            }).catch(err => console.log(err));
+        }).catch(err => console.log(err));
     }
 }

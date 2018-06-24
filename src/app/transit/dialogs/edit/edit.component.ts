@@ -37,17 +37,12 @@ export class EditTransitDialogComponent implements OnInit {
     ngOnInit(){
         this.box = { ...this.data.row };
         this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null;
-        this._db.collection('status').valueChanges().subscribe(status => this.status = status);
-        this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .subscribe(warehouses => this.warehouses = warehouses);
-        this._db.collection('couriers', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .subscribe(couriers => this.couriers = couriers);
-        this._db.collection('users', ref => ref.orderBy('name', 'asc'))
-            .valueChanges()
-            .subscribe(users => this.customers = users);
-        this._db.collection('awbs').valueChanges().subscribe(awbs => this.awbs = awbs);
+        
+        this.status = this.data.status;
+        this.warehouses = this.data.warehouses;
+        this.couriers = this.data.couriers;
+        this.customers = this.data.customers;
+        this.awbs = this.data.awbs;
     }
 
     clearSelect (feature) {

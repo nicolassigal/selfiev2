@@ -10,6 +10,7 @@ import { saveAs } from 'file-saver';
 import { take } from 'rxjs/operators';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as _moment from 'moment';
+import { DataService } from '../shared/data.service';
 @Component({
   selector: 'app-delivered',
   templateUrl: './delivered.component.html',
@@ -19,6 +20,7 @@ export class DeliveredComponent implements OnInit {
   loadingData = false;
   moment = _moment;
   data;
+  customers = [];
   fileUploader = '';
   role = 0;
   cols = [
@@ -40,34 +42,51 @@ export class DeliveredComponent implements OnInit {
     private infoService: InfoService,
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
+    private _dataService: DataService,
     private _tableService: TableService) {}
 
   ngOnInit() {
-    this.loadingData = true;
-    this._db.collection('delivered', ref => ref.orderBy('hbr_id', 'desc'))
-    .valueChanges()
-    .subscribe(data =>  {
-      this._db.collection('users', ref => ref.where('username', '==', this._auth.auth.currentUser.email))
-      .valueChanges()
-      .pipe(take(1))
-      .subscribe((user: {}) => {
-        user = user[0];
-        let role = user['role']  || 0;
-        let id = user['id'];
-        let wh_id = user['wh_id'] || null;
-        this.role = role;
-        switch (role) {
-          case 0: this.data = data.filter(row => row['customer_id'] === id);
-            break;
-          case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
-            break;
-          case 2: this.data = data;
-            break;
-          default: this.data = [];
-        }
-      this.loadingData = false;
+    this.customers = this._dataService.getCustomers();
+    this.data = this._dataService.getDelivered();
+    this._dataService.deliveredSubject.subscribe(data => {
+      if(!this.data.length) {
+        this.loadingData = true;
+      }
+      this.filterData(data);
     });
-  });
+
+    if (!this.customers.length) {
+      this._dataService.customerSubject.subscribe(customers => {
+        this.customers = customers;
+        this.getData();
+      });
+    } else {
+      this.getData();
+    }
+  }
+
+  getData = () => {
+    if (this.data.length) {
+      this.loadingData = true;
+      this.filterData(this.data);
+    }
+  }
+
+  filterData = (data) => {
+    const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+    let role = user['role']  || 0;
+    let id = user['id'];
+    let wh_id = user['wh_id'] || null;
+    switch (role) {
+      case 0: this.data = data.filter(row => row['customer_id'] === id);
+      break;
+    case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+      break;
+    case 2: this.data = data;
+      break;
+    default: this.data = [];
+    }
+    this.loadingData = false;
   }
 
   parseXLS = (evt: any) => {
