@@ -1,0 +1,12 @@
+.empty-table {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    height: 50vh;
+    width: 100%;
+    h2 {
+        color: gray;
+    }
+}

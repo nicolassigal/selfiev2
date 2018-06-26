@@ -1,6 +1,10 @@
 <mat-sidenav-container class="sidenav-container" fullscreen>
     <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
-        <mat-toolbar color="primary">HBR Selfie</mat-toolbar>
+        <mat-toolbar color="primary">
+            <a href="https://www.tucourier.com.ar">
+                <img src="./assets/logo.png" alt="">
+            </a>
+        </mat-toolbar>
         <mat-nav-list>
             <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/stock">Stock</a>
             <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/delivered">Delivered</a>

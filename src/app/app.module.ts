@@ -45,6 +45,7 @@ import { DeleteCourierDialogComponent } from './manager/couriers/delete/delete.c
 import { WarehouseDialogComponent } from './manager/warehouses/edit/edit.component';
 import { DeleteWarehouseDialogComponent } from './manager/warehouses/delete/delete.component';
 import { DataService } from './shared/data.service';
+import { EmptyTableComponent } from './shared/empty-table/empty-table.component';
 
 @NgModule({
   declarations: [
@@ -74,14 +75,15 @@ import { DataService } from './shared/data.service';
     CourierDialogComponent,
     DeleteCourierDialogComponent,
     WarehouseDialogComponent,
-    DeleteWarehouseDialogComponent
+    DeleteWarehouseDialogComponent,
+    EmptyTableComponent
   ],
   imports: [
   BrowserModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule.enablePersistence(),
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
+    ServiceWorkerModule.register('./ngsw-worker.js', { enabled: environment.production }),
     BrowserAnimationsModule,
     HttpModule,
     FormsModule,

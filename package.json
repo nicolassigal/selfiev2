@@ -4,7 +4,7 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
-        "build": "ng build --prod",
+        "build": "ng build --prod --aot --base-href ./ --build-optimizer",
         "firebase": "firebase deploy && firebase open hosting:site",
         "git": "npm run git:add && npm run git:commit && npm run  git:push",
         "git:pull": "git pull origin master",
@@ -16,6 +16,7 @@
         "lint": "ng lint",
         "e2e": "ng e2e"
     },
+
     "private": true,
     "dependencies": {
         "@angular/animations": "^6.0.3",
@@ -50,6 +51,7 @@
         "angularfire2": "^5.0.0-rc.10",
         "codelyzer": "~4.2.1",
         "firebase": "^5.0.4",
+        "gzipper": "^1.3.0",
         "jasmine-core": "~2.99.1",
         "jasmine-spec-reporter": "~4.2.1",
         "karma": "~1.7.1",
@@ -60,6 +62,7 @@
         "protractor": "~5.3.0",
         "ts-node": "~5.0.1",
         "tslint": "~5.9.1",
-        "typescript": "~2.7.2"
+        "typescript": "~2.7.2",
+        "upload-site": "^1.0.0"
     }
 }

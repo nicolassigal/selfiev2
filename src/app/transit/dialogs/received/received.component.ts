@@ -37,7 +37,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         this.status = this.data.status;
         this.warehouses = this.data.warehouses;
         this.customers = this.data.customers;
-        this.operations = this.data.operations;
+        this.operations = [...this.data.operations];
     }
 
     public closeDialog() {

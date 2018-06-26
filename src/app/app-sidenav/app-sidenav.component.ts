@@ -9,7 +9,7 @@ import { AuthService } from '../shared/auth.service';
 @Component({
   selector: 'app-sidenav',
   templateUrl: './app-sidenav.component.html',
-  styleUrls: ['./app-sidenav.component.css']
+  styleUrls: ['./app-sidenav.component.scss']
 })
 export class AppSidenavComponent implements OnInit {
   title;

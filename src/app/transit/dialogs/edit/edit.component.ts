@@ -42,7 +42,7 @@ export class EditTransitDialogComponent implements OnInit {
         this.warehouses = this.data.warehouses;
         this.couriers = this.data.couriers;
         this.customers = this.data.customers;
-        this.awbs = this.data.awbs;
+        this.awbs = [...this.data.awbs];
     }
 
     clearSelect (feature) {

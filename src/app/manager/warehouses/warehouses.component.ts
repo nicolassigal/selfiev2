@@ -29,8 +29,10 @@ export class WarehousesComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.loadingData = true;
     this.data = this._dataService.getWarehouses();
+    if(!this.data.length) {
+      this.loadingData = true;
+    }
     this.operations = this._dataService.getStock();
     this._dataService.warehouseSubject.subscribe(data => {
       if(!data.length) {

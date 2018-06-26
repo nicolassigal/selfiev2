@@ -1,3 +1,4 @@
+import { AuthService } from './../shared/auth.service';
 import { DataService } from './../shared/data.service';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { DeleteTransitDialogComponent } from './dialogs/delete/delete.component';
@@ -42,12 +43,12 @@ export class TransitComponent implements OnInit, OnDestroy {
     private infoService: InfoService,
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
+    private _authService: AuthService,
     private _tableService: TableService,
     private _dataService: DataService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.loadingData = true;
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
@@ -65,7 +66,10 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.data = this._dataService.getAwbs();
     this.status = this._dataService.getStatus();
     this.operations = this._dataService.getStock();
-
+    this.role = this._authService.getRole();
+    if(!this.data.length) {
+      this.loadingData = true;
+    }
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.statusSubject.subscribe(status => this.status = status);

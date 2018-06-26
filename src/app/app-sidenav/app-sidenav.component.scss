@@ -3,7 +3,10 @@
 }
 
 .mat-toolbar {
-  
+  justify-content: space-between;
+  @media(max-width: 600px) {
+    justify-content: initial;
+  }
 }
 
 .sidenav {

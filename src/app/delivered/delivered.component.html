@@ -6,11 +6,12 @@
                 Download
             </button>
         </div>
-        <div class="btn-container-mobile">
+        <div class="btn-container-mobile"   *ngIf="role == 2">
             <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
         </div>
     </form>
-    <app-hbr-table [datasrc]="data" [cols]="cols"></app-hbr-table>
+    <app-hbr-table [datasrc]="data" [cols]="cols" *ngIf="data.length"></app-hbr-table>
+    <app-empty-table *ngIf="!data.length  && !loadingData"></app-empty-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
     <app-spinner></app-spinner>

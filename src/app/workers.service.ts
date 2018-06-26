@@ -28,10 +28,14 @@ private checkDBWorker = `
         let toStorage;
         let xls = e.data.xlsData;
         let db = e.data.dbData;
+        let delivered = e.data.delivered;
         if (db.length) {
           toStorage = xls.filter(row => !db.some(entry => +row.hbr_id === +entry.hbr_id));
         } else {
           toStorage = xls;
+        }
+        if(delivered.length) {
+          toStorage = toStorage.filter(row => !delivered.some(entry => +row.hbr_id === +entry.hbr_id));
         }
         self.postMessage(JSON.stringify(toStorage));
     }

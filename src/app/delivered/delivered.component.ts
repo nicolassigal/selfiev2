@@ -1,3 +1,4 @@
+import { AuthService } from './../shared/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -42,13 +43,17 @@ export class DeliveredComponent implements OnInit {
     private infoService: InfoService,
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
+    private _authService: AuthService,
     private _dataService: DataService,
     private _tableService: TableService) {}
 
   ngOnInit() {
-    this.loadingData = true;
     this.customers = this._dataService.getCustomers();
     this.data = this._dataService.getDelivered();
+    this.role = this._authService.getRole();
+    if(!this.data.length) {
+      this.loadingData = true;
+    }
     this._dataService.deliveredSubject.subscribe(data => {
       if(!data.length) {
         this.loadingData = false;
@@ -69,8 +74,9 @@ export class DeliveredComponent implements OnInit {
 
   getData = () => {
     if (this.data.length) {
-      this.loadingData = true;
       this.filterData(this.data);
+    } else {
+      this.loadingData = false;
     }
   }
 

@@ -10,7 +10,7 @@ import { UsersComponent } from './manager/users/users.component';
 import { WarehousesComponent } from './manager/warehouses/warehouses.component';
 import { CouriersComponent } from './manager/couriers/couriers.component';
 const routes: Routes = [
-  {path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  {path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent, data: { title: 'Hbr Selfie' }},
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { authLevel: [0, 1, 2] },
     children: [
@@ -23,7 +23,7 @@ const routes: Routes = [
       { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
     ]
   },
-  { path: '**', redirectTo: '/', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login', pathMatch: 'full' },
 ];
 
 @NgModule({

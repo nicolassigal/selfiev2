@@ -25,8 +25,10 @@ export class CouriersComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.loadingData = true;
     this.data = this._dataService.getCouriers();
+    if(!this.data.length) {
+      this.loadingData = true;
+    }
     this._dataService.couriersSubject.subscribe(data => {
         if(!data.length) {
           this.loadingData = false;
@@ -36,7 +38,6 @@ export class CouriersComponent implements OnInit {
       });
 
       if(this.data.length) {
-        this.loadingData = true;
         this.getData(this.data);
       }
   }

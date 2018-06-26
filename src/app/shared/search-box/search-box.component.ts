@@ -30,11 +30,11 @@ export class SearchBoxComponent implements OnInit {
 
   filterData = (query) => {
     this.query = query;
-    if (query.length) {
+    if (this.query && this.query.length) {
       this.isFiltering = true;
-      this._tableService.filterSubject.next(query);
+      this._tableService.filterSubject.next(this.query);
     } else {
-      this.isFiltering = false;
+      this.clear();
     }
   }
 }

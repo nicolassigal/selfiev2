@@ -35,11 +35,12 @@ export class UsersComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.loadingData = true;
     this.data = this._dataService.getCustomers();
     this.warehouses = this._dataService.getWarehouses();
     this.roles = this._dataService.getRoles();
-
+    if(!this.data.length) {
+      this.loadingData = true;
+    }
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.customerSubject.subscribe(customers => {
       if(!customers.length) {
