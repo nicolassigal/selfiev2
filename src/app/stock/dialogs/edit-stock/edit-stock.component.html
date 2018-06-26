@@ -7,18 +7,18 @@
   <mat-dialog-content>
     <div class="form-container">
       <mat-form-field>
-        <mat-select placeholder="Warehouse" required [disabled]="isEditing" [(ngModel)]="box.wh_id" required name="wh_id">
+        <mat-select placeholder="Warehouse" [disabled]="isEditing" [(ngModel)]="box.wh_id" required name="wh_id">
           <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
-        <input matInput type="number" placeholder="Box Quantity" [disabled]="isEditing" [(ngModel)]="box.box_qty" required name="box_qty">
+        <input matInput type="number"  placeholder="Box Quantity" [disabled]="isEditing" [(ngModel)]="box.box_qty" required name="box_qty">
       </mat-form-field>
       <mat-form-field>
-        <input matInput type="number" placeholder="Total weight" [disabled]="isEditing" [(ngModel)]="box.total_weight" required name="total_weight">
+        <input matInput type="number" step="0.01" placeholder="Total weight" [disabled]="isEditing" [(ngModel)]="box.total_weight" required name="total_weight">
       </mat-form-field>
       <mat-form-field>
-        <input matInput type="number" placeholder="Total value" [disabled]="isEditing" [(ngModel)]="box.total_value" required name="total_value">
+        <input matInput type="number" step="0.01" placeholder="Total value" [disabled]="isEditing" [(ngModel)]="box.total_value" required name="total_value">
       </mat-form-field>
       <mat-form-field>
         <mat-select placeholder="Customers" [disabled]="isEditing" [(ngModel)]="box.customer_id" required name="customer_id">
@@ -28,6 +28,9 @@
       <mat-form-field>
         <input type="date" matInput [disabled]="isEditing" placeholder="WH in date" [(ngModel)]="box.date" required name="date" />
       </mat-form-field>
+      <mat-form-field>
+        <input required matInput placeholder="Tracking" name="tracking" [(ngModel)]="box.tracking" [disabled]="isEditing">
+    </mat-form-field>
       <mat-form-field>
         <textarea matInput [disabled]="isEditing" placeholder="Description" [(ngModel)]="box.description" required name="description"></textarea>
       </mat-form-field>

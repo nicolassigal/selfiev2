@@ -28,6 +28,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   isMakingChangesOnData = false;
   moment = _moment;
   data = [];
+  tableData = [];
   fileUploader = '';
   role = 0;
   couriers = [];
@@ -67,43 +68,30 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.status = this._dataService.getStatus();
     this.operations = this._dataService.getStock();
     this.role = this._authService.getRole();
-    if(!this.data.length) {
+    if (!this.data.length) {
       this.loadingData = true;
     }
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.statusSubject.subscribe(status => this.status = status);
-    this._dataService.awbsSubject.subscribe(awbs =>  {
-      if(!awbs.length) {
-        this.loadingData = false;
-      } else {
-        this.filterData(awbs);
-      }
-    });
+    this._dataService.awbsSubject.subscribe(awbs =>  this.filterData(awbs));
     this._dataService.stockSubject.subscribe(stocks => this.operations = stocks);
 
-    if(!this.customers.length) {
+    if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.getData();
+        this.filterData(this.data);
       });
     } else {
-      this.getData();
+      this.filterData(this.data);
     }
   }
 
   ngOnDestroy() {
   }
 
-  getData = () => {
-    if (this.data.length) {
-      this.filterData(this.data);
-    } else {
-      this.loadingData = false;
-    }
-  }
-
   filterData = (data) => {
+    if (data.length) {
     let showEdit = false;
     let showDelete = false;
     let showReceived = false;
@@ -117,7 +105,7 @@ export class TransitComponent implements OnInit, OnDestroy {
       showReceived = true;
     }
     if (!this.cols.some(header => header.columnDef === 'actions')) {
-      this.cols.unshift({ 
+      this.cols.unshift({
         columnDef: 'actions',
         header: 'Actions',
         type: '',
@@ -125,42 +113,42 @@ export class TransitComponent implements OnInit, OnDestroy {
         showDelete: showDelete,
          showReceived: showReceived,
          showExpand: true,
-         cell: (element) => '' 
+         cell: (element) => ''
       });
     }
 
-    let id = user['id'];
-    let wh_id = user['wh_id'] || null;
+    const id = user['id'];
+    const wh_id = user['wh_id'] || null;
     switch (role) {
-      case 0: this.data = this._getData(data, id);
+      case 0: data = this._getData(data, id);
         break;
-      case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
+      case 1: data = data.filter(row => row['wh_id'] === wh_id);
         break;
-      case 2: this.data = data;
+      case 2: data = data;
         break;
-      default: this.data = [];
+      default: data = [];
     }
 
-    this.data = data.filter(row => row['status_id'] !== 3);        
-    this.data.map(row => {
+    data = data.filter(row => row['status_id'] !== 3);
+    data.map(row => {
       row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
       row.status = this.status.filter(e => e.id === row.status_id)[0];
       row.status_id = row.status ? row.status.id : 0;
       row.status =  row.status ? row.status.name : null;
       row.destination = this.getDestination(row);
     });
-
+  }
     this.loadingData = false;
-    this._tableService.dataSubject.next(this.data);
+    this.tableData = data;
   }
 
   getDestination = (row) => {
     let destination = null;
     if (row.wh_id) {
-      let warehouse = this.warehouses.filter(wh => wh.id === row.wh_id)[0];
+      const warehouse = this.warehouses.filter(wh => wh.id === row.wh_id)[0];
       destination = warehouse.name ? `WH: ${warehouse.name}` : null;
     } else if (row.customer_id) {
-      let customer = this.customers.filter(customer => customer.id === row.customer_id)[0];
+      const customer = this.customers.filter(cs => cs.id === row.customer_id)[0];
       destination = customer.name ? `${customer.name}` : null;
     }
     return destination;
@@ -314,7 +302,6 @@ export class TransitComponent implements OnInit, OnDestroy {
         </ul>
         `);
         this.finishProccesing();
-        this._tableService.dataSubject.next(this.data);
       })
       .catch(res => console.log(res));
   }
@@ -385,7 +372,7 @@ export class TransitComponent implements OnInit, OnDestroy {
       row.total_weight = 0;
       row.total_value = 0;
       row.processes = row.processes.filter(p => {
-        if(p.customer_id === id) {
+        if (p.customer_id === id) {
           row.box_qty = Number(row.box_qty) +  Number(p.box_qty);
           row.total_weight = Number(row.total_weight) +  Number(p.total_weight);
           row.total_value = Number(row.total_value) +  Number(p.total_value);
@@ -394,7 +381,6 @@ export class TransitComponent implements OnInit, OnDestroy {
       });
       return row;
     });
-    console.log(data);
     return data;
   }
 }

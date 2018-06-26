@@ -28,7 +28,8 @@ import { take } from 'rxjs/operators';
       total_value: null,
       description: null,
       deleted: 0,
-      delivered: 0
+      delivered: 0,
+      tracking: null
      };
     moment = _moment;
     constructor(

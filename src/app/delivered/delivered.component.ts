@@ -21,6 +21,7 @@ export class DeliveredComponent implements OnInit {
   loadingData = false;
   moment = _moment;
   data = [];
+  tableData = [];
   customers = [];
   fileUploader = '';
   role = 0;
@@ -51,52 +52,41 @@ export class DeliveredComponent implements OnInit {
     this.customers = this._dataService.getCustomers();
     this.data = this._dataService.getDelivered();
     this.role = this._authService.getRole();
-    if(!this.data.length) {
+    if (!this.data.length) {
       this.loadingData = true;
     }
-    this._dataService.deliveredSubject.subscribe(data => {
-      if(!data.length) {
-        this.loadingData = false;
-      } else {
-        this.filterData(data);
-      }
-    });
+    this._dataService.deliveredSubject.subscribe(data => this.filterData(data));
 
     if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.getData();
+        this.filterData(this.data);
       });
     } else {
-      this.getData();
-    }
-  }
-
-  getData = () => {
-    if (this.data.length) {
       this.filterData(this.data);
-    } else {
-      this.loadingData = false;
     }
   }
 
   filterData = (data) => {
-    const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
-    let role = user['role']  || 0;
-    this.role = role;
-    let id = user['id'];
-    let wh_id = user['wh_id'] || null;
-    switch (role) {
-      case 0: this.data = data.filter(row => row['customer_id'] === id);
-      break;
-    case 1: this.data = data.filter(row => row['wh_id'] === wh_id);
-      break;
-    case 2: this.data = data;
-      break;
-    default: this.data = [];
+    if (data.length) {
+      const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+      const role = user['role']  || 0;
+      this.role = role;
+      const id = user['id'];
+      const wh_id = user['wh_id'] || null;
+      switch (role) {
+        case 0: data = data.filter(row => row['customer_id'] === id);
+        break;
+      case 1: data = data.filter(row => row['wh_id'] === wh_id);
+        break;
+      case 2: data = data;
+        break;
+      default: data = [];
+      }
     }
-    this._tableService.dataSubject.next(this.data);
+
     this.loadingData = false;
+    this.tableData = data;
   }
 
   parseXLS = (evt: any) => {
@@ -190,7 +180,6 @@ export class DeliveredComponent implements OnInit {
         </ul>
         `);
         this.finishProccesing();
-        this._tableService.dataSubject.next(this.data);
       })
       .catch(res => console.log(res));
   }

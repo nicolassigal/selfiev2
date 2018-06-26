@@ -22,15 +22,13 @@
         </div>
     </form>
     <app-hbr-table
-      [datasrc]="data"
+      [datasrc]="tableData"
       [cols]="cols"
       (editRowEvent)="onEditRow($event)"
       (deleteRowEvent)="onDeleteRow($event)"
       (sendRowEvent)="onSendRow($event)"
-      *ngIf="data.length"
     ></app-hbr-table>
-    <app-empty-table *ngIf="!data.length && !loadingData"></app-empty-table>
 </div>
-<div *ngIf="loadingData" class="spinner-container">
+<div *ngIf="loadingData && !tableData.length" class="spinner-container">
     <app-spinner></app-spinner>
 </div>

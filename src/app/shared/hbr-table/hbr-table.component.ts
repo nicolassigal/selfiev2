@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ViewEncapsulation, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Observable, of } from 'rxjs';
@@ -12,7 +12,7 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./hbr-table.component.scss']
 })
 
-export class HbrTableComponent implements OnInit {
+export class HbrTableComponent implements OnInit, OnChanges {
   isHandset$: Observable<boolean> = this.breakpointObserver.observe([
     Breakpoints.Handset,
     Breakpoints.Tablet,
@@ -34,6 +34,7 @@ export class HbrTableComponent implements OnInit {
   columns;
   isMobile;
   totalizer;
+  data = [];
   dataSource: MatTableDataSource<any>;
   displayedColumns;
 
@@ -41,10 +42,18 @@ export class HbrTableComponent implements OnInit {
 
 
   ngOnInit() {
+    this.data = this.datasrc;
     this.setColumns();
-    this.generateDataSource(this.datasrc);
-    this._tableService.dataSubject.subscribe(source => this.generateDataSource(source));
+    this.generateDataSource(this.data);
+    // this._tableService.dataSubject.subscribe(source => this.generateDataSource(source));
     this._tableService.filterSubject.subscribe(query => this.applyFilter(query));
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+      this.cols = changes.cols && changes.cols.currentValue.length ? changes.cols.currentValue : this.cols;
+      this.data = changes.datasrc && changes.datasrc.currentValue.length ? changes.datasrc.currentValue : this.data;
+      this.setColumns();
+      this.generateDataSource(this.data);
   }
 
   generateDataSource = (ds) => {

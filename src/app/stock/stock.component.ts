@@ -36,7 +36,7 @@ export class StockComponent implements OnInit, OnDestroy {
   isMakingChangesOnData = false;
   setCols = false;
   cols = [];
-
+  tableData = [];
   stockSubscription = new Subscription();
 
   constructor(
@@ -54,6 +54,7 @@ export class StockComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
+      { columnDef: 'related_id', header: 'Linked Op.', type: '', cell: (element) => `${element.related_id ? element.related_id : ''}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
       { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? `${element.box_qty}` : 0}` },
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
@@ -63,6 +64,7 @@ export class StockComponent implements OnInit, OnDestroy {
         return `${element.total_value ? element.total_value : 0}`;
       }},
       { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
+      { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
       { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
     );
@@ -73,70 +75,60 @@ export class StockComponent implements OnInit, OnDestroy {
     this.data = this._dataService.getStock();
     this.delivered = this._dataService.getDelivered();
     this.role = this._authService.getRole();
-    if(!this.data.length) {
+    console.log(this.data, this.data.length);
+    if (!this.data.length) {
       this.loadingData = true;
     }
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
-    this._dataService.stockSubject.subscribe(data => {
-      if(!data.length) {
-        this.loadingData = false;
-      } else {
-        this.filterData(data);
-      }
-    });
-    
-    if(!this.customers.length) {
+    this._dataService.stockSubject.subscribe(data => this.filterData(data));
+
+    if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.getData();
+        this.filterData(this.data);
       });
     } else {
-      this.getData();
+      this.filterData(this.data);
     }
   }
 
   ngOnDestroy() {
   }
 
-  getData = () => {
-    if (this.data.length) {
-      this.filterData(this.data);
-    } else {
-      this.loadingData = false;
-    }
-  }
-
   filterData = (data) => {
-    const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
-    const role = user.role || 0;
-    this.role = role;
-    if (role === 2 && !this.setCols) {
-      this.setCols = true;
-      this.cols.unshift({ 
-        columnDef: 'actions',
-        header: 'Actions',
-        type: '',
-        showEdit: true,
-        showDelete: true,
-        showSendStock: true,
-        cell: (element) => ''
-      });
+    if (data.length) {
+      const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
+      const role = user.role || 0;
+      this.role = role;
+      if (role === 2 && !this.setCols) {
+        this.setCols = true;
+        this.cols.unshift({
+          columnDef: 'actions',
+          header: 'Actions',
+          type: '',
+          showEdit: true,
+          showDelete: true,
+          showSendStock: true,
+          cell: (element) => ''
+        });
+      }
+      const id = user['id'];
+      const wh_id = user['wh_id'] || null;
+      switch (role) {
+        case 0: data = data.filter(row => Number(row['customer_id']) === Number(id));
+          break;
+        case 1: data = data.filter(row => Number(row['wh_id']) === Number(wh_id));
+          break;
+        case 2: data = data;
+          break;
+        default: data = [];
+      }
+      data = data.filter(row => row.delivered === 0);
     }
-    const id = user['id'];
-    const wh_id = user['wh_id'] || null;
-    switch (role) {
-      case 0: this.data = data.filter(row => row['customer_id'] == id);
-        break;
-      case 1: this.data = data.filter(row => row['wh_id'] == wh_id);
-        break;
-      case 2: this.data = data;
-        break;
-      default: this.data = [];
-    }
+    console.log(data.length);
     this.loadingData = false;
-    this.data = this.data.filter(row => row.delivered === 0);
-    this._tableService.dataSubject.next(this.data);
+    this.tableData = data;
   }
 
   parseXLS = (evt: any) => {
@@ -212,10 +204,18 @@ export class StockComponent implements OnInit, OnDestroy {
     const newCustomers = [];
     const newCouriers = [];
     data.map(row => {
-      let customerById = this.customers.filter(cs => cs.id == row.customer_id);
+
+      const customerById = this.customers.filter(cs => Number(cs.id) === Number(row.customer_id));
+      const whById = this.warehouses.filter(cs => Number(cs.id) === Number(row.wh_id));
+      const courierById = this.couriers.filter(cs => Number(cs.id) === Number(row.courier_id));
+
       row.customer = customerById.length ? customerById[0].name : row.customer;
-      const rowCustomer = row.customer ? row.customer.toLowerCase().trim(): null;
+      row.warehouse = whById.length ? whById[0].name : row.warehouse;
+      row.courier = courierById.length ? courierById[0].name : row.courier;
+
+      const rowCustomer = row.customer ? row.customer.toLowerCase().trim() : null;
       const rowCourier = row.courier ? row.courier.toLowerCase().trim() : null;
+
       if (!this.couriers.some(courier => courier.name.toLowerCase().trim() === rowCourier)) {
         if (rowCourier && rowCourier.length) {
           const id = this._utils.getId(this.couriers);
@@ -312,7 +312,7 @@ export class StockComponent implements OnInit, OnDestroy {
       const batch = this._db.firestore.batch();
       chunk.map(row => {
         console.log('row', row.delivered, row.delivered == 1);
-        if (row.delivered == 1 && !this.delivered.some(row => row.hbr_id == row.hbr_id)) { 
+        if (row.delivered == 1 && !this.delivered.some(row => row.hbr_id == row.hbr_id)) {
           let id = this._db.createId();
           const ref = this._db.collection('delivered').doc(`${id}`).ref;
           batch.set(ref, row);

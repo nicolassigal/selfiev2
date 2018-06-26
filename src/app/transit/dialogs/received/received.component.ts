@@ -60,12 +60,18 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.received_date = this.box.received_date;
                 process.wh_id = this.box.wh_id;
                 process.customer_id = this.box.customer_id;
+                process.courier_id = this.box.customer_id;
                 process.destination = this.getDestination(process);
                 if (process.customer_id) {
-                    let id = this._db.createId();
+                    const id = this._db.createId();
                     promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
                 } else if (process.wh_id) {
-                    process.hbr_id = Number(this.operations[0].hbr_id) + 1;
+                    if (Number(process.initial_qty) !== Number(process.box_qty)) {
+                      if (!process.related_id) {
+                        process.related_id = process.hbr_id;
+                      }
+                      process.hbr_id = Number(this.operations[0].hbr_id) + 1;
+                    }
                     process.date = process.received_date;
                     process.warehouse = this.warehouses.filter(wh => wh.id === process.wh_id)[0]['name'];
                     promises.push(this._db.collection('operations').doc(`${process.hbr_id}`).set(process));

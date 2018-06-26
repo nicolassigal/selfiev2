@@ -17,16 +17,14 @@
             <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
         </div>
     </form>
-    <app-hbr-table 
-        [datasrc]="data"
+    <app-hbr-table
+        [datasrc]="tableData"
         [cols]="cols"
         (editRowEvent)="onEditRow($event)"
         (deleteRowEvent)="onDeleteRow($event)"
         (ReceivedRowEvent)="onReceivedRow($event)"
-        (expandRowDataEvent)="onExpandRowDataEvent($event)"
-        *ngIf="data.length">
+        (expandRowDataEvent)="onExpandRowDataEvent($event)">
     </app-hbr-table>
-    <app-empty-table *ngIf="!data.length  && !loadingData"></app-empty-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
     <app-spinner></app-spinner>
