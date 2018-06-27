@@ -86,6 +86,7 @@ export class DeliveredComponent implements OnInit {
     }
 
     this.loadingData = false;
+    this.data = data;
     this.tableData = data;
   }
 

@@ -128,6 +128,7 @@ export class StockComponent implements OnInit, OnDestroy {
     }
     console.log(data.length);
     this.loadingData = false;
+    this.data = data;
     this.tableData = data;
   }
 
@@ -151,7 +152,8 @@ export class StockComponent implements OnInit, OnDestroy {
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
-          this.prepareData(this.data, JSON.parse(response.data));
+          let data = this.data.length? this.data : this.tableData.length ? this.tableData : [];
+          this.prepareData(data, JSON.parse(response.data));
         });
       };
 

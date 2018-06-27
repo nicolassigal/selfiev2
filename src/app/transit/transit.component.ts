@@ -64,7 +64,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.couriers = this._dataService.getCouriers();
     this.warehouses = this._dataService.getWarehouses();
     this.customers = this._dataService.getCustomers();
-    this.data = this._dataService.getAwbs();
+    this.tableData = this._dataService.getAwbs();
     this.status = this._dataService.getStatus();
     this.operations = this._dataService.getStock();
     this.role = this._authService.getRole();
@@ -80,10 +80,10 @@ export class TransitComponent implements OnInit, OnDestroy {
     if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.filterData(this.data);
+        this.filterData(this.tableData);
       });
     } else {
-      this.filterData(this.data);
+      this.filterData(this.tableData);
     }
   }
 

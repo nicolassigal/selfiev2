@@ -31,6 +31,11 @@
       <mat-form-field>
         <input required matInput placeholder="Tracking" name="tracking" [(ngModel)]="box.tracking" [disabled]="isEditing">
     </mat-form-field>
+    <mat-form-field>
+      <mat-select placeholder="Couriers" [disabled]="isEditing" [(ngModel)]="box.courier_id" required name="courier_id">
+        <mat-option *ngFor="let courier of couriers" [value]="courier.id"> {{ courier.name }} </mat-option>
+      </mat-select>
+    </mat-form-field>
       <mat-form-field>
         <textarea matInput [disabled]="isEditing" placeholder="Description" [(ngModel)]="box.description" required name="description"></textarea>
       </mat-form-field>

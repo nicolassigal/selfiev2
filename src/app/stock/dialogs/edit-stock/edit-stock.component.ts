@@ -21,6 +21,7 @@ import { take } from 'rxjs/operators';
       wh_id: null,
       warehouse: null,
       customer_id: null,
+      courier_id: null,
       customer: null,
       box_qty: null,
       initial_qty: null,
@@ -42,6 +43,10 @@ import { take } from 'rxjs/operators';
 
     ngOnInit() {
       this.box = { ...this.data.row };
+      this.box.courier_id = Number(this.box.courier_id);
+      this.box.wh_id = Number(this.box.wh_id);
+      this.box.customer_id = Number(this.box.customer_id);
+      console.log(this.box);
       this.customers = this.data.customers;
       this.warehouses = this.data.warehouses;
       this.couriers = this.data.couriers;
