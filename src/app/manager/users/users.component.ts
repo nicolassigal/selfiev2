@@ -14,6 +14,7 @@ import { DeleteUserDialogComponent } from './dialogs/delete/delete.component';
 export class UsersComponent implements OnInit {
   loadingData = false;
   data = [];
+  tableData = [];
   roles = [];
   warehouses = [];
   cols = [
@@ -35,51 +36,42 @@ export class UsersComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.data = this._dataService.getCustomers();
+    this.tableData = this._dataService.getCustomers();
     this.warehouses = this._dataService.getWarehouses();
     this.roles = this._dataService.getRoles();
-    if(!this.data.length) {
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.customerSubject.subscribe(customers => {
-      if(!customers.length) {
-        this.loadingData = false;
-      } else {
-        this.filterData(customers);
-      }
+        this.tableData = customers;
+        this.filterData(this.tableData);
     });
 
-    if(!this.roles.length) {
+    if (!this.roles.length) {
       this._dataService.rolesSubject.subscribe(roles => {
         this.roles = roles;
-        this.getData();
+        this.filterData(this.tableData);
       });
     } else {
-      this.getData();
+      this.filterData(this.tableData);
     }
   }
 
-  getData = () => {
-    if (!this.data.length) {
-      this.loadingData = false;
-    } else {
-      this.filterData(this.data);
-    } 
-  }
-
   filterData = (data) => {
-    this.data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
-      
-    this.data.map(row => {
+    if (data.length) {
+    data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
+    data.map(row => {
       row.name = this.capitalizeText(row.name);
-      let rowRole = row.role || 0;
-      row.role_name = this.roles.filter(role => role['id'] === rowRole)[0]['name'];
+      const rowRole = row.role || 0;
+      const role = this.roles.filter(role => role['id'] === rowRole)[0];
+      row.role_name = role && role.name ? role.name : null;
       let wh_id = row.wh_id || null;
       row.wh_name = wh_id ? this.warehouses.filter(wh => wh['id'] === wh_id)[0]['name'] : null;
     });
+  }
     this.loadingData = false;
-    this.tbService.dataSubject.next(this.data);
+    this.tableData = data;
   }
 
   onEditRow = (row = {}, title = 'Edit') => {
@@ -88,7 +80,7 @@ export class UsersComponent implements OnInit {
         row: row,
         roles: this.roles,
         warehouses: this.warehouses,
-        users: this.data,
+        users: this.tableData,
         title: `${title} User`,
         confirmBtn: title,
         cancelBtn: 'Cancel'

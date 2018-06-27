@@ -13,7 +13,7 @@ import { DeleteCourierDialogComponent } from './delete/delete.component';
 })
 export class CouriersComponent implements OnInit {
   loadingData = false;
-  data = [];
+  tableData = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
@@ -25,35 +25,34 @@ export class CouriersComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.data = this._dataService.getCouriers();
-    if(!this.data.length) {
+    this.tableData = this._dataService.getCouriers();
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this._dataService.couriersSubject.subscribe(data => {
-        if(!data.length) {
-          this.loadingData = false;
-        } else {
+      this.tableData = data;
           this.getData(data);
-        }
       });
 
-      if(this.data.length) {
-        this.getData(this.data);
+      if (this.tableData.length) {
+        this.getData(this.tableData);
       }
   }
 
   getData = (data) => {
-    this.data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
-    this.data.map(row => row.name = this.capitalizeText(row.name));
+    if (data.length) {
+    data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
+    data.map(row => row.name = this.capitalizeText(row.name));
+    }
     this.loadingData = false;
-    this.tbService.dataSubject.next(this.data);
+    this.tableData = data;
   }
 
   onEditRow = (row = {}, title = 'Edit') => {
     this._dialog.open(CourierDialogComponent, {
       data: {
         row: row,
-        couriers: this.data,
+        couriers: this.tableData,
         title: `${title} Courier`,
         confirmBtn: title,
         cancelBtn: 'Cancel'

@@ -13,7 +13,7 @@ import { MatDialog } from '@angular/material';
 })
 export class WarehousesComponent implements OnInit {
   loadingData = false;
-  data = [];
+  tableData = [];
   operations = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
@@ -29,40 +29,30 @@ export class WarehousesComponent implements OnInit {
     private _dialog: MatDialog) { }
 
   ngOnInit() {
-    this.data = this._dataService.getWarehouses();
-    if(!this.data.length) {
+    this.tableData = this._dataService.getWarehouses();
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this.operations = this._dataService.getStock();
     this._dataService.warehouseSubject.subscribe(data => {
-      if(!data.length) {
-        this.loadingData = false;
-      } else {
-        this.filterData(data);
-      }
+      this.tableData = data;
+      this.filterData(this.tableData);
     });
 
-    if(!this.operations.length) {
+    if (!this.operations.length) {
       this._dataService.stockSubject.subscribe(operations => {
         this.operations = operations;
-        this.getData();
+        this.filterData(this.tableData);
       });
     } else {
-      this.getData();
+      this.filterData(this.tableData);
     }
   }
 
-  getData = () => {
-    if (!this.data.length) {
-      this.loadingData = false;
-    } else {
-      this.filterData(this.data);
-    } 
-  }
-
   filterData = (data) => {
-    this.data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
-    this.data.map(row => {
+    if (data.length) {
+    data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
+    data.map(row => {
       row.box_qty = 0;
       row.total_value = 0;
       row.total_weight = 0;
@@ -75,18 +65,19 @@ export class WarehousesComponent implements OnInit {
             row.total_value = Number(row.total_value) + Number(whOp.total_value);
             row.total_weight = Number(row.total_weight) + Number(whOp.total_weight);
           }
-        })
+        });
       }
     });
+  }
     this.loadingData = false;
-    this.tbService.dataSubject.next(this.data);
+    this.tableData = data;
   }
 
   onEditRow = (row = {}, title = 'Edit') => {
     this._dialog.open(WarehouseDialogComponent, {
       data: {
         row: row,
-        warehouses: this.data,
+        warehouses: this.tableData,
         title: `${title} Warehouse`,
         confirmBtn: title,
         cancelBtn: 'Cancel'

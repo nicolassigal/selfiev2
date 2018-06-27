@@ -50,9 +50,9 @@ export class DeliveredComponent implements OnInit {
 
   ngOnInit() {
     this.customers = this._dataService.getCustomers();
-    this.data = this._dataService.getDelivered();
+    this.tableData = this._dataService.getDelivered();
     this.role = this._authService.getRole();
-    if (!this.data.length) {
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this._dataService.deliveredSubject.subscribe(data => this.filterData(data));
@@ -60,15 +60,14 @@ export class DeliveredComponent implements OnInit {
     if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.filterData(this.data);
+        this.filterData(this.tableData);
       });
     } else {
-      this.filterData(this.data);
+      this.filterData(this.tableData);
     }
   }
 
   filterData = (data) => {
-    if (data.length) {
       const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
       const role = user['role']  || 0;
       this.role = role;
@@ -83,10 +82,8 @@ export class DeliveredComponent implements OnInit {
         break;
       default: data = [];
       }
-    }
 
     this.loadingData = false;
-    this.data = data;
     this.tableData = data;
   }
 
@@ -110,7 +107,7 @@ export class DeliveredComponent implements OnInit {
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
-          this.prepareData(this.data, JSON.parse(response.data));
+          this.prepareData(this.tableData, JSON.parse(response.data));
         });
       };
 
@@ -201,7 +198,7 @@ export class DeliveredComponent implements OnInit {
   }
 
   download = () => {
-    const ordered = JSON.parse(JSON.stringify(this.data));
+    const ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       row.wh_in_date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;

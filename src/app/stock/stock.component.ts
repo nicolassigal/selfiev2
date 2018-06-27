@@ -72,11 +72,10 @@ export class StockComponent implements OnInit, OnDestroy {
     this.couriers = this._dataService.getCouriers();
     this.warehouses = this._dataService.getWarehouses();
     this.customers = this._dataService.getCustomers();
-    this.data = this._dataService.getStock();
+    this.tableData = this._dataService.getStock();
     this.delivered = this._dataService.getDelivered();
     this.role = this._authService.getRole();
-    console.log(this.data, this.data.length);
-    if (!this.data.length) {
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
@@ -86,10 +85,10 @@ export class StockComponent implements OnInit, OnDestroy {
     if (!this.customers.length) {
       this._dataService.customerSubject.subscribe(customers => {
         this.customers = customers;
-        this.filterData(this.data);
+        this.filterData(this.tableData);
       });
     } else {
-      this.filterData(this.data);
+      this.filterData(this.tableData);
     }
   }
 
@@ -97,7 +96,6 @@ export class StockComponent implements OnInit, OnDestroy {
   }
 
   filterData = (data) => {
-    if (data.length) {
       const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
       const role = user.role || 0;
       this.role = role;
@@ -125,10 +123,7 @@ export class StockComponent implements OnInit, OnDestroy {
         default: data = [];
       }
       data = data.filter(row => row.delivered === 0);
-    }
-    console.log(data.length);
     this.loadingData = false;
-    this.data = data;
     this.tableData = data;
   }
 
@@ -152,7 +147,7 @@ export class StockComponent implements OnInit, OnDestroy {
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
-          let data = this.data.length? this.data : this.tableData.length ? this.tableData : [];
+          let data = this.tableData.length ? this.tableData : [];
           this.prepareData(data, JSON.parse(response.data));
         });
       };
@@ -306,7 +301,7 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
 
       if (!entry.hbr_id) {
-        entry.hbr_id = Number(this.data[0].hbr_id) + 1;
+        entry.hbr_id = Number(this.tableData[0].hbr_id) + 1;
       }
     });
     const chunks = data.map((e, i) => i % chunk_size === 0 ? data.slice(i, i + chunk_size) : null).filter(e => e);
@@ -336,7 +331,6 @@ export class StockComponent implements OnInit, OnDestroy {
         </ul>
         `);
         this.finishProccesing();
-        // this._tableService.dataSubject.next(this.data);
         this.isMakingChangesOnData = true;
       })
       .catch(res => console.log(res));
@@ -357,7 +351,7 @@ export class StockComponent implements OnInit, OnDestroy {
 
 
   download = () => {
-    let ordered = JSON.parse(JSON.stringify(this.data));
+    let ordered = JSON.parse(JSON.stringify(this.tableData));
 
     ordered.map(row => {
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;

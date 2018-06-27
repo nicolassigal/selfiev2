@@ -68,7 +68,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.status = this._dataService.getStatus();
     this.operations = this._dataService.getStock();
     this.role = this._authService.getRole();
-    if (!this.data.length) {
+    if (!this.tableData.length) {
       this.loadingData = true;
     }
     this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
@@ -91,7 +91,6 @@ export class TransitComponent implements OnInit, OnDestroy {
   }
 
   filterData = (data) => {
-    if (data.length) {
     let showEdit = false;
     let showDelete = false;
     let showReceived = false;
@@ -137,7 +136,6 @@ export class TransitComponent implements OnInit, OnDestroy {
       row.status =  row.status ? row.status.name : null;
       row.destination = this.getDestination(row);
     });
-  }
     this.loadingData = false;
     this.tableData = data;
   }
@@ -174,7 +172,7 @@ export class TransitComponent implements OnInit, OnDestroy {
           warehouses: this.warehouses,
           couriers: this.couriers,
           customers: this.customers,
-          awbs: this.data,
+          awbs: this.tableData,
           title: 'Mark as...',
           confirmBtn: 'Ok',
           cancelBtn: 'Cancel'
@@ -191,7 +189,7 @@ export class TransitComponent implements OnInit, OnDestroy {
           warehouses: this.warehouses,
           couriers: this.couriers,
           customers: this.customers,
-          awbs: this.data,
+          awbs: this.tableData,
           title: 'Edit Box in transit',
           confirmBtn: 'Edit',
           cancelBtn: 'Cancel'
@@ -231,7 +229,7 @@ export class TransitComponent implements OnInit, OnDestroy {
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
-          this.prepareData(this.data, JSON.parse(response.data));
+          this.prepareData(this.tableData, JSON.parse(response.data));
         });
       };
 
@@ -322,7 +320,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   }
 
   download = () => {
-    const ordered = JSON.parse(JSON.stringify(this.data));
+    const ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       row.shipping_date = row.shipping_date ? this.moment.unix(row.shipping_date).format('DD-MM-YYYY') : null;
       row.processes_list = '';

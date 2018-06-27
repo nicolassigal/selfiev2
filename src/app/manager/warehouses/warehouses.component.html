@@ -10,14 +10,12 @@
                 <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
             </div>
     </form>
-    <app-hbr-table 
-    [datasrc]="data"
+    <app-hbr-table
+    [datasrc]="tableData"
     [cols]="cols"
     [noTotalOperation]="true"
     (editRowEvent)="onEditRow($event)"
-    *ngIf="data.length"
     (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
-    <app-empty-table *ngIf="!data.length"></app-empty-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
         <app-spinner></app-spinner>

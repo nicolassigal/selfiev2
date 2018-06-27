@@ -26,9 +26,9 @@
           && column.type !== 'weight'
           && column.type !== 'date'">{{ column.cell(row) }}</span>
           <span *ngIf="column.cell(row)
-          && column.type === 'value'">U$D {{ column.cell(row) }}</span>
+          && column.type === 'value'">U$D {{ column.cell(row)  | number: '1.2-2' }}</span>
           <span *ngIf="column.cell(row)
-          && column.type === 'weight'">{{ column.cell(row) }} Kg.</span>
+          && column.type === 'weight'">{{ column.cell(row)  | number: '1.2-2' }} Kg.</span>
           <span *ngIf="column.cell(row)
           && column.type === 'date'"> {{ column.cell(row) * 1000 | date:'dd-MM-yy' }}</span>
         </mat-cell>
@@ -39,10 +39,10 @@
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
   <div class="totalizer" *ngIf="!noTotal">
-    <span class="totalizer-title">Total Value: </span><span class="totalizer-value"> U$D{{ totalizer.value }}</span>
-    <span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight }} Kg</span>
-    <span class="totalizer-title">Total Quantity: </span><span class="totalizer-value">{{ totalizer.quantity }}</span>
-    <span *ngIf="!noTotalOperation" class="totalizer-title">Total Operations: </span><span  *ngIf="!noTotalOperation" class="totalizer-value">{{ totalizer.operations }}</span>
+    <span class="totalizer-title">Total Value: </span><span class="totalizer-value"> U$D{{ totalizer.value | number: '1.2-2' }}</span>
+    <span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight | number: '1.2-2' }} Kg</span>
+    <span class="totalizer-title">Total Quantity: </span><span class="totalizer-value">{{ totalizer.quantity | number }}</span>
+    <span *ngIf="!noTotalOperation" class="totalizer-title">Total Operations: </span><span  *ngIf="!noTotalOperation" class="totalizer-value">{{ totalizer.operations | number }}</span>
   </div>
   <mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]"
     showFirstLastButtons>
