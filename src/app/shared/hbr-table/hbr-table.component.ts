@@ -51,7 +51,7 @@ export class HbrTableComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
       this.cols = changes.cols && changes.cols.currentValue.length ? changes.cols.currentValue : this.cols;
-      this.data = changes.datasrc && changes.datasrc.currentValue.length ? changes.datasrc.currentValue : this.data;
+      this.data = changes.datasrc && changes.datasrc.currentValue.length ? changes.datasrc.currentValue : [];
       this.setColumns();
       this.generateDataSource(this.data);
   }

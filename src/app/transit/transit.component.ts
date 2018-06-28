@@ -69,9 +69,11 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.status = this._dataService.getStatus();
     this.operations = this._dataService.getStock();
     this.role = this._authService.getRole();
+
     if (!this.tableData.length) {
       this.loadingData = true;
     }
+
     this._dataService.couriersSubject
     .pipe(takeUntil(componentDestroyed(this)))
     .subscribe(couriers => this.couriers = couriers);
