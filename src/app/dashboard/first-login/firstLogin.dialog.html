@@ -1,0 +1,65 @@
+<mat-toolbar mat-dialog-title color="primary">
+    <mat-toolbar-row>
+      <span> {{ data.title }}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <form #userForm ngNativeValidate (ngSubmit)="update()">
+    <mat-dialog-content>
+      <div class="form-container">
+        <mat-form-field>
+          <input type="email" required autocomplete="off" matInput placeholder="E-mail" [(ngModel)]="user.username" name="email" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="Name" [(ngModel)]="user.name" name="name" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" autocomplete="off" matInput placeholder="Cuit" [(ngModel)]="user.cuit" name="cuit" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="Tel" [(ngModel)]="user.tel" name="tel" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="Address" [(ngModel)]="user.address" name="address" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="City" [(ngModel)]="user.city" name="city" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="Country" [(ngModel)]="user.country" name="country" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field *ngIf="user.wh_id || user.role === 1">
+            <mat-select [required]="user.role === 1" placeholder="Warehouse" name="wh" [(ngModel)]="user.wh_id" [disabled]="editing">
+              <mat-option *ngFor="let wh of warehouses" [value]="wh.id"> {{ wh.name }} </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <input type="password" required autocomplete="off" matInput placeholder="Old Password" [(ngModel)]="oldPassword" name="oldPassword"
+              class="example-right-align" [disabled]="editing">
+          </mat-form-field>
+        <mat-form-field>
+          <input type="password" required autocomplete="off" matInput placeholder="Password" [(ngModel)]="password" name="password"
+            class="example-right-align" [disabled]="editing">
+        </mat-form-field>
+        <mat-form-field>
+          <input type="password" required autocomplete="off" matInput placeholder="Repeat password" [(ngModel)]="password2" name="password2"
+            class="example-right-align" [disabled]="editing">
+        </mat-form-field>
+      </div>
+  
+      <div *ngIf="errors" class="error">
+        <span>{{errors}}</span>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button type="submit" [disabled]="editing">{{ data.confirmBtn }}</button>
+      <button mat-button (click)="backToLogin()" [disabled]="editing">{{ data.cancelBtn }}</button>
+    </mat-dialog-actions>
+  
+  </form>

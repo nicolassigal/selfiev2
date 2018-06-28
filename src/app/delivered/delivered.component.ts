@@ -1,5 +1,5 @@
 import { AuthService } from './../shared/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { WorkersService } from '../workers.service';
@@ -8,16 +8,18 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { resetFakeAsyncZone } from '@angular/core/testing';
 import { TableService } from '../shared/hbr-table/table.service';
 import { saveAs } from 'file-saver';
-import { take } from 'rxjs/operators';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as _moment from 'moment';
 import { DataService } from '../shared/data.service';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+
 @Component({
   selector: 'app-delivered',
   templateUrl: './delivered.component.html',
   styleUrls: ['./delivered.component.scss']
 })
-export class DeliveredComponent implements OnInit {
+export class DeliveredComponent implements OnInit, OnDestroy {
   loadingData = false;
   moment = _moment;
   data = [];
@@ -55,10 +57,14 @@ export class DeliveredComponent implements OnInit {
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this._dataService.deliveredSubject.subscribe(data => this.filterData(data));
+    this._dataService.deliveredSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(data => this.filterData(data));
 
     if (!this.customers.length) {
-      this._dataService.customerSubject.subscribe(customers => {
+      this._dataService.customerSubject
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(customers => {
         this.customers = customers;
         this.filterData(this.tableData);
       });
@@ -67,6 +73,8 @@ export class DeliveredComponent implements OnInit {
     }
   }
 
+  ngOnDestroy() {}
+  
   filterData = (data) => {
       const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
       const role = user['role']  || 0;

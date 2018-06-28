@@ -1,6 +1,9 @@
+import { AngularFireAuth } from 'angularfire2/auth';
 import { DataService } from './../shared/data.service';
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { MatDialog } from '@angular/material';
+import { FirstLoginDialogComponent } from './first-login/firstLogin.dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,13 +14,18 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private _db: AngularFirestore,
-    private dataService: DataService
+    private _auth: AngularFireAuth,
+    private dataService: DataService,
+    private _dialog: MatDialog
   ) { }
 
   ngOnInit() {
     this._db.collection('users', ref => ref.orderBy('name', 'asc'))
     .valueChanges()
-    .subscribe(customers => this.dataService.setCustomers(customers));
+    .subscribe(customers => {
+      this.firstLogin(customers);
+      this.dataService.setCustomers(customers);
+    });
 
     this._db.collection('operations', ref => ref
       .where('deleted', '==', 0)
@@ -50,4 +58,21 @@ export class DashboardComponent implements OnInit {
     .subscribe(roles => this.dataService.setRoles(roles));
   }
 
+  firstLogin = (users) => {
+    const email = this._auth.auth.currentUser.email;
+    const existingUser = users.filter(user => user.username === email)[0];
+    if (existingUser && !existingUser.updatedInfo) {
+      this._dialog.open(FirstLoginDialogComponent, {
+        data: {
+          user: existingUser,
+          users: users,
+          title: `Update your information`,
+          confirmBtn: 'update',
+          cancelBtn: 'Back to login'
+        },
+        width: '500px',
+        disableClose: true
+      });
+    }
+  }
 }

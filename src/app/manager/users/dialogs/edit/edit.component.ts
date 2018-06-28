@@ -36,7 +36,8 @@ export class UserDialogComponent implements OnInit {
     role_name: null,
     tel: null,
     wh_id: null,
-    wh_name: null
+    wh_name: null,
+    updatedInfo: false
   }
   constructor(
     private _dialogRef: MatDialogRef<any>,
@@ -66,6 +67,7 @@ export class UserDialogComponent implements OnInit {
     if (!this.user.id) {
       if (this.password && this.password2 && this.password === this.password2) {
         if (!exists) {
+          this.user.updatedInfo = false;
           this.editing = true;
           this.errors = '';
           this.user.id = this._utils.getId(this.users);
@@ -103,7 +105,8 @@ export class UserDialogComponent implements OnInit {
       this.editing = true;
       this.errors = '';
       if (this.password && this.password2 && this.password === this.password2) {
-        this.secondaryApp.auth().signInWithEmailAndPassword(this.user.username, this.user.password).then(res => {
+        this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password).then(res => {
+          this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
           this.secondaryApp.auth().currentUser.updatePassword(this.password).then(res => {
             this.secondaryApp.auth().signOut();
             this.user.password = this.password,
@@ -122,14 +125,46 @@ export class UserDialogComponent implements OnInit {
             console.log(err);
             this.errors = err.message;
           });
+        }).catch(err => {
+          this.editing = false;
+          console.log(err);
+          this.errors = err.message;
+        });
         })
       } else {
-        this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-          .then(res => {
+        if (this.data.row.username !== this.user.username) {
+          this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password).then(res => {
+            this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
+              this.user.email = this.user.username;
+              this.secondaryApp.auth().signOut();
+              this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+                .then(res => {
+                  this.editing = false;
+                  this.closeDialog();
+                })
+                .catch(err => {
+                  this.editing = false;
+                  console.log(err);
+                  this.errors = err.message;
+                });
+            }).catch(err => {
+              this.editing = false;
+              console.log(err);
+              this.errors = err.message;
+            });
+          }).catch(err => {
             this.editing = false;
-            this.closeDialog();
-          })
-          .catch(err => console.log(err));
+            console.log(err);
+            this.errors = err.message;
+          });
+        } else {
+          this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+            .then(res => {
+              this.editing = false;
+              this.closeDialog();
+            })
+            .catch(err => console.log(err));
+        }
       }
     }
   }

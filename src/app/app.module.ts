@@ -1,3 +1,4 @@
+import { FirstLoginDialogComponent } from './dashboard/first-login/firstLogin.dialog';
 import { DeleteTransitDialogComponent } from './transit/dialogs/delete/delete.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -76,7 +77,8 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
     DeleteCourierDialogComponent,
     WarehouseDialogComponent,
     DeleteWarehouseDialogComponent,
-    EmptyTableComponent
+    EmptyTableComponent,
+    FirstLoginDialogComponent
   ],
   imports: [
   BrowserModule,
@@ -114,7 +116,8 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
     CourierDialogComponent,
     DeleteCourierDialogComponent,
     WarehouseDialogComponent,
-    DeleteWarehouseDialogComponent
+    DeleteWarehouseDialogComponent,
+    FirstLoginDialogComponent
   ],
   bootstrap: [AppComponent]
 })

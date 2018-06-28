@@ -1,17 +1,19 @@
 import { DataService } from './../../shared/data.service';
 import { DeleteWarehouseDialogComponent } from './delete/delete.component';
 import { WarehouseDialogComponent } from './edit/edit.component';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { TableService } from '../../shared/hbr-table/table.service';
 import { MatDialog } from '@angular/material';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 
 @Component({
   selector: 'app-warehouses',
   templateUrl: './warehouses.component.html',
   styleUrls: ['./warehouses.component.scss']
 })
-export class WarehousesComponent implements OnInit {
+export class WarehousesComponent implements OnInit, OnDestroy {
   loadingData = false;
   tableData = [];
   operations = [];
@@ -34,13 +36,18 @@ export class WarehousesComponent implements OnInit {
       this.loadingData = true;
     }
     this.operations = this._dataService.getStock();
-    this._dataService.warehouseSubject.subscribe(data => {
+
+    this._dataService.warehouseSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(data => {
       this.tableData = data;
       this.filterData(this.tableData);
     });
 
     if (!this.operations.length) {
-      this._dataService.stockSubject.subscribe(operations => {
+      this._dataService.stockSubject
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(operations => {
         this.operations = operations;
         this.filterData(this.tableData);
       });
@@ -48,6 +55,8 @@ export class WarehousesComponent implements OnInit {
       this.filterData(this.tableData);
     }
   }
+
+  ngOnDestroy () {}
 
   filterData = (data) => {
     if (data.length) {

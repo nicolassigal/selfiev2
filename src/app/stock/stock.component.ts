@@ -16,8 +16,10 @@ import { SendStockDialogComponent } from './dialogs/send-stock/send-stock.compon
 import { EditStockDialogComponent } from './dialogs/edit-stock/edit-stock.component';
 import * as _moment from 'moment';
 import { DeleteStockDialogComponent } from './dialogs/delete/delete.component';
-import { take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import * as firebase from 'firebase';
+
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
@@ -54,7 +56,7 @@ export class StockComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
-      { columnDef: 'related_id', header: 'Linked Op.', type: '', cell: (element) => `${element.related_id ? element.related_id : ''}` },
+      { columnDef: 'linked_op', header: 'Linked Op.', type: '', cell: (element) => `${element.linked_op ? element.linked_op : ''}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
       { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? `${element.box_qty}` : 0}` },
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
@@ -68,7 +70,7 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
       { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
     );
-
+    
     this.couriers = this._dataService.getCouriers();
     this.warehouses = this._dataService.getWarehouses();
     this.customers = this._dataService.getCustomers();
@@ -78,12 +80,22 @@ export class StockComponent implements OnInit, OnDestroy {
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
-    this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
-    this._dataService.stockSubject.subscribe(data => this.filterData(data));
+    this._dataService.warehouseSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(warehouses => this.warehouses = warehouses);
+
+    this._dataService.couriersSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(couriers => this.couriers = couriers);
+    this._dataService.stockSubject.subscribe(data => {
+      this.tableData = data;
+      this.filterData(this.tableData);
+    });
 
     if (!this.customers.length) {
-      this._dataService.customerSubject.subscribe(customers => {
+      this._dataService.customerSubject
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(customers => {
         this.customers = customers;
         this.filterData(this.tableData);
       });
@@ -148,6 +160,7 @@ export class StockComponent implements OnInit, OnDestroy {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
           let data = this.tableData.length ? this.tableData : [];
+          console.log(data);
           this.prepareData(data, JSON.parse(response.data));
         });
       };
@@ -361,7 +374,7 @@ export class StockComponent implements OnInit, OnDestroy {
     ordered = ordered.filter(row => row.deleted === 0 && row.delivered === 0);
 
     const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
-      header: [ 'hbr_id', 'wh_id', 'warehouse', 'courier_id', 'courier', 'customer_id', 'customer', 'contact_name', 'cuit', 'email',
+      header: [ 'hbr_id', 'linked_op', 'wh_id', 'warehouse', 'courier_id', 'courier', 'customer_id', 'customer', 'contact_name', 'cuit', 'email',
         'tel', 'address', 'city', 'country', 'date', 'description', 'destination', 'proforma', 'shipping_date', 'box_qty', 'total_value',
         'total_weight', 'tracking' ]
     });

@@ -67,8 +67,8 @@ export class ReceivedStockDialogComponent implements OnInit {
                     promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
                 } else if (process.wh_id) {
                     if (Number(process.initial_qty) !== Number(process.box_qty)) {
-                      if (!process.related_id) {
-                        process.related_id = process.hbr_id;
+                      if (!process.linked_op) {
+                        process.linked_op = process.hbr_id;
                       }
                       process.hbr_id = Number(this.operations[0].hbr_id) + 1;
                     }

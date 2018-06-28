@@ -33,7 +33,8 @@ export class LoginComponent implements OnInit {
     country: null,
     tel: null,
     role: 0,
-    id: null
+    id: null,
+    updatedInfo: false
   };
 
   constructor(private auth: AngularFireAuth,
@@ -93,7 +94,8 @@ export class LoginComponent implements OnInit {
       country: null,
       tel: null,
       role: 0,
-      id: null
+      id: null,
+      updatedInfo: false
     };
     this.loginFormActive = !this.loginFormActive;
     this.email = '';
@@ -115,6 +117,7 @@ export class LoginComponent implements OnInit {
             this.user.username = this.email;
             this.user.role = 0;
             this.user.id = this._utils.getId(this.users);
+            this.user.updatedInfo = true;
             this._db.collection('users').doc(`${this.user.id}`).set(this.user)
               .then(() => {
                 this.loggingin = false;

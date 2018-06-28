@@ -1,17 +1,19 @@
 import { DataService } from './../../shared/data.service';
 import { CourierDialogComponent } from './edit/edit.component';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { TableService } from '../../shared/hbr-table/table.service';
 import { MatDialog } from '@angular/material';
 import { DeleteCourierDialogComponent } from './delete/delete.component';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 
 @Component({
   selector: 'app-couriers',
   templateUrl: './couriers.component.html',
   styleUrls: ['./couriers.component.scss']
 })
-export class CouriersComponent implements OnInit {
+export class CouriersComponent implements OnInit, OnDestroy {
   loadingData = false;
   tableData = [];
   cols = [
@@ -29,7 +31,9 @@ export class CouriersComponent implements OnInit {
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this._dataService.couriersSubject.subscribe(data => {
+    this._dataService.couriersSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(data => {
       this.tableData = data;
           this.getData(data);
       });
@@ -38,6 +42,8 @@ export class CouriersComponent implements OnInit {
         this.getData(this.tableData);
       }
   }
+
+  ngOnDestroy() {}
 
   getData = (data) => {
     if (data.length) {

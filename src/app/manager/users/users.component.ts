@@ -1,17 +1,19 @@
 import { DataService } from './../../shared/data.service';
 import { TableService } from './../../shared/hbr-table/table.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { MatDialog } from '@angular/material';
 import { UserDialogComponent } from './dialogs/edit/edit.component'
-import { take } from 'rxjs/operators';
 import { DeleteUserDialogComponent } from './dialogs/delete/delete.component';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   loadingData = false;
   data = [];
   tableData = [];
@@ -42,14 +44,20 @@ export class UsersComponent implements OnInit {
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
-    this._dataService.customerSubject.subscribe(customers => {
+    this._dataService.warehouseSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(warehouses => this.warehouses = warehouses);
+    this._dataService.customerSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(customers => {
         this.tableData = customers;
         this.filterData(this.tableData);
     });
 
     if (!this.roles.length) {
-      this._dataService.rolesSubject.subscribe(roles => {
+      this._dataService.rolesSubject
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(roles => {
         this.roles = roles;
         this.filterData(this.tableData);
       });
@@ -57,6 +65,8 @@ export class UsersComponent implements OnInit {
       this.filterData(this.tableData);
     }
   }
+
+  ngOnDestroy() {}
 
   filterData = (data) => {
     if (data.length) {

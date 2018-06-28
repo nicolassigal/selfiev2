@@ -16,8 +16,9 @@ import { MatDialog } from '@angular/material';
 import { EditTransitDialogComponent } from './dialogs/edit/edit.component';
 import { ExpandTransitDialogComponent } from './dialogs/expand/expand.component';
 import * as _moment from 'moment';
-import { take } from 'rxjs/operators';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { take, takeUntil } from 'rxjs/operators';
+import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+
 @Component({
   selector: 'app-transit',
   templateUrl: './transit.component.html',
@@ -71,14 +72,33 @@ export class TransitComponent implements OnInit, OnDestroy {
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this._dataService.couriersSubject.subscribe(couriers => this.couriers = couriers);
-    this._dataService.warehouseSubject.subscribe(warehouses => this.warehouses = warehouses);
-    this._dataService.statusSubject.subscribe(status => this.status = status);
-    this._dataService.awbsSubject.subscribe(awbs =>  this.filterData(awbs));
-    this._dataService.stockSubject.subscribe(stocks => this.operations = stocks);
+    this._dataService.couriersSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(couriers => this.couriers = couriers);
+
+    this._dataService.warehouseSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(warehouses => this.warehouses = warehouses);
+
+    this._dataService.statusSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(status => this.status = status);
+
+    this._dataService.awbsSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(awbs => {
+      this.tableData = awbs;
+      this.filterData(this.tableData);
+    });
+
+    this._dataService.stockSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(stocks => this.operations = stocks);
 
     if (!this.customers.length) {
-      this._dataService.customerSubject.subscribe(customers => {
+      this._dataService.customerSubject
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(customers => {
         this.customers = customers;
         this.filterData(this.tableData);
       });
