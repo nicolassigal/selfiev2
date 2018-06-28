@@ -9,7 +9,7 @@ export class WorkersService {
 private xlsxWorker = `
   self.addEventListener("message", (e) => {
     if(e.data.msg === "Start Worker") {
-        importScripts(e.data.url + '/xlsx/xlsx.full.min.js');
+        importScripts(e.data.url + '/selfie-v2/xlsx/xlsx.full.min.js');
         let wb = XLSX.read(e.data.bstr, {type: 'binary'});
         let wsname = wb.SheetNames[0];
         let ws = wb.Sheets[wsname];

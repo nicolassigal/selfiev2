@@ -22,6 +22,7 @@
         </div>
     </form>
     <app-hbr-table
+      ondrop="parseXLS(event)"
       [datasrc]="tableData"
       [cols]="cols"
       (editRowEvent)="onEditRow($event)"

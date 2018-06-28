@@ -12,8 +12,11 @@ import { DataService } from '../../../../shared/data.service';
 
 export class DeleteUserDialogComponent implements OnInit {
     user;
+    deleting = false;
     operations = [];
     secondaryApp = firebase.app('Secondary');
+    email = '';
+    error = '';
     constructor(
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
@@ -32,6 +35,8 @@ export class DeleteUserDialogComponent implements OnInit {
     }
 
     update = () => {
+        if (this.email === this.user.username || this.email === this.user.email ) {
+          this.deleting = true;
         let batch = this._db.firestore.batch();
         this.secondaryApp.auth().signInWithEmailAndPassword(this.user.username, this.user.password).then(res => {
             this.secondaryApp.auth().currentUser.delete().then(res => {
@@ -46,9 +51,13 @@ export class DeleteUserDialogComponent implements OnInit {
                     .then(res => {
                         this.secondaryApp.auth().signOut();
                         this.closeDialog();
+                        this.deleting = false;
                     }).catch(err => console.log(err));
                 }).catch(err => console.log(err));
             }).catch(err => console.log(err));
         }).catch(err => console.log(err));
+      } else {
+        this.error = 'email doesnt match';
+      }
     }
 }

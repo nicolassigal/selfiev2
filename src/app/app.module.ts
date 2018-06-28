@@ -47,6 +47,8 @@ import { WarehouseDialogComponent } from './manager/warehouses/edit/edit.compone
 import { DeleteWarehouseDialogComponent } from './manager/warehouses/delete/delete.component';
 import { DataService } from './shared/data.service';
 import { EmptyTableComponent } from './shared/empty-table/empty-table.component';
+import { ChartsModule } from 'ng2-charts';
+import { WHOverviewComponent } from './manager/warehouses/overview/overview.component';
 
 @NgModule({
   declarations: [
@@ -78,7 +80,8 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
     WarehouseDialogComponent,
     DeleteWarehouseDialogComponent,
     EmptyTableComponent,
-    FirstLoginDialogComponent
+    FirstLoginDialogComponent,
+    WHOverviewComponent
   ],
   imports: [
   BrowserModule,
@@ -93,7 +96,8 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
     MaterialModule,
     AngularFireDatabaseModule,
     AngularFireAuthModule,
-    LayoutModule
+    LayoutModule,
+    ChartsModule
   ],
   providers: [
     InfoService,

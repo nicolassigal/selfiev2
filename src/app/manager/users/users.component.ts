@@ -69,17 +69,15 @@ export class UsersComponent implements OnInit, OnDestroy {
   ngOnDestroy() {}
 
   filterData = (data) => {
-    if (data.length) {
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => {
       row.name = this.capitalizeText(row.name);
       const rowRole = row.role || 0;
-      const role = this.roles.filter(role => role['id'] === rowRole)[0];
+      const role = this.roles.filter(role => role['id'] == rowRole)[0];
       row.role_name = role && role.name ? role.name : null;
       let wh_id = row.wh_id || null;
-      row.wh_name = wh_id ? this.warehouses.filter(wh => wh['id'] === wh_id)[0]['name'] : null;
+      row.wh_name = wh_id ? this.warehouses.filter(wh => wh['id'] == wh_id)[0]['name'] : null;
     });
-  }
     this.loadingData = false;
     this.tableData = data;
   }

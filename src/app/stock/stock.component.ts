@@ -70,7 +70,7 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
       { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
     );
-    
+
     this.couriers = this._dataService.getCouriers();
     this.warehouses = this._dataService.getWarehouses();
     this.customers = this._dataService.getCustomers();
@@ -159,8 +159,14 @@ export class StockComponent implements OnInit, OnDestroy {
         this._worker.worker.addEventListener('message', (response) => {
           this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
           this._worker.terminateWorker();
-          let data = this.tableData.length ? this.tableData : [];
-          console.log(data);
+          const data = this.tableData.length ? this.tableData : [];
+          data.map(row => {
+            Object.keys(row).filter(obj => {
+              if (obj.indexOf('__EMPTY') > -1) {
+                  delete row[obj];
+              }
+           });
+          });
           this.prepareData(data, JSON.parse(response.data));
         });
       };

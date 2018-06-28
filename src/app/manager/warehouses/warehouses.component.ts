@@ -7,6 +7,7 @@ import { TableService } from '../../shared/hbr-table/table.service';
 import { MatDialog } from '@angular/material';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-warehouses',
@@ -28,14 +29,16 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   constructor(private _db: AngularFirestore,
     private tbService: TableService,
     private _dataService: DataService,
+    private _router: Router,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
     this.tableData = this._dataService.getWarehouses();
+    this.operations = this._dataService.getStock();
+
     if (!this.tableData.length) {
       this.loadingData = true;
     }
-    this.operations = this._dataService.getStock();
 
     this._dataService.warehouseSubject
     .pipe(takeUntil(componentDestroyed(this)))
@@ -44,14 +47,14 @@ export class WarehousesComponent implements OnInit, OnDestroy {
       this.filterData(this.tableData);
     });
 
-    if (!this.operations.length) {
-      this._dataService.stockSubject
-      .pipe(takeUntil(componentDestroyed(this)))
-      .subscribe(operations => {
-        this.operations = operations;
-        this.filterData(this.tableData);
-      });
-    } else {
+    this._dataService.stockSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(operations => {
+      this.operations = operations;
+      this.filterData(this.tableData);
+    });
+
+    if (this.tableData.length) {
       this.filterData(this.tableData);
     }
   }
@@ -59,14 +62,13 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   ngOnDestroy () {}
 
   filterData = (data) => {
-    if (data.length) {
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => {
       row.box_qty = 0;
       row.total_value = 0;
       row.total_weight = 0;
       row.name = this.capitalizeText(row.name);
-      let whOperations = this.operations.filter(op => op.wh_id === row.id);
+      let whOperations = this.operations.filter(op => Number(op.wh_id) === Number(row.id));
       if (whOperations.length) {
         whOperations.map(whOp => {
           if (whOp.box_qty > 0 && whOp.delivered == 0 && whOp.deleted == 0) {
@@ -77,9 +79,13 @@ export class WarehousesComponent implements OnInit, OnDestroy {
         });
       }
     });
-  }
+
     this.loadingData = false;
     this.tableData = data;
+  }
+
+  navigateToOverview = () => {
+    this._router.navigate(['dashboard/wh-overview']);
   }
 
   onEditRow = (row = {}, title = 'Edit') => {

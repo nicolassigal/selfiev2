@@ -34,22 +34,18 @@ export class CouriersComponent implements OnInit, OnDestroy {
     this._dataService.couriersSubject
     .pipe(takeUntil(componentDestroyed(this)))
     .subscribe(data => {
-      this.tableData = data;
-          this.getData(data);
-      });
+        this.tableData = data;
+          this.getData(this.tableData);
+    });
 
-      if (this.tableData.length) {
-        this.getData(this.tableData);
-      }
+    this.getData(this.tableData);
   }
 
   ngOnDestroy() {}
 
   getData = (data) => {
-    if (data.length) {
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => row.name = this.capitalizeText(row.name));
-    }
     this.loadingData = false;
     this.tableData = data;
   }

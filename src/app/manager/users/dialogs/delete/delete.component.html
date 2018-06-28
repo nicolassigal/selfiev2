@@ -3,13 +3,24 @@
           <span> {{ data.title }}</span>
         </mat-toolbar-row>
       </mat-toolbar>
+      <form #deleteForm ngNativeValidate (ngSubmit)="update()">
       <mat-dialog-content>
         <div class="form-container">
             <h3>Are you sure you want to delete user: {{ user.name }} ?</h3>
             <h4>All operations in stock, transit or registered as delivered will be lost.</h4>
+            <p>Please enter user's email to prevent an accidental delete</p>
+            <mat-form-field>
+              <input type="email" required autocomplete="off" matInput placeholder="E-mail" [(ngModel)]="email" name="email" class="example-right-align" [disabled]="deleting">
+            </mat-form-field>
+        </div>
+        <div *ngIf="error" class="error">
+          <span>{{error}}</span>
         </div>
       </mat-dialog-content>
       <mat-dialog-actions>
-        <button mat-button (click)="update()">{{ data.confirmBtn }}</button>
+        <button mat-button color="warn" type="submit"> {{ data.confirmBtn }}</button>
         <button mat-button mat-dialog-close>{{ data.cancelBtn }}</button>
       </mat-dialog-actions>
+    </form>
+
+
