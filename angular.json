@@ -35,7 +35,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/chart.js/src/chart.js"
+              "node_modules/chart.js/dist/Chart.bundle.min.js"
             ]
           },
           "configurations": {

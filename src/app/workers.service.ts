@@ -30,7 +30,7 @@ private checkDBWorker = `
         let db = e.data.dbData;
         let delivered = e.data.delivered;
         if (db.length) {
-          toStorage = xls.filter(row => !db.some(entry => +row.hbr_id === +entry.hbr_id));
+            toStorage = xls.filter(row => (!db.some(entry => +row.hbr_id === +entry.hbr_id) || row.update == 1) );
         } else {
           toStorage = xls;
         }

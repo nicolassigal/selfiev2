@@ -395,6 +395,7 @@ export class StockComponent implements OnInit, OnDestroy {
     ordered.map(row => {
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
+      delete row.update;
     });
 
     ordered = ordered.filter(row => row.deleted === 0 && row.delivered === 0);

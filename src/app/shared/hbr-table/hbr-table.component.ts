@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, Input, ViewEncapsulation, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ViewEncapsulation,
+  Output, EventEmitter, SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Observable, of } from 'rxjs';
@@ -12,7 +13,7 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./hbr-table.component.scss']
 })
 
-export class HbrTableComponent implements OnInit, OnChanges {
+export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
   isHandset$: Observable<boolean> = this.breakpointObserver.observe([
     Breakpoints.Handset,
     Breakpoints.Tablet,
@@ -45,8 +46,11 @@ export class HbrTableComponent implements OnInit, OnChanges {
     this.data = this.datasrc;
     this.setColumns();
     this.generateDataSource(this.data);
-    // this._tableService.dataSubject.subscribe(source => this.generateDataSource(source));
     this._tableService.filterSubject.subscribe(query => this.applyFilter(query));
+  }
+
+  ngOnDestroy() {
+    console.log('destroyed');
   }
 
   ngOnChanges(changes: SimpleChanges): void {
