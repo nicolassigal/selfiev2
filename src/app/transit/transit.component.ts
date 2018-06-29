@@ -18,6 +18,7 @@ import { ExpandTransitDialogComponent } from './dialogs/expand/expand.component'
 import * as _moment from 'moment';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { SidenavService } from '../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-transit',
@@ -48,9 +49,11 @@ export class TransitComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _tableService: TableService,
     private _dataService: DataService,
+    private _sidenav: SidenavService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this._sidenav.setTitle('In Transit');
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },

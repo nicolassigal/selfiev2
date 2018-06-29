@@ -19,7 +19,7 @@ export class SearchBoxComponent implements OnInit {
     .pipe(filter(e => e instanceof ActivationEnd))
     .subscribe(e => this.clear());
 
-    this._tableService.dataSubject.subscribe(() => this.clear());
+    this._tableService.dataChangedSubject.subscribe(() => this.clear());
   }
 
   clear = () => {

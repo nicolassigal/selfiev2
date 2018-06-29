@@ -47,9 +47,9 @@ import { take } from 'rxjs/operators';
       this.box.wh_id = Number(this.box.wh_id);
       this.box.customer_id = Number(this.box.customer_id);
       console.log(this.box);
-      this.customers = this.data.customers;
-      this.warehouses = this.data.warehouses;
-      this.couriers = this.data.couriers;
+      this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
+      this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
+      this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
       this.box.date = this.box.date ? this.moment.unix(this.box.date).format('YYYY-MM-DD') : null;
       this.operations = this._dataService.getStock();
     }
@@ -61,7 +61,7 @@ import { take } from 'rxjs/operators';
       this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;
 
       if (!this.box.hbr_id) {
-        this.box.hbr_id = Number(this.operations[0].hbr_id) + 1;
+        this.box.hbr_id = this.operations.length ? Number(this.operations[0].hbr_id) + 1 : 1;
         this.box.deleted = 0;
         this.box.delivered = 0;
         this.box.initial_qty = this.box.box_qty;

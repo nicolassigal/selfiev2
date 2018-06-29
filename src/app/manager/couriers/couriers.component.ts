@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material';
 import { DeleteCourierDialogComponent } from './delete/delete.component';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { SidenavService } from '../../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-couriers',
@@ -24,9 +25,11 @@ export class CouriersComponent implements OnInit, OnDestroy {
   constructor(private _db: AngularFirestore,
     private tbService: TableService,
     private _dataService: DataService,
+    private _sidenav: SidenavService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this._sidenav.setTitle('Manage Couriers');
     this.tableData = this._dataService.getCouriers();
     if (!this.tableData.length) {
       this.loadingData = true;

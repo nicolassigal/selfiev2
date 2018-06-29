@@ -54,6 +54,7 @@ export class HbrTableComponent implements OnInit, OnChanges {
       this.data = changes.datasrc && changes.datasrc.currentValue.length ? changes.datasrc.currentValue : [];
       this.setColumns();
       this.generateDataSource(this.data);
+      this._tableService.dataChangedSubject.next(true);
   }
 
   generateDataSource = (ds) => {

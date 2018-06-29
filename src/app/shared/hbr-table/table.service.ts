@@ -6,5 +6,5 @@ import { Subject } from 'rxjs';
 })
 export class TableService {
   filterSubject: Subject<any> = new Subject<any>();
-  dataSubject: Subject<any> = new Subject<any>();
+  dataChangedSubject: Subject<any> = new Subject<any>();
 }

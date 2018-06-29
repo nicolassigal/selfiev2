@@ -13,6 +13,7 @@ import * as _moment from 'moment';
 import { DataService } from '../shared/data.service';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { SidenavService } from '../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-delivered',
@@ -48,9 +49,11 @@ export class DeliveredComponent implements OnInit, OnDestroy {
     private _auth: AngularFireAuth,
     private _authService: AuthService,
     private _dataService: DataService,
+    private _sidenav: SidenavService,
     private _tableService: TableService) {}
 
   ngOnInit() {
+    this._sidenav.setTitle('Delivered');
     this.customers = this._dataService.getCustomers();
     this.tableData = this._dataService.getDelivered();
     this.role = this._authService.getRole();
@@ -74,7 +77,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {}
-  
+
   filterData = (data) => {
       const user = this.customers.filter(customer => customer.username === this._auth.auth.currentUser.email)[0];
       const role = user['role']  || 0;

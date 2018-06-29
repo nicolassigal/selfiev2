@@ -49,6 +49,7 @@ import { DataService } from './shared/data.service';
 import { EmptyTableComponent } from './shared/empty-table/empty-table.component';
 import { ChartsModule } from 'ng2-charts';
 import { WHOverviewComponent } from './manager/warehouses/overview/overview.component';
+import { SidenavService } from './app-sidenav/sidenav.service';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,7 @@ import { WHOverviewComponent } from './manager/warehouses/overview/overview.comp
     WHOverviewComponent
   ],
   imports: [
-  BrowserModule,
+BrowserModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule.enablePersistence(),
@@ -105,7 +106,8 @@ import { WHOverviewComponent } from './manager/warehouses/overview/overview.comp
     AuthGuard,
     AuthService,
     UtilsService,
-    DataService
+    DataService,
+    SidenavService
   ],
   entryComponents: [
     EditStockDialogComponent,

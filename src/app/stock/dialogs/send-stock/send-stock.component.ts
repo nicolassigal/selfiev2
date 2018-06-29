@@ -42,9 +42,9 @@ export class SendStockDialogComponent implements OnInit {
 
     ngOnInit() {
         this.maxQty = Number(this.data.row.box_qty);
-        this.warehouses = this.data.warehouses;
-        this.couriers = this.data.couriers;
-        this.customers = this.data.customers;
+        this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
+        this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
+        this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
         this.awbs = this._dataService.getAwbs();
         this.awbs = this.awbs.filter(row => row.status_id < 3);
     }

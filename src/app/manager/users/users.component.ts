@@ -7,6 +7,8 @@ import { UserDialogComponent } from './dialogs/edit/edit.component'
 import { DeleteUserDialogComponent } from './dialogs/delete/delete.component';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { Router } from '@angular/router';
+import { SidenavService } from '../../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-users',
@@ -35,9 +37,12 @@ export class UsersComponent implements OnInit, OnDestroy {
   constructor(private _db: AngularFirestore,
     private tbService: TableService,
     private _dataService: DataService,
+    private _router: Router,
+    private _sidenav: SidenavService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this._sidenav.setTitle('Manage Users');
     this.tableData = this._dataService.getCustomers();
     this.warehouses = this._dataService.getWarehouses();
     this.roles = this._dataService.getRoles();
@@ -69,6 +74,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   ngOnDestroy() {}
 
   filterData = (data) => {
+    data = data.sort((a, b) => a.name.localeCompare(b.name));
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => {
       row.name = this.capitalizeText(row.name);
@@ -80,6 +86,10 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
     this.loadingData = false;
     this.tableData = data;
+  }
+
+  navigateToOverview = () => {
+    this._router.navigate(['dashboard/user-overview']);
   }
 
   onEditRow = (row = {}, title = 'Edit') => {

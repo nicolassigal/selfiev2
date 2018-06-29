@@ -55,7 +55,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         } else {
             const promises = [];
             this.box.received_date = this.box.received_date ? this.moment(this.box.received_date).unix() : null;
-
+            let max_id = Number(this.operations[0].hbr_id);
             this.box.processes.map(process => {
                 process.received_date = this.box.received_date;
                 process.wh_id = this.box.wh_id;
@@ -70,10 +70,12 @@ export class ReceivedStockDialogComponent implements OnInit {
                       if (!process.linked_op) {
                         process.linked_op = process.hbr_id;
                       }
-                      process.hbr_id = Number(this.operations[0].hbr_id) + 1;
+                      max_id = max_id + 1;
+                      process.hbr_id = max_id;
                     }
                     process.date = process.received_date;
                     process.warehouse = this.warehouses.filter(wh => wh.id === process.wh_id)[0]['name'];
+
                     promises.push(this._db.collection('operations').doc(`${process.hbr_id}`).set(process));
                 }
             });

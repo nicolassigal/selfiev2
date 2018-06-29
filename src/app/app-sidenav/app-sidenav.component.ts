@@ -5,6 +5,7 @@ import { map, filter, take } from 'rxjs/operators';
 import { ActivatedRoute, Router, ChildActivationEnd, NavigationEnd, ActivationEnd, RouterEvent } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../shared/auth.service';
+import { SidenavService } from './sidenav.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -24,17 +25,26 @@ export class AppSidenavComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private titleService: Title,
+    private _sidenavService: SidenavService,
     private authService: AuthService) {}
 
     ngOnInit() {
-      this.router.events
+      this.title = this._sidenavService.getTitle();
+      this._sidenavService.titleSubject.subscribe(title => {
+        this.title = title;
+        this.titleService.setTitle(`HBR Selfie | ${this.title}`);
+      });
+      if (this.title.length) {
+        this.titleService.setTitle(`HBR Selfie | ${this.title}`);
+      }
+      /*this.router.events
       .pipe(filter(e => e instanceof ActivationEnd))
-      .subscribe((event: ActivationEnd) =>{
-        if(event.snapshot.data.title) {
+      .subscribe((event: ActivationEnd) => {
+        if (event.snapshot.data.title) {
           this.title =  event.snapshot.data.title;
         }
         this.titleService.setTitle(`HBR Selfie | ${this.title}`);
-      });
+      });*/
     }
 
     checkRole = (roles) => {

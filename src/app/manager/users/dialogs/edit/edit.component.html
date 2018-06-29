@@ -52,6 +52,9 @@
         <input type="password" autocomplete="off" matInput placeholder="Repeat password" [(ngModel)]="password2" name="password2"
           class="example-right-align" [disabled]="editing">
       </mat-form-field>
+      <div style="width:100%">
+          <mat-checkbox class="example-margin" name="updatedInfo" [(ngModel)]="askToChange"> ask to change email and password? </mat-checkbox>
+      </div>
     </div>
 
     <div *ngIf="errors" class="error">

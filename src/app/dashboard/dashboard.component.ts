@@ -4,6 +4,8 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { MatDialog } from '@angular/material';
 import { FirstLoginDialogComponent } from './first-login/firstLogin.dialog';
+import { SidenavService } from '../app-sidenav/sidenav.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +18,8 @@ export class DashboardComponent implements OnInit {
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
     private dataService: DataService,
+    private _route: ActivatedRoute,
+    private _sidenavService: SidenavService,
     private _dialog: MatDialog
   ) { }
 

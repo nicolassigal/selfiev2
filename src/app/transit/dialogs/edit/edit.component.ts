@@ -34,14 +34,14 @@ export class EditTransitDialogComponent implements OnInit {
         private _db: AngularFirestore,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
-    ngOnInit(){
+    ngOnInit() {
         this.box = { ...this.data.row };
         this.box.shipping_date = this.box.shipping_date ? this.moment.unix(this.box.shipping_date).format("YYYY-MM-DD") : null;
-        
+
         this.status = this.data.status;
-        this.warehouses = this.data.warehouses;
-        this.couriers = this.data.couriers;
-        this.customers = this.data.customers;
+        this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
+        this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
+        this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
         this.awbs = [...this.data.awbs];
     }
 

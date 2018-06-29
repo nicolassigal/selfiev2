@@ -20,9 +20,10 @@ export class UserDialogComponent implements OnInit {
   password;
   editing = false;
   password2;
+  askToChange = false;
   errors;
   secondaryApp = firebase.app('Secondary');
-  user = { 
+  user = {
     name: null,
     address: null,
     city: null,
@@ -64,10 +65,10 @@ export class UserDialogComponent implements OnInit {
 
   update = () => {
     const exists = this.users.some(user => user.username === this.user.username || user.email === this.user.username);
+    this.user.updatedInfo = this.askToChange ? false : true;
     if (!this.user.id) {
       if (this.password && this.password2 && this.password === this.password2) {
         if (!exists) {
-          this.user.updatedInfo = false;
           this.editing = true;
           this.errors = '';
           this.user.id = this._utils.getId(this.users);
@@ -75,7 +76,7 @@ export class UserDialogComponent implements OnInit {
           this.user.role = this.user.role || 0;
           this.user.password = this.password;
           this.secondaryApp.auth().createUserWithEmailAndPassword(this.user.username, this.password)
-            .then(res => { 
+            .then(res => {
               this.secondaryApp.auth().signOut();
               this._db.collection('users').doc(`${this.user.id}`).set(this.user)
                 .then(res => {
@@ -87,7 +88,7 @@ export class UserDialogComponent implements OnInit {
                   console.log(err);
                   this.errors = err.message;
                 });
-            })                
+            })
             .catch(err => {
               this.editing = false;
               console.log(err);

@@ -19,6 +19,7 @@ import { DeleteStockDialogComponent } from './dialogs/delete/delete.component';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import * as firebase from 'firebase';
+import { SidenavService } from '../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-stock',
@@ -51,9 +52,11 @@ export class StockComponent implements OnInit, OnDestroy {
     private _dialog: MatDialog,
     private authService: AuthService,
     private _utils: UtilsService,
+    private _sidenav: SidenavService,
     private _dataService: DataService) { }
 
   ngOnInit() {
+    this._sidenav.setTitle('Manage Stock');
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'linked_op', header: 'Linked Op.', type: '', cell: (element) => `${element.linked_op ? element.linked_op : ''}` },
@@ -105,6 +108,23 @@ export class StockComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+  }
+
+  genBackup = () => {
+    const promises = [];
+    this.customers.map(user => {
+      promises.push(this._db.collection('backup_users').doc(`${user.id}`).set(user));
+    });
+
+    this.warehouses.map(wh => {
+      promises.push(this._db.collection('backup_warehouses').doc(`${wh.id}`).set(wh));
+    });
+
+    this.couriers.map(courier => {
+      promises.push(this._db.collection('backup_couriers').doc(`${courier.id}`).set(courier));
+    });
+
+    Promise.all(promises).then(res => console.log(res)).catch(err => console.log(err));
   }
 
   filterData = (data) => {
@@ -320,7 +340,7 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
 
       if (!entry.hbr_id) {
-        entry.hbr_id = Number(this.tableData[0].hbr_id) + 1;
+        entry.hbr_id = this.tableData.length ? Number(this.tableData[0].hbr_id) + 1 : 1;
       }
     });
     const chunks = data.map((e, i) => i % chunk_size === 0 ? data.slice(i, i + chunk_size) : null).filter(e => e);

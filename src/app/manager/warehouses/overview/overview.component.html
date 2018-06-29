@@ -1,11 +1,14 @@
-<div class="overview">
-  <div class="overview-item quantity">
-      <canvas baseChart [data]="doughnutChartData" [labels]="doughnutChartLabels" [chartType]="'doughnut'"></canvas>
+<div class="overview" *ngIf="warehouses.length">
+  <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && qtyChartData.length">
+      <h2>By Quantity</h2>
+      <canvas baseChart responsive [data]="qtyChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
   </div>
-  <div class="overview-item weight">
-    <canvas baseChart [data]="doughnutChartData" [labels]="doughnutChartLabels" [chartType]="'doughnut'"></canvas>
+  <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && weightChartData.length">
+    <h2>By Weight</h2>
+    <canvas baseChart responsive [data]="weightChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
 </div>
-<div class="overview-item value">
-  <canvas baseChart [data]="doughnutChartData" [labels]="doughnutChartLabels" [chartType]="'doughnut'"></canvas>
+<div class="overview-item" style="width:38%" *ngIf="warehousesLabel && valueChartData.length">
+  <h2>By Value</h2>
+  <canvas baseChart  responsive [data]="valueChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
 </div>
 </div>

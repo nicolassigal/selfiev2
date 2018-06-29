@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import { Router } from '@angular/router';
+import { SidenavService } from '../../app-sidenav/sidenav.service';
 
 @Component({
   selector: 'app-warehouses',
@@ -30,9 +31,11 @@ export class WarehousesComponent implements OnInit, OnDestroy {
     private tbService: TableService,
     private _dataService: DataService,
     private _router: Router,
+    private _sidenav: SidenavService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
+    this._sidenav.setTitle('Manage Warehouses');
     this.tableData = this._dataService.getWarehouses();
     this.operations = this._dataService.getStock();
 
@@ -62,6 +65,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   ngOnDestroy () {}
 
   filterData = (data) => {
+    const promises = [];
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => {
       row.box_qty = 0;
@@ -78,10 +82,12 @@ export class WarehousesComponent implements OnInit, OnDestroy {
           }
         });
       }
+      promises.push(this._db.collection('warehouses').doc(`${row.id}`).set(row));
     });
-
-    this.loadingData = false;
-    this.tableData = data;
+    Promise.all(promises).then(res => {
+      this.loadingData = false;
+      this.tableData = data;
+    });
   }
 
   navigateToOverview = () => {
