@@ -1,5 +1,5 @@
 {
-  "index": "/selfie-v2/index.html",
+  "index": "/index.html",
   "assetGroups": [{
     "name": "app",
     "installMode": "prefetch",
