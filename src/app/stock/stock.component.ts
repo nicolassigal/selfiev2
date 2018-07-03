@@ -322,7 +322,7 @@ export class StockComponent implements OnInit, OnDestroy {
 
     customerBatch.commit()
       .catch(err => console.log('error on adding customers', err));
-
+    let nextId = Number(this.tableData[0].hbr_id) + 1;
     data.map(entry => {
       entry.deleted = 0;
       entry.initial_qty = Number(entry.initial_qty);
@@ -340,7 +340,12 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
 
       if (!entry.hbr_id) {
-        entry.hbr_id = this.tableData.length ? Number(this.tableData[0].hbr_id) + 1 : 1;
+        if (this.tableData.length) {
+          entry.hbr_id = nextId;
+          nextId = nextId + 1;
+        } else {
+          entry.hbr_id = 1;
+        }
       }
     });
     const chunks = data.map((e, i) => i % chunk_size === 0 ? data.slice(i, i + chunk_size) : null).filter(e => e);
@@ -395,15 +400,41 @@ export class StockComponent implements OnInit, OnDestroy {
     ordered.map(row => {
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
-      delete row.update;
+        delete row.update;
+        delete row.salido;
     });
 
     ordered = ordered.filter(row => row.deleted === 0 && row.delivered === 0);
 
     const worksheet: any = XLSX.utils.json_to_sheet(ordered.sort((row1, row2) => Number(row1.hbr_id) - Number(row2.hbr_id)), {
-      header: [ 'hbr_id', 'linked_op', 'wh_id', 'warehouse', 'courier_id', 'courier', 'customer_id', 'customer', 'contact_name', 'cuit', 'email',
-        'tel', 'address', 'city', 'country', 'date', 'description', 'destination', 'proforma', 'shipping_date', 'box_qty', 'total_value',
-        'total_weight', 'tracking' ]
+      header: [
+        'update',
+        'hbr_id',
+        'linked_op',
+        'wh_id',
+        'warehouse',
+        'courier_id',
+        'courier',
+        'customer_id',
+        'customer',
+        'contact_name',
+        'cuit',
+        'email',
+        'tel',
+        'address',
+        'city',
+        'country',
+        'date',
+        'description',
+        'destination',
+        'shipping_date',
+        'box_qty',
+        'total_value',
+        'total_weight',
+        'tracking',
+        'received_date',
+        'delivered'
+      ]
     });
 
     const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };

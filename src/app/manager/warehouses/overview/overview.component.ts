@@ -3,20 +3,22 @@ import { DataService } from '../../../shared/data.service';
 import { takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import { SidenavService } from '../../../app-sidenav/sidenav.service';
-
+import 'chart.piecelabel.js';
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
 export class WHOverviewComponent implements OnInit, OnDestroy {
-  public doughnutChartLabels: string[] = ['Download Sales', 'In-Store Sales', 'Mail-Order Sales'];
-  public doughnutChartData: number[] = [350, 450, 100];
   warehouses = [];
   warehousesLabel: string[] = [];
   qtyChartData: number[] = [];
   valueChartData: number[] = [];
   weightChartData: number[] = [];
+  total_qty = 0;
+  total_value = 0;
+  total_weight = 0;
+  chartOptions: any;
   constructor(private _dataService: DataService,
     private _sidenav: SidenavService) { }
 
@@ -45,7 +47,20 @@ export class WHOverviewComponent implements OnInit, OnDestroy {
           this.qtyChartData.push(wh.box_qty);
           this.valueChartData.push(wh.total_value);
           this.weightChartData.push(wh.total_weight);
+
+          this.total_qty = Number(this.total_qty) + Number(wh.box_qty);
+          this.total_value = Number(this.total_value) + Number(wh.total_value);
+          this.total_weight = Number(this.total_weight) + Number(wh.total_weight);
         });
+        this.chartOptions = {
+          pieceLabel: {
+          render: 'value',
+          precision: 0,
+          fontSize: 12,
+          fontColor: '#fff',
+          textShadow: true
+        }
+      };
     }
   }
 }

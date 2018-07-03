@@ -1,14 +1,14 @@
 <div class="overview" *ngIf="warehouses.length">
   <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && qtyChartData.length">
-      <h2>By Quantity</h2>
-      <canvas baseChart responsive [data]="qtyChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
+      <h2>Box Quantity: {{this.total_qty| number }}</h2>
+      <canvas baseChart responsive [data]="qtyChartData" [labels]="warehousesLabel" [chartType]="'doughnut'" [options]="chartOptions"></canvas>
   </div>
   <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && weightChartData.length">
-    <h2>By Weight</h2>
-    <canvas baseChart responsive [data]="weightChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
+    <h2>Weight: {{this.total_weight | number: '1.2-2' }} Kg</h2>
+    <canvas baseChart responsive [data]="weightChartData"  [labels]="warehousesLabel" [chartType]="'doughnut'" [options]="chartOptions"></canvas>
 </div>
 <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && valueChartData.length">
-  <h2>By Value</h2>
-  <canvas baseChart  responsive [data]="valueChartData" [labels]="warehousesLabel" [chartType]="'doughnut'"></canvas>
+  <h2>Value: U$D {{this.total_value | number: '1.2-2' }}</h2>
+  <canvas baseChart  responsive [data]="valueChartData"  [labels]="warehousesLabel" [chartType]="'doughnut'" [options]="chartOptions"></canvas>
 </div>
 </div>

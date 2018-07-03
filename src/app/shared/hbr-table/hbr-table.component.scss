@@ -1,3 +1,5 @@
+@import './../../../_variables';
+
 .mat-row,
 .mat-header-row {
     width: 100%;
@@ -10,30 +12,46 @@
 }
 
 .totalizer {
-    font-family: Roboto,"Helvetica Neue",sans-serif;
-    font-size: 12px;
-    position: absolute;
-    min-height: 56px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 45%;
-    align-items: center;
-    padding: 0px 20px;
-    &-title {
-        color: rgba(0,0,0,.54);
-    }
+  background: $secondaryColor;
+  color: $primaryColor;
+  border-top: $primaryColor solid 4px;
+  font-family: Roboto,"Helvetica Neue",sans-serif;
+  font-size: 12px;
+  position: absolute;
+  min-height: 52px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 40%;
+  align-items: center;
+  padding: 0px 20px;
+  &-value {
+    margin-left: 10px;
+  }
+  &-title {
+      color: white;
+  }
 }
 
-.mat-paginator-container {
+.mat-paginator {
+  background-color: $secondaryColor !important;
+  color: $primaryColor !important;
+  border-top: $primaryColor solid 4px !important;
+
+  &-container {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    min-height: 56px;
+    min-height: 52px;
     flex-wrap: wrap-reverse;
     position: sticky;
     bottom: 0;
     right: 0;
+  }
+}
+
+.mat-icon-button [disabled] {
+  color: white !important;
 }
 
 .mat-column-actions {
@@ -103,7 +121,7 @@
 
 .mat-table {
     overflow: auto;
-    height: calc(100vh - 204px);
+    height: calc(100vh - 208px);
 }
 
 .mobile-label {
@@ -125,7 +143,7 @@
     }
     .mat-table {
         overflow-x: hidden;
-        height: calc(100vh - 245px);
+        height: calc(100vh - 247px);
     }
     .mobile-label {
         display: inline-block;
@@ -158,7 +176,7 @@
         right: 0;
     }
     .mat-row {
-        position: relative; 
+        position: relative;
         flex-direction: column;
         align-items: start;
         padding: 8px 24px;

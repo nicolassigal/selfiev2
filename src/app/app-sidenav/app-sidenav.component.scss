@@ -1,9 +1,12 @@
+@import './../../_variables';
+
 .sidenav-container {
   height: 100%;
 }
 
 .mat-toolbar {
   justify-content: space-between;
+  background-color: $secondaryColor;
   @media(max-width: 600px) {
     justify-content: initial;
   }
