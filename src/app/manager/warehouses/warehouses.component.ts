@@ -24,7 +24,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
     { columnDef: 'box_qty', header: 'Total Qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
-    { columnDef: 'total_value', header: 'Total Val', type: 'value', cell: (element) => `${element.total_value ? element.total_value : ''}` },
+    { columnDef: 'profit', header: 'Profit', type: 'value', cell: (element) => `${element.profit ? element.profit : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` }
   ];
   constructor(private _db: AngularFirestore,
@@ -69,7 +69,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
     data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
     data.map(row => {
       row.box_qty = 0;
-      row.total_value = 0;
+      row.profit = 0;
       row.total_weight = 0;
       row.name = this.capitalizeText(row.name);
       let whOperations = this.operations.filter(op => Number(op.wh_id) === Number(row.id));
@@ -77,7 +77,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
         whOperations.map(whOp => {
           if (whOp.box_qty > 0 && whOp.delivered == 0 && whOp.deleted == 0) {
             row.box_qty = Number(row.box_qty) + Number(whOp.box_qty);
-            row.total_value = Number(row.total_value) + Number(whOp.total_value);
+            row.profit = Number(row.profit) + Number(whOp.profit);
             row.total_weight = Number(row.total_weight) + Number(whOp.total_weight);
           }
         });

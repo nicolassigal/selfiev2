@@ -25,7 +25,7 @@ export class SendStockDialogComponent implements OnInit {
         customer_id: null,
         wh_id: null,
         total_weight: 0,
-        total_value: 0,
+        profit: 0,
         box_qty: 0,
         status_id: 0,
         courier_id: null,
@@ -76,7 +76,7 @@ export class SendStockDialogComponent implements OnInit {
                 customer_id: null,
                 wh_id: null,
                 total_weight: 0,
-                total_value: 0,
+                profit: 0,
                 box_qty: 0,
                 status_id: 0,
                 courier_id: null,
@@ -104,28 +104,28 @@ export class SendStockDialogComponent implements OnInit {
 
             // get value per unit
             const kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
-            const valuePerUnit = Number(this.data.row.total_value) / Number(this.data.row.box_qty);
+            const valuePerUnit = Number(this.data.row.profit) / Number(this.data.row.box_qty);
 
             // calc actual weight and value in transit
             attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
-            attachedProcess.total_value = Number(valuePerUnit) * Number(attachedProcess.box_qty);
+            attachedProcess.profit = Number(valuePerUnit) * Number(attachedProcess.box_qty);
 
             this.box.processes.push({ ...attachedProcess });
 
-            // calc total values in guide
+            // calc total profit in guide
             this.box.total_weight = 0;
-            this.box.total_value = 0;
+            this.box.profit = 0;
             this.box.box_qty = 0;
             this.box.processes.map(process => {
                 this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
-                this.box.total_value = Number(this.box.total_value) + Number(process.total_value);
+                this.box.profit = Number(this.box.profit) + Number(process.profit);
                 this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
             });
 
             // calc remaining values in stock
             this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
             this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
-            this.data.row.total_value = Number(valuePerUnit) * Number(this.data.row.box_qty);
+            this.data.row.profit = Number(valuePerUnit) * Number(this.data.row.box_qty);
 
             if (this.data.row.box_qty === 0) {
               this.data.row.delivered = 1;

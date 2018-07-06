@@ -26,7 +26,7 @@ import { take } from 'rxjs/operators';
       box_qty: null,
       initial_qty: null,
       total_weight: null,
-      total_value: null,
+      profit: null,
       description: null,
       deleted: 0,
       delivered: 0,

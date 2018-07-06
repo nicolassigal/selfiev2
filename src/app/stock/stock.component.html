@@ -14,7 +14,6 @@
                     <mat-icon>add</mat-icon>
                     Add
                 </button>
-
         </div>
         <div class="btn-container-mobile"  *ngIf="role == 2">
             <mat-icon  (click)="file.click()" aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
@@ -29,6 +28,7 @@
       (editRowEvent)="onEditRow($event)"
       (deleteRowEvent)="onDeleteRow($event)"
       (sendRowEvent)="onSendRow($event)"
+      [noProfit]="role !== 2"
     ></app-hbr-table>
 </div>
 <div *ngIf="loadingData && !tableData.length" class="spinner-container">

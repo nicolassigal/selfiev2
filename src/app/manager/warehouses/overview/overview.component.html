@@ -8,7 +8,7 @@
     <canvas baseChart responsive [data]="weightChartData"  [labels]="warehousesLabel" [chartType]="'doughnut'" [options]="chartOptions"></canvas>
 </div>
 <div class="overview-item" style="width:38%" *ngIf="warehousesLabel && valueChartData.length">
-  <h2>Value: U$D {{this.total_value | number: '1.2-2' }}</h2>
+  <h2>Profit: U$D {{this.profit | number: '1.2-2' }}</h2>
   <canvas baseChart  responsive [data]="valueChartData"  [labels]="warehousesLabel" [chartType]="'doughnut'" [options]="chartOptions"></canvas>
 </div>
 </div>

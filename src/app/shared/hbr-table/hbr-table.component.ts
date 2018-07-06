@@ -25,6 +25,7 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input('datasrc') datasrc;
   @Input('cols') cols;
   @Input('noTotal') noTotal;
+  @Input('noProfit') noProfit;
   @Input('noTotalOperation') noTotalOperation;
   @Output() editRowEvent = new EventEmitter<{}>();
   @Output() deleteRowEvent = new EventEmitter<{}>();
@@ -78,7 +79,7 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
 
     data.map(row => {
       this.totalizer.weight = Number(this.totalizer.weight) + Number(row.total_weight) || 0;
-      this.totalizer.value = Number(this.totalizer.value) + Number(row.total_value)  || 0;
+      this.totalizer.value = Number(this.totalizer.value) + Number(row.profit)  || 0;
       this.totalizer.quantity = Number(this.totalizer.quantity) + Number(row.box_qty)  || 0
     });
 

@@ -6,7 +6,7 @@ import { take } from "rxjs/operators";
 
 export interface Operation {
   total_weight: number;
-  total_value: number;
+  profit: number;
   box_qty: number;
   hbr_id: number;
 }
@@ -19,6 +19,7 @@ export interface Operation {
 export class ExpandTransitDialogComponent implements OnInit {
   moment = _moment;
   panelOpenState: boolean = false;
+  role;
   process = {
     processes: []
   };
@@ -31,6 +32,7 @@ export class ExpandTransitDialogComponent implements OnInit {
 
   ngOnInit() {
     this.process = { ...this.data.row };
+    this.role = this.data.role;
   }
 
   public closeDialog() {

@@ -23,6 +23,7 @@
         (editRowEvent)="onEditRow($event)"
         (deleteRowEvent)="onDeleteRow($event)"
         (ReceivedRowEvent)="onReceivedRow($event)"
+        [noProfit]="role !== 2"
         (expandRowDataEvent)="onExpandRowDataEvent($event)">
     </app-hbr-table>
 </div>

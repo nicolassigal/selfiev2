@@ -10,7 +10,7 @@
             <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
         </div>
     </form>
-    <app-hbr-table [datasrc]="tableData" [cols]="cols"></app-hbr-table>
+    <app-hbr-table [datasrc]="tableData" [cols]="cols"  [noProfit]="role !== 2"></app-hbr-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">
     <app-spinner></app-spinner>

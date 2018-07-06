@@ -26,6 +26,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
   data = [];
   tableData = [];
   customers = [];
+  setCols = false;
   fileUploader = '';
   role = 0;
   cols = [
@@ -33,7 +34,6 @@ export class DeliveredComponent implements OnInit, OnDestroy {
     { columnDef: 'warehouse', header: 'Origin', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty > 0 ? element.box_qty : element.initial_qty}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
-    { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : 0}` },
     { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
     { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
     { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
@@ -93,7 +93,15 @@ export class DeliveredComponent implements OnInit, OnDestroy {
         break;
       default: data = [];
       }
-
+      if (role === 2 && !this.setCols) {
+        this.setCols = true;
+        this.cols.splice(5, 0, {
+           columnDef: 'profit',
+           header: 'Profit',
+           type: 'value',
+           cell: (element) => `${element.profit ? element.profit : 0}`
+        });
+      }
     this.loadingData = false;
     this.tableData = data;
   }
@@ -168,7 +176,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
     data.map(entry => {
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
-      entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
+      entry.profit = !isNaN(entry.profit) ? Number(entry.profit) : null;
       entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
       entry.customer = entry.customer && entry.customer.length ? this.capitalizeText(entry.customer) : null;
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
@@ -209,6 +217,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
   }
 
   download = () => {
+    const today = this.moment().format('DD_MM_YYYY');
     const ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       row.wh_in_date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
@@ -229,7 +238,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
       'warehouse',
       'box_qty',
       'total_weight',
-      'total_value',
+      'profit',
       'description',
       'customer_id',
       'customer',
@@ -239,7 +248,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
     ]});
     const workbook: any = { Sheets: { 'delivered': worksheet }, SheetNames: ['delivered'] };
     const excelBuffer: any = XLSX.write(workbook, {bookType: 'xlsx', bookSST: true, type: 'binary'});
-    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), 'delivered.xlsx');
+    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), `hbr_delivered_${today}.xlsx`);
   }
 
   s2ab = (s) => {

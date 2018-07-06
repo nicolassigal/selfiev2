@@ -16,7 +16,7 @@ export class WHOverviewComponent implements OnInit, OnDestroy {
   valueChartData: number[] = [];
   weightChartData: number[] = [];
   total_qty = 0;
-  total_value = 0;
+  profit = 0;
   total_weight = 0;
   chartOptions: any;
   constructor(private _dataService: DataService,
@@ -40,17 +40,21 @@ export class WHOverviewComponent implements OnInit, OnDestroy {
   }
 
   getData = () => {
-    console.log(this.warehouses);
     if (this.warehouses.length) {
         this.warehouses.map(wh => {
           this.warehousesLabel.push(wh.name);
           this.qtyChartData.push(wh.box_qty);
-          this.valueChartData.push(wh.total_value);
+          this.valueChartData.push(wh.profit);
           this.weightChartData.push(wh.total_weight);
-
-          this.total_qty = Number(this.total_qty) + Number(wh.box_qty);
-          this.total_value = Number(this.total_value) + Number(wh.total_value);
-          this.total_weight = Number(this.total_weight) + Number(wh.total_weight);
+          if (!isNaN(Number(wh.box_qty))) {
+            this.total_qty = Number(this.total_qty) + Number(wh.box_qty);
+          }
+          if (!isNaN(Number(wh.profit))) {
+            this.profit = Number(this.profit) + Number(wh.profit);
+          }
+          if (!isNaN(Number(wh.total_weight))) {
+            this.total_weight = Number(this.total_weight) + Number(wh.total_weight);
+          }
         });
         this.chartOptions = {
           pieceLabel: {

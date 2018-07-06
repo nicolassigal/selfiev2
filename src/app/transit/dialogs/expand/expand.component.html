@@ -24,9 +24,9 @@
             <span class="col-title">Weight: </span>
             <span class="col-desc">{{p.total_weight}} Kg.</span>
           </div>
-          <div class="col">
-            <span class="col-title">Value: </span>
-            <span class="col-desc">U$D {{p.total_value}}</span>
+          <div class="col" *ngIf="role == 2">
+            <span class="col-title">Profit: </span>
+            <span class="col-desc">U$D {{p.profit}}</span>
           </div>
           <div class="col">
             <span class="col-title">Customer: </span>

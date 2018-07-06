@@ -65,9 +65,7 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
         return `${element.total_weight ? element.total_weight : 0}`;
       }},
-      { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => {
-        return `${element.total_value ? element.total_value : 0}`;
-      }},
+
       { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
       { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
@@ -142,6 +140,13 @@ export class StockComponent implements OnInit, OnDestroy {
           showSendStock: true,
           cell: (element) => ''
         });
+
+        this.cols.splice(6, 0, {
+            columnDef: 'profit',
+            header: 'Profit',
+            type: 'value',
+            cell: (element) => `${element.profit ? element.profit : 0}`
+          });
       }
       const id = user['id'];
       const wh_id = user['wh_id'] || null;
@@ -329,7 +334,7 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
       entry.delivered = !isNaN(entry.box_qty) && entry.box_qty > 0 ? 0 : 1;
-      entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
+      entry.profit = !isNaN(entry.profit) ? Number(entry.profit) : null;
       entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
       entry.customer = entry.customer && entry.customer.length ? this.capitalizeText(entry.customer) : null;
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
@@ -395,6 +400,8 @@ export class StockComponent implements OnInit, OnDestroy {
 
 
   download = () => {
+    const today = this.moment().format('DD_MM_YYYY');
+    console.log(today);
     let ordered = JSON.parse(JSON.stringify(this.tableData));
 
     ordered.map(row => {
@@ -410,6 +417,7 @@ export class StockComponent implements OnInit, OnDestroy {
       header: [
         'update',
         'hbr_id',
+        'date',
         'linked_op',
         'wh_id',
         'warehouse',
@@ -424,12 +432,11 @@ export class StockComponent implements OnInit, OnDestroy {
         'address',
         'city',
         'country',
-        'date',
         'description',
         'destination',
         'shipping_date',
         'box_qty',
-        'total_value',
+        'profit',
         'total_weight',
         'tracking',
         'received_date',
@@ -440,7 +447,7 @@ export class StockComponent implements OnInit, OnDestroy {
     const workbook: any = { Sheets: { 'stock': worksheet }, SheetNames: ['stock'] };
     const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', bookSST: true, type: 'binary' });
 
-    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'stock.xlsx');
+    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), `hbr_stock_${today}.xlsx`);
   }
 
   s2ab = (s) => {
@@ -490,6 +497,7 @@ export class StockComponent implements OnInit, OnDestroy {
       }, width: '500px'
     })
   }
+
 
   /*users = () => {
     let users = [

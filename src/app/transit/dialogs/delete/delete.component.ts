@@ -5,7 +5,7 @@ import * as _moment from "moment";
 import { take } from "rxjs/operators";
 export interface Operation {
   total_weight: number;
-  total_value: number;
+  profit: number;
   box_qty: number;
   hbr_id: number;
   deleted: number;
@@ -59,10 +59,10 @@ export class DeleteTransitDialogComponent implements OnInit {
         let op = operation[0];
         if (op.box_qty > 0) {
           const kgPerUnit = Number(op.total_weight) / Number(op.box_qty);
-          const valuePerUnit = Number(op.total_value) / Number(op.box_qty);
+          const valuePerUnit = Number(op.profit) / Number(op.box_qty);
           op.box_qty = Number(process.box_qty) + Number(op.box_qty);
           op.total_weight = Number(kgPerUnit) * Number(op.box_qty);
-          op.total_value = Number(valuePerUnit) * Number(op.box_qty);
+          op.profit = Number(valuePerUnit) * Number(op.box_qty);
         } else {
           if (op.box_qty === 0) {
             op.deleted = 0;
@@ -70,7 +70,7 @@ export class DeleteTransitDialogComponent implements OnInit {
           }
           op.box_qty = Number(process.box_qty);
           op.total_weight = Number(process.total_weight);
-          op.total_value = Number(process.total_value);
+          op.profit = Number(process.profit);
         }
 
         operationsPromiseArray.push(this._db.collection('operations').doc(`${op.hbr_id}`).set(op));

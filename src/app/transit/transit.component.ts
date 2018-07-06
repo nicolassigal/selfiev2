@@ -57,7 +57,6 @@ export class TransitComponent implements OnInit, OnDestroy {
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
-    { columnDef: 'total_value', header: 'Total Value', type: 'value', cell: (element) => `${element.total_value ? element.total_value : ''}` },
     { columnDef: 'shipping_date', header: 'Shipping Date', type: 'date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}` },
     { columnDef: 'courier', header: 'Courier', type: '', cell: (element) => `${element.courier ? element.courier : ''}` },
     { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
@@ -127,6 +126,12 @@ export class TransitComponent implements OnInit, OnDestroy {
       showEdit = true;
       showDelete = true;
       showReceived = true;
+      this.cols.splice(4, 0, {
+        columnDef: 'profit',
+        header: 'Profit',
+        type: 'value',
+        cell: (element) => `${element.profit ? element.profit : 0}`
+     });
     }
     if (!this.cols.some(header => header.columnDef === 'actions')) {
       this.cols.unshift({
@@ -139,6 +144,8 @@ export class TransitComponent implements OnInit, OnDestroy {
          showExpand: true,
          cell: (element) => ''
       });
+
+
     }
 
     const id = user['id'];
@@ -198,6 +205,7 @@ export class TransitComponent implements OnInit, OnDestroy {
           couriers: this.couriers,
           customers: this.customers,
           awbs: this.tableData,
+          role: this.role,
           title: 'Mark as...',
           confirmBtn: 'Ok',
           cancelBtn: 'Cancel'
@@ -304,7 +312,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     data.map(entry => {
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
-      entry.total_value = !isNaN(entry.total_value) ? Number(entry.total_value) : null;
+      entry.profit = !isNaN(entry.profit) ? Number(entry.profit) : null;
       entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
       entry.customer = entry.customer && entry.customer.length ? this.capitalizeText(entry.customer) : null;
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
@@ -345,6 +353,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   }
 
   download = () => {
+    const today = this.moment().format('DD_MM_YYYY');
     const ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       row.shipping_date = row.shipping_date ? this.moment.unix(row.shipping_date).format('DD-MM-YYYY') : null;
@@ -363,7 +372,7 @@ export class TransitComponent implements OnInit, OnDestroy {
         'processes_list',
         'box_qty',
         'total_weight',
-        'total_value',
+        'profit',
         'shipping_date',
         'courier_id',
         'courier',
@@ -377,7 +386,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     });
     const workbook: any = { Sheets: { 'in_transit': worksheet }, SheetNames: ['in_transit'] };
     const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', bookSST: true, type: 'binary' });
-    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), 'in_transit.xlsx');
+    saveAs(new Blob([this.s2ab(excelBuffer)], { type: 'application/octet-stream' }), `hbr_in_transit_${today}.xlsx`);
   }
 
   s2ab = (s) => {
@@ -393,12 +402,12 @@ export class TransitComponent implements OnInit, OnDestroy {
     data = data.map(row => {
       row.box_qty = 0;
       row.total_weight = 0;
-      row.total_value = 0;
+      row.profit = 0;
       row.processes = row.processes.filter(p => {
         if (p.customer_id === id) {
           row.box_qty = Number(row.box_qty) +  Number(p.box_qty);
           row.total_weight = Number(row.total_weight) +  Number(p.total_weight);
-          row.total_value = Number(row.total_value) +  Number(p.total_value);
+          row.profit = Number(row.profit) +  Number(p.profit);
           return p;
         }
       });
