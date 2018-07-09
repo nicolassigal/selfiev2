@@ -22,7 +22,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   roles = [];
   warehouses = [];
   cols = [
-    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
+    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, type: '', cell: (element) => `${element.actions}` },
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
     { columnDef: 'tel', header: 'Phone', type: '', cell: (element) => `${element.tel ? element.tel : ''}` },
@@ -50,32 +50,32 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.loadingData = true;
     }
     this._dataService.warehouseSubject
-    .pipe(takeUntil(componentDestroyed(this)))
-    .subscribe(warehouses => this.warehouses = warehouses);
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(warehouses => this.warehouses = warehouses);
     this._dataService.customerSubject
-    .pipe(takeUntil(componentDestroyed(this)))
-    .subscribe(customers => {
+      .pipe(takeUntil(componentDestroyed(this)))
+      .subscribe(customers => {
         this.tableData = customers;
         this.filterData(this.tableData);
-    });
+      });
 
     if (!this.roles.length) {
       this._dataService.rolesSubject
-      .pipe(takeUntil(componentDestroyed(this)))
-      .subscribe(roles => {
-        this.roles = roles;
-        this.filterData(this.tableData);
-      });
+        .pipe(takeUntil(componentDestroyed(this)))
+        .subscribe(roles => {
+          this.roles = roles;
+          this.filterData(this.tableData);
+        });
     } else {
       this.filterData(this.tableData);
     }
   }
 
-  ngOnDestroy() {}
+  ngOnDestroy() { }
 
   filterData = (data) => {
     data = data.sort((a, b) => a.name.localeCompare(b.name));
-    data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null ) : row);
+    data = data.filter(row => row['deleted'] ? (row['deleted'] == 0 ? row : null) : row);
     data.map(row => {
       row.name = this.capitalizeText(row.name);
       const rowRole = row.role || 0;
@@ -115,7 +115,11 @@ export class UsersComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
-}
+  }
+
+  onStockRoomEvent = (row) => {
+    this._router.navigate([`/dashboard/users/${row.id}/stock`]);
+  }
 
   capitalizeText = (text) => {
     if (text !== null && text !== undefined && typeof text === 'string') {

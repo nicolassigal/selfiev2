@@ -19,8 +19,10 @@ const routes: Routes = [
       { path: 'delivered', component: DeliveredComponent, data: { title: 'Delivered',  authLevel: [0, 1, 2] }},
       { path: 'transit', component: TransitComponent, data: { title: 'In Transit', authLevel: [0, 1, 2]}},
       { path: 'users', component: UsersComponent, data: { title: 'Manage Users', authLevel: [2] }},
-      { path: 'wh', component: WarehousesComponent, data: { title: 'Manage Warehouses', authLevel: [2] }},
-      { path: 'wh-overview', component: WHOverviewComponent, data: { title: 'Warehouses Overview', authLevel: [2] }},
+      { path: 'users/:id/stock', component: StockComponent, data: { title: 'User Stock', filter: 'users', authLevel: [2] }},
+      { path: 'warehouses', component: WarehousesComponent, data: { title: 'Manage Warehouses', authLevel: [2] }},
+      { path: 'warehouses/:id/stock', component: StockComponent, data: { title: 'Warehouse Stock', filter: 'warehouse', authLevel: [2] }},
+      { path: 'warehouses-overview', component: WHOverviewComponent, data: { title: 'Warehouses Overview', authLevel: [2] }},
       { path: 'couriers', component: CouriersComponent, data: { title: 'Manage Couriers', authLevel: [2] }},
       { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
     ]

@@ -20,7 +20,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   tableData = [];
   operations = [];
   cols = [
-    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
+    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, type: '', cell: (element) => `${element.actions}` },
     { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
     { columnDef: 'box_qty', header: 'Total Qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
@@ -91,7 +91,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   }
 
   navigateToOverview = () => {
-    this._router.navigate(['dashboard/wh-overview']);
+    this._router.navigate(['dashboard/warehouses-overview']);
   }
 
   onEditRow = (row = {}, title = 'Edit') => {
@@ -115,6 +115,10 @@ export class WarehousesComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
+  }
+
+  onStockRoomEvent = (row) => {
+    this._router.navigate([`/dashboard/warehouses/${row.id}/stock`]);
   }
 
   capitalizeText = (text) => {

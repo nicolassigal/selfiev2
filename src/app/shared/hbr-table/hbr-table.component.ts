@@ -10,6 +10,7 @@ import { map } from 'rxjs/operators';
 @Component({
   selector: 'app-hbr-table',
   templateUrl: './hbr-table.component.html',
+  encapsulation: ViewEncapsulation.None,
   styleUrls: ['./hbr-table.component.scss']
 })
 
@@ -32,6 +33,7 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
   @Output() sendRowEvent = new EventEmitter<{}>();
   @Output() ReceivedRowEvent = new EventEmitter<{}>();
   @Output() expandRowDataEvent = new EventEmitter<{}>();
+  @Output() stockRoomEvent = new EventEmitter<{}>();
 
   columns;
   isMobile;
@@ -106,6 +108,10 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
 
   expand = (row) => {
     this.expandRowDataEvent.emit(row);
+  }
+
+  stockRoom = (row) => {
+    this.stockRoomEvent.emit(row);
   }
 
   applyFilter(data) {

@@ -50,6 +50,7 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
 import { ChartsModule } from 'ng2-charts';
 import { WHOverviewComponent } from './manager/warehouses/overview/overview.component';
 import { SidenavService } from './app-sidenav/sidenav.service';
+
 @NgModule({
   declarations: [
     AppComponent,

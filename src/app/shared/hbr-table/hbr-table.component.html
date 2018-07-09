@@ -12,6 +12,7 @@
             <button *ngIf="column.showSendStock" mat-menu-item (click)="sendBoxes(row)">Send Boxes</button>
             <button *ngIf="column.showReceived" mat-menu-item (click)="received(row)">Mark as...</button>
             <button *ngIf="column.showExpand" mat-menu-item (click)="expand(row)">Expand</button>
+            <button *ngIf="column.showStockRoom" mat-menu-item (click)="stockRoom(row)">Stock Room</button>
             <button *ngIf="column.showDelete" mat-menu-item (click)="deleteRow(row)">Delete</button>
           </mat-menu>
         </mat-cell>
@@ -36,13 +37,15 @@
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
-  <div class="totalizer" *ngIf="!noTotal">
-    <div class="totalizer-col" *ngIf="!noProfit"><span class="totalizer-title">Total Profit: </span><span class="totalizer-value"> U$D {{ totalizer.value | number: '1.2-2' }}</span></div>
-    <div class="totalizer-col"><span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight | number: '1.2-2' }} Kg</span></div>
-    <div class="totalizer-col"><span class="totalizer-title">Total Box Qty: </span><span class="totalizer-value">{{ totalizer.quantity | number }}</span></div>
-    <div class="totalizer-col"> <span *ngIf="!noTotalOperation" class="totalizer-title">Total Operations: </span><span  *ngIf="!noTotalOperation" class="totalizer-value">{{ totalizer.operations | number }}</span></div>
+  <div class="table-footer">
+    <div class="totalizer" *ngIf="!noTotal">
+      <div class="totalizer-col" *ngIf="!noProfit"><span class="totalizer-title">Total Profit: </span><span class="totalizer-value"> U$D {{ totalizer.value | number: '1.2-2' }}</span></div>
+      <div class="totalizer-col"><span class="totalizer-title">Total Kg: </span><span class="totalizer-value">{{ totalizer.weight | number: '1.2-2' }} Kg</span></div>
+      <div class="totalizer-col"><span class="totalizer-title">Total Box Qty: </span><span class="totalizer-value">{{ totalizer.quantity | number }}</span></div>
+      <div class="totalizer-col"> <span *ngIf="!noTotalOperation" class="totalizer-title">Total Operations: </span><span  *ngIf="!noTotalOperation" class="totalizer-value">{{ totalizer.operations | number }}</span></div>
+    </div>
+    <mat-paginator id="paginator" #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]"
+      showFirstLastButtons>
+    </mat-paginator>
   </div>
-  <mat-paginator #paginator [length]="dataSource.data.length" [pageIndex]="0" [pageSize]="50" [pageSizeOptions]="[50, 100, 250]"
-    showFirstLastButtons>
-  </mat-paginator>
   <!--<app-empty-table  *ngIf="!data.length"></app-empty-table>-->

@@ -30,7 +30,7 @@ import { take } from 'rxjs/operators';
       description: null,
       deleted: 0,
       delivered: 0,
-      tracking: null
+      tracking: ''
      };
     moment = _moment;
     constructor(
@@ -46,11 +46,10 @@ import { take } from 'rxjs/operators';
       this.box.courier_id = Number(this.box.courier_id);
       this.box.wh_id = Number(this.box.wh_id);
       this.box.customer_id = Number(this.box.customer_id);
-      console.log(this.box);
       this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
       this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
       this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
-      this.box.date = this.box.date ? this.moment.unix(this.box.date).format('YYYY-MM-DD') : null;
+      this.box.date = this.box.date ? this.moment.unix(this.box.date).format('YYYY-MM-DD') : this.moment().format('YYYY-MM-DD');
       this.operations = this._dataService.getStock();
     }
 

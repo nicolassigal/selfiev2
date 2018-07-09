@@ -55,6 +55,7 @@ export class TransitComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this._sidenav.setTitle('In Transit');
     this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
+    { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },
     { columnDef: 'shipping_date', header: 'Shipping Date', type: 'date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}` },
@@ -162,10 +163,13 @@ export class TransitComponent implements OnInit, OnDestroy {
 
     data = data.filter(row => row['status_id'] !== 3);
     data.map(row => {
-      row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
+      if (row.courier_id) {
+        row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
+      }
       row.status = this.status.filter(e => e.id === row.status_id)[0];
       row.status_id = row.status ? row.status.id : 0;
       row.status =  row.status ? row.status.name : null;
+      row.customer = row.processes[0].customer_id ? this.customers.filter(cs => cs.id === row.processes[0].customer_id)[0].name : '';
       row.destination = this.getDestination(row);
     });
     this.loadingData = false;

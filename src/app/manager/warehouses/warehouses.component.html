@@ -12,6 +12,7 @@
         </div>
         <div class="btn-container-mobile">
                 <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
+                <mat-icon (click)="navigateToOverview()">visibility</mat-icon>
             </div>
     </form>
     <app-hbr-table
@@ -19,6 +20,7 @@
     [cols]="cols"
     [noTotalOperation]="true"
     (editRowEvent)="onEditRow($event)"
+    (stockRoomEvent)="onStockRoomEvent($event)"
     (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">

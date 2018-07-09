@@ -1,5 +1,5 @@
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, Renderer, ViewChild, ElementRef } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
 import { UtilsService } from '../../../shared/utils.service';
@@ -29,15 +29,18 @@ export class SendStockDialogComponent implements OnInit {
         box_qty: 0,
         status_id: 0,
         courier_id: null,
-        tracking: null,
+        tracking: '',
     };
     maxQty;
+    @ViewChild('mat-dialog-container') dialog;
     constructor(
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
         private _db: AngularFirestore,
         private _dataService: DataService,
         private _utils: UtilsService,
+        private _elementRef: ElementRef,
+        private _renderer: Renderer,
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit() {
@@ -47,6 +50,8 @@ export class SendStockDialogComponent implements OnInit {
         this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
         this.awbs = this._dataService.getAwbs();
         this.awbs = this.awbs.filter(row => row.status_id < 3);
+        this.box.quantity = this.maxQty;
+        this.box.shipping_date = this.moment().format("YYYY-MM-DD");
     }
 
     public closeDialog() {

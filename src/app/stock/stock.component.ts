@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { DataService } from './../shared/data.service';
 import { AuthService } from './../shared/auth.service';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -44,6 +45,7 @@ export class StockComponent implements OnInit, OnDestroy {
 
   constructor(
     private _worker: WorkersService,
+    private _route: ActivatedRoute,
     private infoService: InfoService,
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
@@ -56,7 +58,9 @@ export class StockComponent implements OnInit, OnDestroy {
     private _dataService: DataService) { }
 
   ngOnInit() {
-    this._sidenav.setTitle('Manage Stock');
+    const snapshotTitle = this._route.snapshot.data.filter;
+    const title = snapshotTitle == 'warehouse' ? 'Warehouse Stock' : snapshotTitle == 'users'? 'User Stock' : 'Manage Stock';
+    this._sidenav.setTitle(title);
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'linked_op', header: 'Linked Op.', type: '', cell: (element) => `${element.linked_op ? element.linked_op : ''}` },
@@ -161,6 +165,19 @@ export class StockComponent implements OnInit, OnDestroy {
       }
       data = data.filter(row => row.delivered === 0);
     this.loadingData = false;
+    
+    if(this._route.snapshot.data.filter === 'warehouse') {
+      this._route.params.subscribe(params => {
+        data = data.filter(row => row.wh_id == params.id);
+      });
+    }
+
+    if(this._route.snapshot.data.filter === 'users') {
+      this._route.params.subscribe(params => {
+        data = data.filter(row => row.customer_id == params.id);
+      });
+    }
+
     this.tableData = data;
   }
 

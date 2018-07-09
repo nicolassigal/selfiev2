@@ -38,6 +38,7 @@ export class ReceivedStockDialogComponent implements OnInit {
         this.warehouses = this.data.warehouses;
         this.customers = this.data.customers;
         this.operations = [...this.data.operations];
+        this.box.received_date = this.moment().format('YYYY-MM-DD');
     }
 
     public closeDialog() {

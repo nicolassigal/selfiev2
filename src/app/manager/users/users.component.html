@@ -15,6 +15,7 @@
     [cols]="cols"
     [noTotal]="true"
     (editRowEvent)="onEditRow($event)"
+    (stockRoomEvent)="onStockRoomEvent($event)"
     (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
 </div>
 <div *ngIf="loadingData" class="spinner-container">

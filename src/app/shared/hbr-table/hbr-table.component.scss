@@ -12,19 +12,16 @@
 }
 
 .totalizer {
-  background: $secondaryColor;
-  color: $primaryColor;
-  border-top: $primaryColor solid 4px;
-  font-family: Roboto,"Helvetica Neue",sans-serif;
   font-size: 12px;
-  position: absolute;
   min-height: 52px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 40%;
   align-items: center;
   padding: 0px 20px;
+  &-col {
+      padding-right: 10px;
+  }
   &-value {
     margin-left: 10px;
   }
@@ -34,10 +31,8 @@
 }
 
 .mat-paginator {
-  background-color: $secondaryColor !important;
-  color: $primaryColor !important;
-  border-top: $primaryColor solid 4px !important;
-
+    background: $secondaryColor;
+    color: $primaryColor;
   &-container {
     display: flex;
     align-items: center;
@@ -49,7 +44,16 @@
     right: 0;
   }
 }
-
+.table-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    background: $secondaryColor;
+    color: $primaryColor;
+    border-top: $primaryColor solid 4px;
+    font-family: Roboto,"Helvetica Neue",sans-serif;
+}
 .mat-icon-button [disabled] {
   color: white !important;
 }
@@ -120,8 +124,10 @@
 }
 
 @media(max-width: 800px) {
-    .mat-paginator-range-label {
-        margin: 0 32px 0 0px
+    .table-footer {
+        flex-direction: column;
+        position:absolute;
+        bottom: 0;
     }
     .mat-table {
         overflow-x: hidden;
@@ -136,14 +142,15 @@
     .totalizer {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-around;
-        background: white;
-        padding: 10px 50px;
-        position: absolute;
+        justify-content: space-between;
+        padding: 10px 20px;
         bottom: 0;
         width: auto;
         flex-direction: initial;
         min-height: auto;
+        &-col {
+            padding-right: 0;
+        }
     }
     .mat-cell:first-child,
     .mat-footer-cell:first-child,
@@ -164,7 +171,16 @@
         padding: 8px 24px;
         width: 100%;
     }
-    .mat-paginator-container {
-        justify-content: center !important;
+    .mat-paginator {
+        border-top: none !important;
+        &-container {
+            flex-wrap: nowrap !important;
+        }
+        &-page-size-label {
+            display: none;
+        }
+        &-range-label {
+            margin: 0 15px 0 15px !important;
+        }
     }
 }
