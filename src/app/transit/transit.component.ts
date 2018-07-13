@@ -145,8 +145,6 @@ export class TransitComponent implements OnInit, OnDestroy {
          showExpand: true,
          cell: (element) => ''
       });
-
-
     }
 
     const id = user['id'];
@@ -169,7 +167,7 @@ export class TransitComponent implements OnInit, OnDestroy {
       row.status = this.status.filter(e => e.id === row.status_id)[0];
       row.status_id = row.status ? row.status.id : 0;
       row.status =  row.status ? row.status.name : null;
-      row.customer = row.processes[0].customer_id ? this.customers.filter(cs => cs.id === row.processes[0].customer_id)[0].name : '';
+      row.customer = row.processes[0].customer_id ? this.customers.filter(cs => cs.id == row.processes[0].customer_id)[0].name : '';
       row.destination = this.getDestination(row);
     });
     this.loadingData = false;
