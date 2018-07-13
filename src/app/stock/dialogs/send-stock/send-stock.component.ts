@@ -30,6 +30,7 @@ export class SendStockDialogComponent implements OnInit {
         status_id: 0,
         courier_id: null,
         tracking: '',
+        dest_type: null
     };
     maxQty;
     @ViewChild('mat-dialog-container') dialog;
@@ -85,7 +86,8 @@ export class SendStockDialogComponent implements OnInit {
                 box_qty: 0,
                 status_id: 0,
                 courier_id: null,
-                tracking: null
+                tracking: null,
+                dest_type: null
             };
         }
     }
@@ -93,8 +95,10 @@ export class SendStockDialogComponent implements OnInit {
     clearSelect (feature) {
         if (feature === 'wh') {
             this.box.customer_id  = null;
+            this.box.dest_type = 'warehouse';
         } else {
             this.box.wh_id  = null;
+            this.box.dest_type = 'customer';
         }
     }
 

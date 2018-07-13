@@ -162,12 +162,14 @@ export class TransitComponent implements OnInit, OnDestroy {
     data = data.filter(row => row['status_id'] !== 3);
     data.map(row => {
       if (row.courier_id) {
-        row.courier = this.couriers.filter(courier => courier.id === row.courier_id)[0].name;
+        row.courier = this.couriers.filter(courier => courier.id == row.courier_id)[0].name;
       }
       row.status = this.status.filter(e => e.id === row.status_id)[0];
       row.status_id = row.status ? row.status.id : 0;
       row.status =  row.status ? row.status.name : null;
-      row.customer = row.processes[0].customer_id ? this.customers.filter(cs => cs.id == row.processes[0].customer_id)[0].name : '';
+      const customer = row.processes[0].customer_id ? this.customers.filter(cs => cs.id == row.processes[0].customer_id)[0] : '';
+      row.customer = customer.name ? customer.name : '';
+      row.customer_id = customer.id ? customer.id : '';
       row.destination = this.getDestination(row);
     });
     this.loadingData = false;
@@ -381,6 +383,7 @@ export class TransitComponent implements OnInit, OnDestroy {
         'tracking',
         'wh_id',
         'customer_id',
+        'customer',
         'destination',
         'status_id',
         'status'

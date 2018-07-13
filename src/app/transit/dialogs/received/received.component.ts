@@ -22,7 +22,9 @@ export class ReceivedStockDialogComponent implements OnInit {
         processes: [],
         received_date: null,
         customer_id: null,
-        wh_id: null
+        courier_id: null,
+        wh_id: null,
+        dest_type: null
     };
 
     constructor(
@@ -61,12 +63,12 @@ export class ReceivedStockDialogComponent implements OnInit {
                 process.received_date = this.box.received_date;
                 process.wh_id = this.box.wh_id;
                 process.customer_id = this.box.customer_id;
-                process.courier_id = this.box.customer_id;
+                process.courier_id = this.box.courier_id;
                 process.destination = this.getDestination(process);
-                if (process.customer_id) {
+                if (this.box.dest_type === 'customer') {
                     const id = this._db.createId();
                     promises.push(this._db.collection('delivered').doc(`${id}`).set(process));
-                } else if (process.wh_id) {
+                } else if (this.box.dest_type === 'warehouse') {
                     if (Number(process.initial_qty) !== Number(process.box_qty)) {
                       if (!process.linked_op) {
                         process.linked_op = process.hbr_id;
