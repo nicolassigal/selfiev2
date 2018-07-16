@@ -178,6 +178,12 @@ export class StockComponent implements OnInit, OnDestroy {
       });
     }
 
+    if(this._route.snapshot.data.filter === 'stock') {
+      this._route.params.subscribe(params => {
+        data = data.filter(row => row.hbr_id == params.id);
+      });
+    }
+
     this.tableData = data;
   }
 

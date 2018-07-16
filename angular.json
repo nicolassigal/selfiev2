@@ -25,6 +25,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/server",
               "src/manifest.json",
               "src/xlsx"
             ],

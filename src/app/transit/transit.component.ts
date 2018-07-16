@@ -19,6 +19,7 @@ import * as _moment from 'moment';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import { SidenavService } from '../app-sidenav/sidenav.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-transit',
@@ -50,6 +51,7 @@ export class TransitComponent implements OnInit, OnDestroy {
     private _tableService: TableService,
     private _dataService: DataService,
     private _sidenav: SidenavService,
+    private _route: ActivatedRoute,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
@@ -173,6 +175,13 @@ export class TransitComponent implements OnInit, OnDestroy {
       row.destination = this.getDestination(row);
     });
     this.loadingData = false;
+
+    this._route.params.subscribe(params => {
+      if(params.id) {
+        data = data.filter(row => row.id == params.id);
+      }
+    });
+
     this.tableData = data;
   }
 

@@ -1,0 +1,19 @@
+<div class="deep-search">
+  <form #f>
+    <button mat-raised-button color="primary" class="search-by" [matMenuTriggerFor]="menu">
+      <span>
+        {{ defaultLabel }} <mat-icon>keyboard_arrow_down</mat-icon>
+      </span>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item *ngFor="let param of deepSearchParams" (click)="setDeepSearchQueryParam(param)">{{ param.label }}</button>
+    </mat-menu>
+    <mat-form-field>
+      <input matInput type="text" placeholder="Search text" [(ngModel)]="queryText" name="queryText">
+    </mat-form-field>
+    <button (click)="deepSearch(f)" mat-raised-button color="primary"><mat-icon>search</mat-icon> Search </button>
+  </form>
+  <app-results class="results" *ngIf="stock.length" [data]="stock" [title]="'Stock'" [route]="'stock'"></app-results>
+  <app-results class="results" *ngIf="transit.length" [data]="transit" [title]="'Transit'" [route]="'transit'"></app-results>
+  <app-results class="results" *ngIf="delivered.length" [data]="delivered" [title]="'Delivered'" [route]="'delivered'"></app-results>
+</div>

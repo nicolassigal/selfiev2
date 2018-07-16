@@ -1,0 +1,19 @@
+<mat-card>
+  <mat-card-header>
+    <span><b>Hbr Id:</b> {{ result.id || result.hbr_id }}</span><span *ngIf="result.linked_op"> - <b>Linked Op.:</b> {{result.linked_op}} </span>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="content">
+        <span *ngIf="result.awb_id"><b>Transit Id:</b> {{result.awb_id}}</span>
+        <span *ngIf="result.warehouse"><b>Wharehouse:</b> {{result.warehouse}}</span>
+        <span *ngIf="result.customer"><b>Customer:</b> {{result.customer}}</span>
+        <span *ngIf="result.description"><b>Description:</b> {{result.description}}</span>
+        <span *ngIf="result.box_qty"><b>Box Qty.:</b> {{result.box_qty}}</span>
+        <span *ngIf="result.total_weight"><b>Box Weight:</b> {{result.total_weight}}</span>
+        <span *ngIf="result.destination"><b>Destination:</b> {{result.destination}}</span>
+    </div>
+    <div class="arrow-right">
+        <mat-icon>keyboard_arrow_right</mat-icon>
+    </div>
+  </mat-card-content>
+</mat-card>

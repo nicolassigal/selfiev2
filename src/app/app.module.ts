@@ -1,3 +1,4 @@
+import { NotificationService } from './shared/notification.service';
 import { FirstLoginDialogComponent } from './dashboard/first-login/firstLogin.dialog';
 import { DeleteTransitDialogComponent } from './transit/dialogs/delete/delete.component';
 import { BrowserModule } from '@angular/platform-browser';
@@ -50,6 +51,9 @@ import { EmptyTableComponent } from './shared/empty-table/empty-table.component'
 import { ChartsModule } from 'ng2-charts';
 import { WHOverviewComponent } from './manager/warehouses/overview/overview.component';
 import { SidenavService } from './app-sidenav/sidenav.service';
+import { DeepSearchComponent } from './deep-search/deep-search.component';
+import { ResultsComponent } from './deep-search/results/results.component';
+import { ResultComponent } from './deep-search/results/result/result.component';
 
 @NgModule({
   declarations: [
@@ -82,7 +86,10 @@ import { SidenavService } from './app-sidenav/sidenav.service';
     DeleteWarehouseDialogComponent,
     EmptyTableComponent,
     FirstLoginDialogComponent,
-    WHOverviewComponent
+    WHOverviewComponent,
+    DeepSearchComponent,
+    ResultsComponent,
+    ResultComponent
   ],
   imports: [
 BrowserModule,
@@ -107,7 +114,8 @@ BrowserModule,
     AuthService,
     UtilsService,
     DataService,
-    SidenavService
+    SidenavService,
+    NotificationService
   ],
   entryComponents: [
     EditStockDialogComponent,

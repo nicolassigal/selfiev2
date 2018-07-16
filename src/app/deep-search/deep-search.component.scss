@@ -1,0 +1,33 @@
+.deep-search {
+    width: 80%;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1% 10%;
+    form {
+        display: flex;
+        flex-direction: row;
+        align-content: space-between;
+        align-items: center;
+        width: 100%;
+        button {
+            min-width: 150px;
+        }
+        button.mat-raised-button.search-by {
+            span {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .mat-form-field {
+            margin: 0% 2%;
+            flex-grow: 1;
+        }
+    }
+}
+.results {
+    width: 100%;
+}

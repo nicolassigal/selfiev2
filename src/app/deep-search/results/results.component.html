@@ -1,0 +1,13 @@
+<div class="results">
+    <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="card-title">{{ title }} </span>
+              <span class="card-qty">({{ data.length }})</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <app-result [result]="result" (click)="navigateTo(result)" *ngFor="let result of data"></app-result>
+        </mat-expansion-panel>
+      </mat-accordion>
+</div>

@@ -9,6 +9,10 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es5",
+    "paths": {
+      "#notifications": ["src/server/notifications"],
+      "#server": ["src/server"]
+    },
     "typeRoots": [
       "node_modules/@types"
     ],

@@ -1,0 +1,15 @@
+.results {
+    width: 100%;
+    .card {
+        &-title {
+            font-weight: 700;
+        }
+        &-qty {
+        padding-left: 5px;
+        color: rgba(0,0,0,0.65);
+        }
+    }
+}
+.mat-expansion-panel {
+    background-color: #fcfcfc;
+}

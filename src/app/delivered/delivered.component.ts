@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from './../shared/auth.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -50,6 +51,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
     private _auth: AngularFireAuth,
     private _authService: AuthService,
     private _dataService: DataService,
+    private _route: ActivatedRoute,
     private _sidenav: SidenavService,
     private _tableService: TableService) {}
 
@@ -104,6 +106,12 @@ export class DeliveredComponent implements OnInit, OnDestroy {
         });
       }
     this.loadingData = false;
+
+    this._route.params.subscribe(params => {
+      if(params.id) {
+        data = data.filter(row => row.hbr_id == params.id);
+      }
+    });
     this.tableData = data;
   }
 

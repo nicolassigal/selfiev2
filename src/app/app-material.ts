@@ -22,7 +22,8 @@ import {
   MatExpansionModule,
   MatSpinner,
   MatProgressSpinnerModule,
-  MatAutocompleteModule
+  MatAutocompleteModule,
+  MatCardModule
 } from '@angular/material';
 
 @NgModule({
@@ -46,7 +47,8 @@ import {
     MatSelectModule,
     MatExpansionModule,
     MatProgressSpinnerModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatCardModule
   ],
   exports: [
     MatInputModule,
@@ -68,7 +70,8 @@ import {
     MatSelectModule,
     MatExpansionModule,
     MatProgressSpinnerModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatCardModule
   ],
 })
 export class MaterialModule { }

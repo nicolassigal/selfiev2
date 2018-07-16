@@ -1,3 +1,4 @@
+import { DeepSearchComponent } from './deep-search/deep-search.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { StockComponent } from './stock/stock.component';
@@ -16,14 +17,18 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard], data: { authLevel: [0, 1, 2] },
     children: [
       { path: 'stock', component: StockComponent, data: { title: 'Stock', authLevel: [0, 1, 2] }},
+      { path: 'stock/:id', component: StockComponent, data: { title: 'Stock', filter: 'stock', authLevel: [0, 1, 2] }},
       { path: 'delivered', component: DeliveredComponent, data: { title: 'Delivered',  authLevel: [0, 1, 2] }},
+      { path: 'delivered/:id', component: DeliveredComponent, data: { title: 'Delivered',  authLevel: [0, 1, 2] }},
       { path: 'transit', component: TransitComponent, data: { title: 'In Transit', authLevel: [0, 1, 2]}},
+      { path: 'transit/:id', component: TransitComponent, data: { title: 'In Transit', authLevel: [0, 1, 2]}},
       { path: 'users', component: UsersComponent, data: { title: 'Manage Users', authLevel: [2] }},
       { path: 'users/:id/stock', component: StockComponent, data: { title: 'User Stock', filter: 'users', authLevel: [2] }},
       { path: 'warehouses', component: WarehousesComponent, data: { title: 'Manage Warehouses', authLevel: [2] }},
       { path: 'warehouses/:id/stock', component: StockComponent, data: { title: 'Warehouse Stock', filter: 'warehouse', authLevel: [2] }},
       { path: 'warehouses-overview', component: WHOverviewComponent, data: { title: 'Warehouses Overview', authLevel: [2] }},
       { path: 'couriers', component: CouriersComponent, data: { title: 'Manage Couriers', authLevel: [2] }},
+      { path: 'deep-search', component: DeepSearchComponent, data: { title: 'Deep Search', authLevel: [2] }},
       { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
     ]
   },
