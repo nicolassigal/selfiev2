@@ -14,14 +14,14 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-
   constructor(
     private _db: AngularFirestore,
     private _auth: AngularFireAuth,
     private dataService: DataService,
     private _route: ActivatedRoute,
     private _sidenavService: SidenavService,
-    private _dialog: MatDialog
+    private _dialog: MatDialog,
+    private _ns: NotificationService
   ) { }
 
   ngOnInit() {

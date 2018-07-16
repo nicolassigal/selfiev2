@@ -9,6 +9,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { take, takeUntil } from 'rxjs/operators';
 import { UtilsService } from '../shared/utils.service';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
+import { NotificationService } from '../shared/notification.service';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -35,15 +36,47 @@ export class LoginComponent implements OnInit, OnDestroy {
     tel: null,
     role: 0,
     id: null,
-    updatedInfo: false
+    updatedInfo: false,
+    password: null
   };
-
+  subject = 'Bienvenido a HBR - Selfie';
+  template = `
+    <article>
+      <p>Hola ${ this.user.name }, gracias por elegirnos, a partir de ahora vas a poder realizar tus compras y recibirlas en Tu casa, con nuestro servicio courier.</p>
+      <p>Tu número de cliente es: ${ this.user.id } </p>
+      <p>Por favor tené en cuenta las siguientes consideraciones:</p>
+      <ol>
+        <li>Las cajas deberán ir rotuladas con tu nombre y tu número de cliente.</li>
+        <li>Al efectuar el envío por favor informarnos el número de tracking para realizar el seguimiento.</li>
+        <li>Enviarnos por mail adjunto de factura con detalle de la compra.</li>
+      </ol>
+      <p>Recordá que nuestro servicio comienza con la recepción de tus compras en nuestros depósitos; si tenés alguna duda con respecto al ingreso de la mercadería  a EEUU,  por favor confirmá con tu proveedor o consultanos.</p>
+      <p>Para más información del Régimen Aduanero Courier vigente podés consultarlo en nuestra página  https://tucourier.com.ar/  en nuestra sección Preguntas Frecuentes.</p>
+      <p>Podes ingresar a https://tucourier.com.ar/ boton ”selfie” y registrate con tu usuario y contraseña:</p>
+      <ul>
+        <li>e-mail: ${ this.user.email }</li>
+        <li>Password: ${ this.user.password }</li>
+      </ul>
+      <p>Y comenza a utilizar nuestros sistemas de control de Stock</p>
+      <p>El domicilio de nuestro WH en Miami es:</p>
+      <ul>
+        <li><b>12307 SW 133 CT</b></li>
+        <li><b>MIAMI FL 33186</b></li>
+        <li><b>tel +1 (786) 357-8906</b></li>
+      </ul>
+      <p>Nota: Si realizas tus compras fuera de EEUU y las envías a EEUU, tene en cuenta las siguientes consideraciones aduaneras:</p>
+      <img src="https://lh6.googleusercontent.com/AM-kwz3J5zOFm05u9wjJ1bP7ll6o3oTZmJNLuQcJwzHrUvBn7zqdXjO9qasLnahLX_kAvjq63nffYdj9ZpB3EhBfmhZONGZoSsHKFEsqr6qqgILiGYXYT6EnPWHRv1tvvgQFuQ1C" />
+      <p>Al pie mis datos para cualquier consulta,</p>
+      <p>Santiago</p>
+    </article>
+  `;
   constructor(private auth: AngularFireAuth,
     private router: Router,
     private _db: AngularFirestore,
     private authService: AuthService,
     private _dataService: DataService,
-    private _utils: UtilsService) { }
+    private _utils: UtilsService,
+    private _notificationService: NotificationService) { }
 
   ngOnInit() {
     this.error = '';
@@ -98,7 +131,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       tel: null,
       role: 0,
       id: null,
-      updatedInfo: false
+      updatedInfo: false,
+      password: null
     };
     this.loginFormActive = !this.loginFormActive;
     this.email = '';
@@ -118,15 +152,18 @@ export class LoginComponent implements OnInit, OnDestroy {
           .then(res => {
             this.user.email = this.email;
             this.user.username = this.email;
+            this.user.password = this.password;
             this.user.role = 0;
             this.user.id = this._utils.getId(this.users);
             this.user.updatedInfo = true;
             this._db.collection('users').doc(`${this.user.id}`).set(this.user)
               .then(() => {
-                this.loggingin = false;
-                this.error = '';
-                this.registering = false;
-                this.registered = true;
+                this._notificationService.notify(this.user.email, this.template, this.subject).subscribe(() => {
+                  this.loggingin = false;
+                  this.error = '';
+                  this.registering = false;
+                  this.registered = true;
+                });
               }).catch(err => console.log(err));
           }).catch(err => this.handleErrors(err));
       } else {
