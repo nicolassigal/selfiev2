@@ -21,18 +21,10 @@ export class DashboardComponent implements OnInit {
     private dataService: DataService,
     private _route: ActivatedRoute,
     private _sidenavService: SidenavService,
-    private _dialog: MatDialog,
-    private _notificationService: NotificationService
+    private _dialog: MatDialog
   ) { }
 
   ngOnInit() {
-    const body = `
-      <article>
-        <h1>Heey !!!!</h1>
-        <h2>Yooooou!!</h2>
-      </article>
-    `;
-    this._notificationService.notify('nicolas.sigal@gmail.com', body, 'hey you!').subscribe(res => console.log('notify! ', res));
     this._db.collection('users', ref => ref.orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(customers => {
