@@ -37,10 +37,10 @@ export class NotificationService {
             </div>
             <footer>
                 <p>
-                Arregui 6395 | Tercer Piso "C" | CABA (1408) 
-            </p>   
+                Arregui 6395 | Tercer Piso "C" | CABA (1408)
+            </p>
             <p>
-                155311-6210 | 153168-8888 
+                155311-6210 | 153168-8888
             </p>
             <p>
               <a href="https://tucourier.com.ar/">www.tucourier.com.ar</a>
