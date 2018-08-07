@@ -21,7 +21,7 @@ export class WarehousesComponent implements OnInit, OnDestroy {
   operations = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, type: '', cell: (element) => `${element.actions}` },
-    { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
+    { columnDef: 'id', header: 'WH ID', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
     { columnDef: 'box_qty', header: 'Total Qty.', type: '', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'profit', header: 'Profit', type: 'value', cell: (element) => `${element.profit ? element.profit : ''}` },

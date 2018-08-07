@@ -19,7 +19,7 @@ export class CouriersComponent implements OnInit, OnDestroy {
   tableData = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, type: '', cell: (element) => `${element.actions}` },
-    { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
+    { columnDef: 'id', header: 'Cour. ID', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` }
   ];
   constructor(private _db: AngularFirestore,

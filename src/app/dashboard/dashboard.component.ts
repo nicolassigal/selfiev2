@@ -38,19 +38,27 @@ export class DashboardComponent implements OnInit {
     .valueChanges()
     .subscribe(stock => this.dataService.setStock(stock));
 
-    this._db.collection('warehouses', ref => ref.orderBy('name', 'asc'))
+    this._db.collection('warehouses', ref => ref
+    .where('deleted', '==', 0)
+    .orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(warehouses => this.dataService.setWarehouses(warehouses));
 
-    this._db.collection('couriers', ref => ref.orderBy('name', 'asc'))
+    this._db.collection('couriers', ref => ref
+    .where('deleted', '==', 0)
+    .orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(couriers => this.dataService.setCouriers(couriers));
 
-    this._db.collection('awbs', ref => ref.orderBy('id', 'asc'))
+    this._db.collection('awbs', ref => ref
+    .where('deleted', '==', 0)
+    .orderBy('id', 'asc'))
     .valueChanges()
     .subscribe(awbs => this.dataService.setAwbs(awbs));
 
-    this._db.collection('delivered', ref => ref.orderBy('hbr_id', 'desc'))
+    this._db.collection('delivered', ref => ref
+    .where('deleted', '==', 0)
+    .orderBy('hbr_id', 'desc'))
     .valueChanges()
     .subscribe(delivered => this.dataService.setDelivered(delivered));
 

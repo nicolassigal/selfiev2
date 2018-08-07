@@ -56,7 +56,7 @@ export class TransitComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._sidenav.setTitle('In Transit');
-    this.cols.push({ columnDef: 'id', header: 'Id', cell: (element) => `${element.id}` },
+    this.cols.push({ columnDef: 'id', header: 'Trans. ID', cell: (element) => `${element.id}` },
     { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', cell: (element) => `${element.box_qty ? element.box_qty : ''}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : ''}` },

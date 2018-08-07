@@ -23,7 +23,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   warehouses = [];
   cols = [
     { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, type: '', cell: (element) => `${element.actions}` },
-    { columnDef: 'id', header: 'Id', type: '', cell: (element) => `${element.id}` },
+    { columnDef: 'id', header: 'User ID', type: '', cell: (element) => `${element.id}` },
     { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
     { columnDef: 'tel', header: 'Phone', type: '', cell: (element) => `${element.tel ? element.tel : ''}` },
     { columnDef: 'address', header: 'Address', type: '', cell: (element) => `${element.address ? element.address : ''}` },

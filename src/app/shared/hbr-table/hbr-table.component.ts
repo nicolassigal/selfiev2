@@ -80,9 +80,9 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
     this.totalizer = { weight: 0, value: 0, quantity: 0, operations: 0 };
 
     data.map(row => {
-      this.totalizer.weight = Number(this.totalizer.weight) + Number(row.total_weight) || 0;
-      this.totalizer.value = Number(this.totalizer.value) + Number(row.profit)  || 0;
-      this.totalizer.quantity = Number(this.totalizer.quantity) + Number(row.box_qty)  || 0
+      this.totalizer.weight = Number(this.totalizer.weight) + (!isNaN(row.total_weight) ? Number(row.total_weight) : 0);
+      this.totalizer.value = Number(this.totalizer.value) + (!isNaN(row.profit) ? Number(row.profit) : 0);
+      this.totalizer.quantity = Number(this.totalizer.quantity) + (!isNaN(row.box_qty) ? Number(row.box_qty) : 0);
     });
 
     this.totalizer.weight = this.totalizer.weight.toFixed(2);
