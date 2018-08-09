@@ -9,6 +9,9 @@ import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
 import { Router } from '@angular/router';
 import { SidenavService } from '../../app-sidenav/sidenav.service';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import * as _moment from 'moment';
 
 @Component({
   selector: 'app-users',
@@ -17,6 +20,7 @@ import { SidenavService } from '../../app-sidenav/sidenav.service';
 })
 export class UsersComponent implements OnInit, OnDestroy {
   loadingData = false;
+  moment = _moment;
   data = [];
   tableData = [];
   roles = [];
@@ -128,4 +132,22 @@ export class UsersComponent implements OnInit, OnDestroy {
       })).join(' ');
     }
   }
+
+  download = () => {
+    const users = JSON.parse(JSON.stringify(this.tableData));
+    const today = this.moment().format('DD_MM_YYYY');
+    const worksheet: any = XLSX.utils.json_to_sheet(users.sort((row1, row2) => Number(row1.id) - Number(row2.id)));
+    const workbook: any = { Sheets: { 'users': worksheet }, SheetNames: ['users'] };
+    const excelBuffer: any = XLSX.write(workbook, {bookType: 'xlsx', bookSST: true, type: 'binary'});
+    saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), `users_${today}.xlsx`);
+  }
+
+  s2ab = (s) => {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i != s.length; ++i) {
+      view[i] = s.charCodeAt(i) & 0xFF;
+    }
+    return buf;
+}
 }
