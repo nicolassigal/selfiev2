@@ -28,6 +28,8 @@ export class DashboardComponent implements OnInit {
     this._db.collection('users', ref => ref.orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(customers => {
+      localStorage.setItem('users', JSON.stringify(customers));
+      customers = customers.filter(customer => !customer['deleted'] || customer['deleted'] !== 1);
       this.firstLogin(customers);
       this.dataService.setCustomers(customers);
     });
@@ -42,15 +44,19 @@ export class DashboardComponent implements OnInit {
     .orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(warehouses => {
+      localStorage.setItem('warehouses', JSON.stringify(warehouses));
       warehouses = warehouses.filter(warehouse => !warehouse['deleted'] || warehouse['deleted'] !== 1);
       this.dataService.setWarehouses(warehouses);
     });
 
     this._db.collection('couriers', ref => ref
-    .where('deleted', '==', 0)
     .orderBy('name', 'asc'))
     .valueChanges()
-    .subscribe(couriers => this.dataService.setCouriers(couriers));
+    .subscribe(couriers => {
+      localStorage.setItem('couriers', JSON.stringify(couriers));
+      couriers = couriers.filter(courier => !courier['deleted'] || courier['deleted'] !== 1);
+      this.dataService.setCouriers(couriers);
+    });
 
     this._db.collection('awbs', ref => ref
     .orderBy('id', 'asc'))
@@ -68,11 +74,17 @@ export class DashboardComponent implements OnInit {
 
     this._db.collection('status')
     .valueChanges()
-    .subscribe(status => this.dataService.setStatus(status));
+    .subscribe(status => {
+      localStorage.setItem('status', JSON.stringify(status));
+      this.dataService.setStatus(status);
+    });
 
     this._db.collection('roles')
     .valueChanges()
-    .subscribe(roles => this.dataService.setRoles(roles));
+    .subscribe(roles => {
+      localStorage.setItem('roles', JSON.stringify(roles));
+      this.dataService.setRoles(roles);
+    });
   }
 
   firstLogin = (users) => {

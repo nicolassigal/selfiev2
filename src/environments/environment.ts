@@ -21,3 +21,15 @@ export const environment = {
  * because it will have performance impact when throw error
  */
 // import 'zone.js/dist/zone-error';  // Included with Angular CLI.
+
+
+/*
+   firebase: {
+    apiKey: 'AIzaSyDvd1ICC_m01qEhLv-TjE7D_RQ1taQ_1vo',
+    authDomain: 'selfie-v2-dev.firebaseapp.com',
+    databaseURL: 'https://selfie-v2-dev.firebaseio.com',
+    projectId: 'selfie-v2-dev',
+    storageBucket: 'selfie-v2-dev.appspot.com',
+    messagingSenderId: '532258695559'
+  }
+ */

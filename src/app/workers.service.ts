@@ -11,7 +11,7 @@ private xlsxWorker = `
     if(e.data.msg === "Start Worker") {
         var prodUrl = e.data.url + '/selfie-v2/xlsx/xlsx.full.min.js';
         var devUrl = e.data.url + '/xlsx/xlsx.full.min.js';
-        importScripts(devUrl);
+        importScripts(prodUrl);
         let wb = XLSX.read(e.data.bstr, {type: 'binary'});
         let wsname = wb.SheetNames[0];
         let ws = wb.Sheets[wsname];
