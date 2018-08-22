@@ -19,7 +19,6 @@ import * as _moment from 'moment';
 import { DeleteStockDialogComponent } from './dialogs/delete/delete.component';
 import { take, takeUntil } from 'rxjs/operators';
 import { componentDestroyed } from 'ng2-rx-componentdestroyed';
-import * as firebase from 'firebase';
 import { SidenavService } from '../app-sidenav/sidenav.service';
 
 @Component({
@@ -175,7 +174,7 @@ export class StockComponent implements OnInit, OnDestroy {
       }
       data = data.filter(row => row.delivered === 0);
     this.loadingData = false;
-    
+
     if(this._route.snapshot.data.filter === 'warehouse') {
       this._route.params.subscribe(params => {
         data = data.filter(row => row.wh_id == params.id);

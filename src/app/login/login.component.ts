@@ -1,6 +1,5 @@
 import { DataService } from './../shared/data.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import * as firebase from 'firebase';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router } from '@angular/router';
 import { AuthService } from '../shared/auth.service';

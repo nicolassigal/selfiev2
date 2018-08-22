@@ -2,7 +2,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 import { take } from 'rxjs/operators';
 import { DataService } from '../../../../shared/data.service';
 @Component({

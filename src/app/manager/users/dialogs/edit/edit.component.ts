@@ -5,7 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { UtilsService } from '../../../../shared/utils.service';
 import { Http, RequestOptions, Headers } from '@angular/http';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 @Component({
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.scss']

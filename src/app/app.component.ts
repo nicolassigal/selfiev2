@@ -1,6 +1,6 @@
 import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 import { environment } from '../environments/environment';
 @Component({
   selector: 'app-root',
@@ -9,10 +9,10 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent implements OnInit {
   secondaryApp;
-  
+
   ngOnInit() {
     if(!this.secondaryApp) {
-      this.secondaryApp = firebase.initializeApp(environment.firebase, "Secondary");
+      this.secondaryApp = firebase.initializeApp(environment.firebase, 'Secondary');
     }
   }
 }
