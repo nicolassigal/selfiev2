@@ -9,7 +9,9 @@ export class WorkersService {
 private xlsxWorker = `
   self.addEventListener("message", (e) => {
     if(e.data.msg === "Start Worker") {
-        importScripts(e.data.url + '/selfie-v2/xlsx/xlsx.full.min.js');
+        var prodUrl = e.data.url + '/selfie-v2/xlsx/xlsx.full.min.js';
+        var devUrl = e.data.url + '/xlsx/xlsx.full.min.js';
+        importScripts(devUrl);
         let wb = XLSX.read(e.data.bstr, {type: 'binary'});
         let wsname = wb.SheetNames[0];
         let ws = wb.Sheets[wsname];
@@ -29,6 +31,7 @@ private checkDBWorker = `
         let xls = e.data.xlsData;
         let db = e.data.dbData;
         let delivered = e.data.delivered;
+        let transit = e.data.transit;
         if (db.length) {
             toStorage = xls.filter(row => (!db.some(entry => +row.hbr_id === +entry.hbr_id) || row.update == 1) );
         } else {
@@ -36,6 +39,10 @@ private checkDBWorker = `
         }
         if(delivered.length) {
           toStorage = toStorage.filter(row => !delivered.some(entry => +row.hbr_id === +entry.hbr_id));
+        }
+
+        if(transit.length) {
+          toStorage = toStorage.filter(entry => !transit.some(awb => awb['processes'].some(process => +process.hbr_id === +entry.hbr_id)));
         }
         self.postMessage(JSON.stringify(toStorage));
     }

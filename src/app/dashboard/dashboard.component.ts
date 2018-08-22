@@ -39,10 +39,12 @@ export class DashboardComponent implements OnInit {
     .subscribe(stock => this.dataService.setStock(stock));
 
     this._db.collection('warehouses', ref => ref
-    .where('deleted', '==', 0)
     .orderBy('name', 'asc'))
     .valueChanges()
-    .subscribe(warehouses => this.dataService.setWarehouses(warehouses));
+    .subscribe(warehouses => {
+      warehouses = warehouses.filter(warehouse => !warehouse['deleted'] || warehouse['deleted'] !== 1);
+      this.dataService.setWarehouses(warehouses);
+    });
 
     this._db.collection('couriers', ref => ref
     .where('deleted', '==', 0)
@@ -51,10 +53,12 @@ export class DashboardComponent implements OnInit {
     .subscribe(couriers => this.dataService.setCouriers(couriers));
 
     this._db.collection('awbs', ref => ref
-    .where('deleted', '==', 0)
     .orderBy('id', 'asc'))
     .valueChanges()
-    .subscribe(awbs => this.dataService.setAwbs(awbs));
+    .subscribe(awbs => {
+      awbs = awbs.filter(awb => !awb['deleted'] || awb['deleted'] !== 1);
+      this.dataService.setAwbs(awbs);
+    });
 
     this._db.collection('delivered', ref => ref
     .where('deleted', '==', 0)

@@ -35,6 +35,7 @@ export class StockComponent implements OnInit, OnDestroy {
   moment = _moment;
   customers = [];
   delivered = [];
+  transit = [];
   couriers = [];
   warehouses = [];
   isMakingChangesOnData = false;
@@ -81,6 +82,7 @@ export class StockComponent implements OnInit, OnDestroy {
     this.customers = this._dataService.getCustomers();
     this.tableData = this._dataService.getStock();
     this.delivered = this._dataService.getDelivered();
+    this.transit = this._dataService.getAwbs();
     this.role = this._authService.getRole();
     if (!this.tableData.length) {
       this.loadingData = true;
@@ -88,6 +90,14 @@ export class StockComponent implements OnInit, OnDestroy {
     this._dataService.warehouseSubject
     .pipe(takeUntil(componentDestroyed(this)))
     .subscribe(warehouses => this.warehouses = warehouses);
+
+    this._dataService.deliveredSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(delivered => this.delivered = delivered);
+
+    this._dataService.awbsSubject
+    .pipe(takeUntil(componentDestroyed(this)))
+    .subscribe(awbs => this.transit = awbs);
 
     this._dataService.couriersSubject
     .pipe(takeUntil(componentDestroyed(this)))
@@ -224,7 +234,7 @@ export class StockComponent implements OnInit, OnDestroy {
   }
 
   prepareData = (data, xls) => {
-    const msgToWorker = { msg: 'Start Worker', xlsData: xls, dbData: data, delivered: this.delivered };
+    const msgToWorker = { msg: 'Start Worker', xlsData: xls, dbData: data, delivered: this.delivered, transit: this.transit };
     this.infoService.showMessage(`
     <ul>
       <li><p>Getting data... Finished </p></li>
@@ -235,7 +245,8 @@ export class StockComponent implements OnInit, OnDestroy {
     this._worker.createWorker(this._worker.getUniqueDBWorker());
     this._worker.postMessageToWorker(msgToWorker);
     this._worker.worker.addEventListener('message', (response) => {
-      this._worker.terminateWorker();
+      console.log(response);
+     /* this._worker.terminateWorker();
       const result = JSON.parse(response.data);
       if (result.length) {
         this.addEntry(result);
@@ -248,7 +259,7 @@ export class StockComponent implements OnInit, OnDestroy {
         </ul>
         `);
         setTimeout(this.finishProccesing, 3000);
-      }
+      }*/
     });
   }
 
