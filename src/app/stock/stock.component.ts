@@ -206,6 +206,7 @@ export class StockComponent implements OnInit, OnDestroy {
         const msgToWorker = {
           url: `${document.location.protocol}//${document.location.host}`,
           msg: 'Start Worker',
+          prod: JSON.parse(sessionStorage.getItem('prod')),
           bstr: bstr
         };
 
@@ -244,8 +245,7 @@ export class StockComponent implements OnInit, OnDestroy {
     this._worker.createWorker(this._worker.getUniqueDBWorker());
     this._worker.postMessageToWorker(msgToWorker);
     this._worker.worker.addEventListener('message', (response) => {
-      console.log(response);
-     /* this._worker.terminateWorker();
+     this._worker.terminateWorker();
       const result = JSON.parse(response.data);
       if (result.length) {
         this.addEntry(result);
@@ -258,7 +258,7 @@ export class StockComponent implements OnInit, OnDestroy {
         </ul>
         `);
         setTimeout(this.finishProccesing, 3000);
-      }*/
+      }
     });
   }
 

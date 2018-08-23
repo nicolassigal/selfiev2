@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit {
     this._db.collection('users', ref => ref.orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(customers => {
-      localStorage.setItem('users', JSON.stringify(customers));
+      // localStorage.setItem('users', JSON.stringify(customers));
       customers = customers.filter(customer => !customer['deleted'] || customer['deleted'] !== 1);
       this.firstLogin(customers);
       this.dataService.setCustomers(customers);
@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
     .orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(warehouses => {
-      localStorage.setItem('warehouses', JSON.stringify(warehouses));
+      // localStorage.setItem('warehouses', JSON.stringify(warehouses));
       warehouses = warehouses.filter(warehouse => !warehouse['deleted'] || warehouse['deleted'] !== 1);
       this.dataService.setWarehouses(warehouses);
     });
@@ -53,7 +53,7 @@ export class DashboardComponent implements OnInit {
     .orderBy('name', 'asc'))
     .valueChanges()
     .subscribe(couriers => {
-      localStorage.setItem('couriers', JSON.stringify(couriers));
+      // localStorage.setItem('couriers', JSON.stringify(couriers));
       couriers = couriers.filter(courier => !courier['deleted'] || courier['deleted'] !== 1);
       this.dataService.setCouriers(couriers);
     });
@@ -75,16 +75,42 @@ export class DashboardComponent implements OnInit {
     this._db.collection('status')
     .valueChanges()
     .subscribe(status => {
-      localStorage.setItem('status', JSON.stringify(status));
+     // localStorage.setItem('status', JSON.stringify(status));
       this.dataService.setStatus(status);
     });
 
     this._db.collection('roles')
     .valueChanges()
     .subscribe(roles => {
-      localStorage.setItem('roles', JSON.stringify(roles));
+     // localStorage.setItem('roles', JSON.stringify(roles));
       this.dataService.setRoles(roles);
     });
+
+
+    /*let userArray = [];
+    let users = JSON.parse(localStorage.getItem('users'));
+    users.map(user => userArray.push(this._db.collection('users').doc(`${user.id}`).set(user)));
+    Promise.all(userArray).then(res => console.log(res));
+
+    let whArray = [];
+    let whs = JSON.parse(localStorage.getItem('warehouses'));
+    whs.map(wh => whArray.push(this._db.collection('warehouses').doc(`${wh.id}`).set(wh)));
+    Promise.all(whArray).then(res => console.log(res));
+
+    let rolesArray = [];
+    let roles = JSON.parse(localStorage.getItem('roles'));
+    roles.map(role => rolesArray.push(this._db.collection('roles').doc(`${role.id}`).set(role)));
+    Promise.all(rolesArray).then(res => console.log(res));
+
+    let couriersArray = [];
+    let couriers = JSON.parse(localStorage.getItem('couriers'));
+    couriers.map(courier => couriersArray.push(this._db.collection('couriers').doc(`${courier.id}`).set(courier)));
+    Promise.all(couriersArray).then(res => console.log(res));
+
+    let statusArray = [];
+    let status = JSON.parse(localStorage.getItem('status'));
+    status.map(st => statusArray.push(this._db.collection('status').doc(`${st.id}`).set(st)));
+    Promise.all(statusArray).then(res => console.log(res));*/
   }
 
   firstLogin = (users) => {

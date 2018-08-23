@@ -11,6 +11,7 @@ export class AppComponent implements OnInit {
   secondaryApp;
 
   ngOnInit() {
+    sessionStorage.setItem('prod', JSON.stringify(environment.production));
     if(!this.secondaryApp) {
       this.secondaryApp = firebase.initializeApp(environment.firebase, 'Secondary');
     }
