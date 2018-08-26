@@ -44,7 +44,7 @@ export class WHOverviewComponent implements OnInit, OnDestroy {
         this.warehouses.map(wh => {
           this.warehousesLabel.push(wh.name);
           this.qtyChartData.push(wh.box_qty);
-          this.valueChartData.push(wh.profit);
+          this.valueChartData.push(wh.profit.toFixed(2));
           this.weightChartData.push(wh.total_weight);
           if (!isNaN(Number(wh.box_qty))) {
             this.total_qty = Number(this.total_qty) + Number(wh.box_qty);

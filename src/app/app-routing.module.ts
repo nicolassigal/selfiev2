@@ -29,6 +29,7 @@ const routes: Routes = [
       { path: 'warehouses-overview', component: WHOverviewComponent, data: { title: 'Warehouses Overview', authLevel: [2] }},
       { path: 'couriers', component: CouriersComponent, data: { title: 'Manage Couriers', authLevel: [2] }},
       { path: 'deep-search', component: DeepSearchComponent, data: { title: 'Deep Search', authLevel: [2] }},
+      { path: 'deep-search/:query/:id', component: DeepSearchComponent, data: { title: 'Deep Search', authLevel: [2] }},
       { path: '**', redirectTo: '/dashboard', pathMatch: 'full' }
     ]
   },

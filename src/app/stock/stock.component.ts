@@ -360,7 +360,7 @@ export class StockComponent implements OnInit, OnDestroy {
 
     customerBatch.commit()
       .catch(err => console.log('error on adding customers', err));
-    let nextId = Number(this.tableData[0].hbr_id) + 1;
+    let nextId = Number(this.tableData.length ? this.tableData[0].hbr_id : 0) + 1;
     data.map(entry => {
       entry.deleted = 0;
       entry.initial_qty = Number(entry.initial_qty);
