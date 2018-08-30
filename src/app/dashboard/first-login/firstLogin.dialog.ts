@@ -29,6 +29,7 @@ export class FirstLoginDialogComponent implements OnInit {
     secondaryApp = firebase.app('Secondary');
     users = [];
     editing = false;
+    change_pwd = false;
     password;
     password2;
     oldPassword;
@@ -45,8 +46,11 @@ export class FirstLoginDialogComponent implements OnInit {
   ngOnInit() {
     this.user = {...this.data.user};
     this.users = [...this.data.users];
-    this.user.username = null;
-    this.user.email = null;
+    this.change_pwd = this.data.change_pwd;
+    if (!this.change_pwd) {
+      this.user.username = null;
+      this.user.email = null;
+    }
   }
 
 
@@ -57,7 +61,7 @@ export class FirstLoginDialogComponent implements OnInit {
   update = () => {
     this.editing = true;
     const exists = this.users.some(user => user.username === this.user.username || user.email === this.user.username);
-    if(!exists) {
+    if (!exists) {
         this.errors = '';
         if (this.password && this.password2 && this.password === this.password2) {
             this.secondaryApp.auth().signInWithEmailAndPassword(this.data.user.username, this.oldPassword).then(res => {
@@ -90,7 +94,7 @@ export class FirstLoginDialogComponent implements OnInit {
             }).catch(err => {
               this.editing = false;
               console.log(err);
-              if (err.code == 'auth/wrong-password') {
+              if (err.code === 'auth/wrong-password') {
                 this.errors = 'invalid old password';
               }
             });

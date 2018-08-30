@@ -14,6 +14,8 @@ import { saveAs } from 'file-saver';
 import * as _moment from 'moment';
 import { WorkersService } from 'src/app/workers.service';
 import { InfoService } from 'src/app/info/info.service';
+import { UtilsService } from '../../shared/utils.service';
+import { AuthService } from '../../shared/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -48,6 +50,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     private _dataService: DataService,
     private _router: Router,
     private _sidenav: SidenavService,
+    private _utils: UtilsService,
+    private _authService: AuthService,
     private _dialog: MatDialog) { }
 
   ngOnInit() {
@@ -90,7 +94,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       const rowRole = row.role || 0;
       const role = this.roles.filter(role => role['id'] == rowRole)[0];
       row.role_name = role && role.name ? role.name : null;
-      let wh_id = row.wh_id || null;
+      const wh_id = row.wh_id || null;
       row.warehouse = wh_id ? this.warehouses.filter(wh => wh['id'] == wh_id)[0] :  null;
       row.wh_name = row.warehouse ? row.warehouse['name'] : null;
     });
@@ -206,8 +210,55 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   addEntry = (data) => {
+    console.log('DATA', data);
     const customerBatch = this._db.firestore.batch();
     const chunk_size = 250;
+    this.infoService.showMessage(`
+    <ul>
+      <li><p>Getting data... Finished </p></li>
+      <li><p>Preparing data... Finished </p></li>
+      <li><p>Updating ${data.length} new entries... please wait </p></li>
+    </ul>
+    `);
+
+    data.map(customer => {
+      if (customer) {
+        const updateUsernameArray = [];
+        const tbDataCustomer = this.tableData.filter(cs => cs.id === customer.id)[0];
+        customer.id = customer.id ? customer.id : this._utils.getId(this.tableData);
+        customer.username = customer.username ? customer.username : `username_${customer.id}@tucourier.com.ar`;
+        customer.email = customer.username;
+        customer.password = `password_${customer.id}`;
+        customer.changed_pwd = customer.changed_pwd ? true : false;
+        customer.role = customer.role ? customer.role : 0;
+        if (!customer.update) {
+          this._authService._addUser(customer.username, customer.password).subscribe();
+        }
+        if (customer.update && tbDataCustomer && tbDataCustomer.username !== customer.username) {
+          updateUsernameArray.push(this._authService.updateUsername(tbDataCustomer.username, customer.username, tbDataCustomer.password));
+        }
+
+        const ref = this._db.collection('users').doc(`${customer.id}`).ref;
+        customerBatch.set(ref, customer);
+
+        if (updateUsernameArray.length) {
+          Promise.all(updateUsernameArray)
+          .then(res => console.log(res))
+          .catch(err => console.log(err));
+        }
+      }
+    });
+
+    customerBatch.commit().then(res => {
+      this.infoService.showMessage(`
+      <ul>
+        <li><p>Getting data... Finished </p></li>
+        <li><p>Preparing data... Finished </p></li>
+        <li><p>Updating ${data.length} new entries... Finished</p></li>
+      </ul>
+      `);
+      this.finishProccesing();
+    });
   }
 
   finishProccesing = () => {
@@ -216,7 +267,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   download = () => {
-    let users = JSON.parse(JSON.stringify(this.tableData));
+    const users = JSON.parse(JSON.stringify(this.tableData));
     users.map(user => {
       delete user.password;
       delete user.changed_pwd;
@@ -241,6 +292,8 @@ export class UsersComponent implements OnInit, OnDestroy {
         'products',
         'role',
         'role_name',
+        'ask_change_pwd',
+        'updated_info',
         'deleted'
       ]
     });

@@ -8,34 +8,34 @@
       <div class="form-container">
         <mat-form-field>
           <input type="email" required autocomplete="off" matInput placeholder="E-mail" [(ngModel)]="user.username" name="email" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" required autocomplete="off" matInput placeholder="Name" [(ngModel)]="user.name" name="name" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" autocomplete="off" matInput placeholder="Cuit" [(ngModel)]="user.cuit" name="cuit" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" required autocomplete="off" matInput placeholder="Tel" [(ngModel)]="user.tel" name="tel" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" required autocomplete="off" matInput placeholder="Address" [(ngModel)]="user.address" name="address" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" required autocomplete="off" matInput placeholder="City" [(ngModel)]="user.city" name="city" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field>
           <input type="text" required autocomplete="off" matInput placeholder="Country" [(ngModel)]="user.country" name="country" class="example-right-align"
-            [disabled]="editing">
+            [disabled]="editing || change_pwd">
         </mat-form-field>
         <mat-form-field *ngIf="user.wh_id || user.role === 1">
-            <mat-select [required]="user.role === 1" placeholder="Warehouse" name="wh" [(ngModel)]="user.wh_id" [disabled]="editing">
+            <mat-select [required]="user.role === 1" placeholder="Warehouse" name="wh" [(ngModel)]="user.wh_id" [disabled]="editing || change_pwd">
               <mat-option *ngFor="let wh of warehouses" [value]="wh.id"> {{ wh.name }} </mat-option>
             </mat-select>
           </mat-form-field>
@@ -52,7 +52,7 @@
             class="example-right-align" [disabled]="editing">
         </mat-form-field>
       </div>
-  
+
       <div *ngIf="errors" class="error">
         <span>{{errors}}</span>
       </div>
@@ -61,5 +61,5 @@
       <button mat-button type="submit" [disabled]="editing">{{ data.confirmBtn }}</button>
       <button mat-button (click)="backToLogin()" [disabled]="editing">{{ data.cancelBtn }}</button>
     </mat-dialog-actions>
-  
+
   </form>
