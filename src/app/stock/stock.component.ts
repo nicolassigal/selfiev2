@@ -431,7 +431,6 @@ export class StockComponent implements OnInit, OnDestroy {
     }
   }
 
-
   download = () => {
     const today = this.moment().format('DD_MM_YYYY');
     console.log(today);

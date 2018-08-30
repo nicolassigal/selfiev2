@@ -55,6 +55,27 @@ private checkDBWorker = `
   });
 `;
 
+private checkWorkerById = `
+ self.addEventListener("message", (e) => {
+    if(e.data.msg === "Start Worker") {
+        let toStorage;
+        let xls = e.data.xlsData;
+        let db = e.data.dbData;
+        if (db.length) {
+            toStorage = xls.filter(row => (!db.some(entry => +row.id === +entry.id) || row.update == 1) );
+        } else {
+          toStorage = xls;
+        }
+
+        self.postMessage(JSON.stringify(toStorage));
+    }
+    if(e.data.msg === "Stop Worker") {
+        self.removeEventListener("message");
+        self.close();
+    }
+  });
+`;
+
   constructor() { }
 
   createWorker(workerFunction) {
@@ -79,5 +100,9 @@ private checkDBWorker = `
 
   getUniqueDBWorker = () => {
     return this.checkDBWorker;
+  }
+
+  getWorkerbyId = () => {
+    return this.checkWorkerById;
   }
 }

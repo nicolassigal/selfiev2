@@ -12,6 +12,8 @@ import { SidenavService } from '../../app-sidenav/sidenav.service';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import * as _moment from 'moment';
+import { WorkersService } from 'src/app/workers.service';
+import { InfoService } from 'src/app/info/info.service';
 
 @Component({
   selector: 'app-users',
@@ -23,6 +25,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   moment = _moment;
   data = [];
   tableData = [];
+  fileUploader = '';
   roles = [];
   warehouses = [];
   cols = [
@@ -39,6 +42,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     { columnDef: 'wh_name', header: 'Wh', type: '', cell: (element) => `${element.wh_name ? element.wh_name : ''}` },
   ];
   constructor(private _db: AngularFirestore,
+    private _worker: WorkersService,
+    private infoService: InfoService,
     private tbService: TableService,
     private _dataService: DataService,
     private _router: Router,
@@ -86,7 +91,8 @@ export class UsersComponent implements OnInit, OnDestroy {
       const role = this.roles.filter(role => role['id'] == rowRole)[0];
       row.role_name = role && role.name ? role.name : null;
       let wh_id = row.wh_id || null;
-      row.wh_name = wh_id ? this.warehouses.filter(wh => wh['id'] == wh_id)[0]['name'] : null;
+      row.warehouse = wh_id ? this.warehouses.filter(wh => wh['id'] == wh_id)[0] :  null;
+      row.wh_name = row.warehouse ? row.warehouse['name'] : null;
     });
     this.loadingData = false;
     this.tableData = data;
@@ -133,10 +139,111 @@ export class UsersComponent implements OnInit, OnDestroy {
     }
   }
 
+  parseXLS = (evt: any) => {
+    if (evt.target.files) {
+      const target: DataTransfer = <DataTransfer>(evt.target);
+      const reader: FileReader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const bstr: string = e.target.result;
+        const msgToWorker = {
+          url: `${document.location.protocol}//${document.location.host}`,
+          msg: 'Start Worker',
+          prod: JSON.parse(sessionStorage.getItem('prod')),
+          bstr: bstr
+        };
+
+        this.infoService.showMessage(`<ul><li><p>Getting data... Please Wait</p></li></ul>`);
+
+        this._worker.createWorker(this._worker.getXlsxWorker());
+        this._worker.postMessageToWorker(msgToWorker);
+        this._worker.worker.addEventListener('message', (response) => {
+          this.infoService.showMessage(`<ul><li><p>Getting data... Finished </p></li></ul>`);
+          this._worker.terminateWorker();
+          const data = this.tableData.length ? this.tableData : [];
+          data.map(row => {
+            Object.keys(row).filter(obj => {
+              if (obj.indexOf('__EMPTY') > -1) {
+                  delete row[obj];
+              }
+           });
+          });
+          this.prepareData(data, JSON.parse(response.data));
+        });
+      };
+
+      reader.readAsBinaryString(target.files[0]);
+    }
+  }
+
+  prepareData = (data, xls) => {
+    const msgToWorker = { msg: 'Start Worker', xlsData: xls, dbData: data };
+    this.infoService.showMessage(`
+    <ul>
+      <li><p>Getting data... Finished </p></li>
+      <li><p>Preparing data... Please wait </p></li>
+    </ul>
+    `);
+
+    this._worker.createWorker(this._worker.getWorkerbyId());
+    this._worker.postMessageToWorker(msgToWorker);
+    this._worker.worker.addEventListener('message', (response) => {
+     this._worker.terminateWorker();
+      const result = JSON.parse(response.data);
+      if (result.length) {
+        this.addEntry(result);
+      } else {
+        this.infoService.showMessage(`
+        <ul>
+          <li><p>Getting data... Finished </p></li>
+          <li><p>Preparing data... Finished </p></li>
+          <li><p>Nothing to update. </p></li>
+        </ul>
+        `);
+        setTimeout(this.finishProccesing, 3000);
+      }
+    });
+  }
+
+  addEntry = (data) => {
+    const customerBatch = this._db.firestore.batch();
+    const chunk_size = 250;
+  }
+
+  finishProccesing = () => {
+    this.fileUploader = '';
+    setTimeout(this.infoService.hideMessage, 3000);
+  }
+
   download = () => {
-    const users = JSON.parse(JSON.stringify(this.tableData));
+    let users = JSON.parse(JSON.stringify(this.tableData));
+    users.map(user => {
+      delete user.password;
+      delete user.changed_pwd;
+      delete user.updatedInfo;
+    });
     const today = this.moment().format('DD_MM_YYYY');
-    const worksheet: any = XLSX.utils.json_to_sheet(users.sort((row1, row2) => Number(row1.id) - Number(row2.id)));
+    const worksheet: any = XLSX.utils.json_to_sheet(users.sort((row1, row2) => Number(row1.id) - Number(row2.id)), {
+      header: [
+        'update',
+        'id',
+        'name',
+        'email',
+        'username',
+        'wh_id',
+        'wh_name',
+        'tel',
+        'cuit',
+        'address',
+        'city',
+        'country',
+        'contact_name',
+        'products',
+        'role',
+        'role_name',
+        'deleted'
+      ]
+    });
     const workbook: any = { Sheets: { 'users': worksheet }, SheetNames: ['users'] };
     const excelBuffer: any = XLSX.write(workbook, {bookType: 'xlsx', bookSST: true, type: 'binary'});
     saveAs(new Blob([this.s2ab(excelBuffer)], {type: 'application/octet-stream'}), `users_${today}.xlsx`);

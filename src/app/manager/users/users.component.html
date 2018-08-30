@@ -1,16 +1,23 @@
 <div class="users" *ngIf="!loadingData">
     <form>
+            <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
         <div class="btn-container">
-            <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add')" class="btn-desktop">
-                <mat-icon>add</mat-icon>
-                Add
+            <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop">
+                <mat-icon>cloud_upload</mat-icon>
+                Upload File
             </button>
             <button mat-raised-button color="primary" (click)="download()" class="btn-desktop">
                 <mat-icon>cloud_download</mat-icon>
                 Download
             </button>
+            <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add')" class="btn-desktop">
+                <mat-icon>add</mat-icon>
+                Add
+            </button>
         </div>
         <div class="btn-container-mobile">
+            <mat-icon  (click)="file.click()" aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
+            <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
             <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
         </div>
     </form>
