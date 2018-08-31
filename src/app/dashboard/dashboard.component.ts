@@ -116,12 +116,13 @@ export class DashboardComponent implements OnInit {
   firstLogin = (users) => {
     const email = this._auth.auth.currentUser.email;
     const existingUser = users.filter(user => user.username === email)[0];
-    if (existingUser && (!existingUser.updatedInfo || existingUser['ask_change_pwd'])) {
+    if (existingUser && (!existingUser.updatedInfo || existingUser['ask_change_info'] || existingUser['ask_change_pwd'])) {
       this._dialog.open(FirstLoginDialogComponent, {
         data: {
           user: existingUser,
           users: users,
           change_pwd: existingUser.ask_change_pwd ? true : false,
+          change_info: existingUser.ask_change_info ? true : false,
           title: existingUser.ask_change_pwd ? `Action Required: Update your password` : `Action Required: Update your information`,
           confirmBtn: 'update',
           cancelBtn: 'Back to login'

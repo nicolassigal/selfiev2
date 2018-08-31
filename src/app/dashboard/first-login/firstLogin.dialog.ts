@@ -17,6 +17,8 @@ export class FirstLoginDialogComponent implements OnInit {
       password: '',
       id: null,
       updatedInfo: false,
+      ask_change_pwd: false,
+      ask_change_info: false,
       name: null,
       cuit: null,
       address: null,
@@ -30,6 +32,7 @@ export class FirstLoginDialogComponent implements OnInit {
     users = [];
     editing = false;
     change_pwd = false;
+    change_info = false;
     password;
     password2;
     oldPassword;
@@ -47,9 +50,10 @@ export class FirstLoginDialogComponent implements OnInit {
     this.user = {...this.data.user};
     this.users = [...this.data.users];
     this.change_pwd = this.data.change_pwd;
+    this.change_info = this.data.change_info;
+    this.password = this.data.user.password;
     if (!this.change_pwd) {
-      this.user.username = null;
-      this.user.email = null;
+      this.oldPassword = this.data.user.password;
     }
   }
 
@@ -58,54 +62,87 @@ export class FirstLoginDialogComponent implements OnInit {
     this._dialogRef.close();
   }
 
+  changePwd = () => {
+    this.editing = true;
+    this.errors = '';
+    if (this.password && this.password2 && this.password === this.password2) {
+      this.secondaryApp.auth().signInWithEmailAndPassword(this.data.user.username, this.oldPassword).then(res => {
+        this.updatePassword();
+      }).catch(err => {
+        this.editing = false;
+        console.log(err);
+        if (err.code === 'auth/wrong-password') {
+          this.errors = 'invalid old password';
+        }
+      });
+    } else {
+      this.editing = false;
+      this.errors = 'Please enter a valid password / password doesnt match';
+    }
+  }
+
   update = () => {
     this.editing = true;
-    const exists = this.users.some(user => user.username === this.user.username || user.email === this.user.username);
-    if (!exists) {
         this.errors = '';
-        if (this.password && this.password2 && this.password === this.password2) {
-            this.secondaryApp.auth().signInWithEmailAndPassword(this.data.user.username, this.oldPassword).then(res => {
-                this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
-                  this.secondaryApp.auth().currentUser.updatePassword(this.password).then(res => {
-                  this.secondaryApp.auth().signOut();
-                  this.user.password = this.password,
-                  this.user.updatedInfo = true;
-                  this.user.email = this.user.username;
-                  this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-                      .then(res => {
-                      this.editing = false;
-                      this.closeDialog();
-                      })
-                      .catch(err => {
+        if (!this.change_pwd || this.password && this.password2 && this.password === this.password2) {
+            if (this.data.user.username !== this.user.username) {
+              const exists = this.users.some(user => user.username === this.user.username || user.email === this.user.username);
+              if (!exists) {
+                this.secondaryApp.auth().signInWithEmailAndPassword(this.data.user.username, this.oldPassword).then(res => {
+                    this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
+                      this.updatePassword();
+                    }).catch(err => {
                       this.editing = false;
                       console.log(err);
                       this.errors = err.message;
-                      });
-                  }).catch(err => {
-                  this.editing = false;
-                  console.log(err);
-                  this.errors = err.message;
-                  });
+                    });
                 }).catch(err => {
                   this.editing = false;
                   console.log(err);
-                  this.errors = err.message;
+                  if (err.code === 'auth/wrong-password') {
+                    this.errors = 'invalid old password';
+                  }
                 });
-            }).catch(err => {
-              this.editing = false;
-              console.log(err);
-              if (err.code === 'auth/wrong-password') {
-                this.errors = 'invalid old password';
+              } else {
+                this.editing = false;
+                this.errors = 'E-mail already exists';
               }
-            });
+          } else {
+            this.updateInfo();
+          }
         } else {
           this.editing = false;
           this.errors = 'Please enter a valid password / password doesnt match';
         }
-    } else {
+  }
+
+  updateInfo = () => {
+    this.user.password = this.password,
+    this.user.updatedInfo = true;
+    this.user.ask_change_pwd = false;
+    this.user.ask_change_info = false;
+    this.user.email = this.user.username;
+    this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+        .then(res => {
+        this.editing = false;
+        this.closeDialog();
+        })
+        .catch(err => {
+        this.editing = false;
+        console.log(err);
+        this.errors = err.message;
+        });
+  }
+
+  updatePassword = () => {
+    this.secondaryApp.auth().currentUser.updatePassword(this.password).then(res => {
+      this.secondaryApp.auth().signOut();
+      this.updateInfo();
+    }).catch(err => {
       this.editing = false;
-      this.errors = 'E-mail already exists';
-    }
+      console.log(err);
+      this.errors = err.message;
+    });
   }
 
   backToLogin = () => {

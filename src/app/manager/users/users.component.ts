@@ -128,7 +128,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         confirmBtn: 'Delete',
         cancelBtn: 'Cancel'
       }, width: '500px'
-    })
+    });
   }
 
   onStockRoomEvent = (row) => {
@@ -225,12 +225,23 @@ export class UsersComponent implements OnInit, OnDestroy {
       if (customer) {
         const updateUsernameArray = [];
         const tbDataCustomer = this.tableData.filter(cs => cs.id === customer.id)[0];
+        if (customer.update) {
+          customer = {
+            ...tbDataCustomer,
+            ...customer
+          };
+        }
         customer.id = customer.id ? customer.id : this._utils.getId(this.tableData);
         customer.username = customer.username ? customer.username : `username_${customer.id}@tucourier.com.ar`;
         customer.email = customer.username;
-        customer.password = `password_${customer.id}`;
+        if (!customer.update) {
+          customer.password = `password_${customer.id}`;
+        }
         customer.changed_pwd = customer.changed_pwd ? true : false;
         customer.role = customer.role ? customer.role : 0;
+        if (customer.update && !customer.updatedInfo) {
+          customer.updatedInfo = false;
+        }
         if (!customer.update) {
           this._authService._addUser(customer.username, customer.password).subscribe();
         }
@@ -266,12 +277,28 @@ export class UsersComponent implements OnInit, OnDestroy {
     setTimeout(this.infoService.hideMessage, 3000);
   }
 
+  updateAndDownload = () => {
+    this._db.collection('users', ref => ref.orderBy('name', 'asc'))
+    .valueChanges()
+    .pipe(take(1))
+    .subscribe(customers => {
+      // localStorage.setItem('users', JSON.stringify(customers));
+      customers = customers.filter(customer => !customer['deleted'] || customer['deleted'] !== 1);
+      this._dataService.setCustomers(customers);
+      this.download();
+    });
+  }
+
   download = () => {
     const users = JSON.parse(JSON.stringify(this.tableData));
     users.map(user => {
       delete user.password;
       delete user.changed_pwd;
       delete user.updatedInfo;
+      delete user.ask_change_pwd;
+      delete user.ask_change_info;
+      delete user.updated_info;
+      delete user.update;
     });
     const today = this.moment().format('DD_MM_YYYY');
     const worksheet: any = XLSX.utils.json_to_sheet(users.sort((row1, row2) => Number(row1.id) - Number(row2.id)), {
@@ -293,7 +320,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         'role',
         'role_name',
         'ask_change_pwd',
-        'updated_info',
+        'ask_change_info',
         'deleted'
       ]
     });
