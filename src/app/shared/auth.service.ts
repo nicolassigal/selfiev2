@@ -5,6 +5,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { take, filter } from 'rxjs/operators';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import * as firebase from 'firebase/app';
+import { DataService } from './data.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
   constructor(private router: Router,
     private auth: AngularFireAuth,
     private _http: Http,
+    private _dataService: DataService,
     private _db: AngularFirestore) { }
 
   _setToken = (token, role) => {
@@ -93,6 +95,31 @@ export class AuthService {
         .catch( err => reject(err));
       })
       .catch( err => reject(err));
+    });
+  }
+
+  deleteUser = (user) => {
+    const operations = this._dataService.getStock();
+    const batch = this._db.firestore.batch();
+    return new Promise((reject, resolve) => {
+      this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
+        this._secondaryApp.auth().currentUser.delete().then(() => {
+            const customerRows = operations.filter(op => op.customer_id == user.id);
+            customerRows.map(row => {
+                row['deleted'] = 1;
+                const ref = this._db.collection('operations').doc(`${row['hbr_id']}`).ref;
+                batch.set(ref, row);
+            });
+            batch.commit().then(() => {
+                this._db.collection('users').doc(`${user.id}`)
+                .delete()
+                .then(() => {
+                    this._secondaryApp.auth().signOut();
+                    resolve();
+                }).catch(err => reject(err));
+            }).catch(err => reject(err));
+        }).catch(err => reject(err));
+      }).catch(err => reject(err));
     });
   }
 }

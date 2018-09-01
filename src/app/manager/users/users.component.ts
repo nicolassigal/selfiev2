@@ -212,6 +212,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   addEntry = (data) => {
     console.log('DATA', data);
     const customerBatch = this._db.firestore.batch();
+    const deleteCustomerPromise = [];
     const chunk_size = 250;
     this.infoService.showMessage(`
     <ul>
@@ -227,6 +228,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         const tbDataCustomer = this.tableData.filter(cs => cs.id === customer.id)[0];
         customer.ask_change_info = +customer.ask_change_info === 1 ? true : false;
         customer.ask_change_pwd = +customer.ask_change_pwd === 1 ? true : false;
+        customer.deleted = +customer.deleted === 1 ? true : false;
         if (customer.update) {
           customer = {
             ...tbDataCustomer,
@@ -251,6 +253,10 @@ export class UsersComponent implements OnInit, OnDestroy {
           updateUsernameArray.push(this._authService.updateUsername(tbDataCustomer.username, customer.username, tbDataCustomer.password));
         }
 
+        if (customer.deleted) {
+          deleteCustomerPromise.push(this._authService.deleteUser(customer));
+        }
+
         const ref = this._db.collection('users').doc(`${customer.id}`).ref;
         customerBatch.set(ref, customer);
 
@@ -270,7 +276,13 @@ export class UsersComponent implements OnInit, OnDestroy {
         <li><p>Updating ${data.length} new entries... Finished</p></li>
       </ul>
       `);
-      this.finishProccesing();
+      if (deleteCustomerPromise.length) {
+        Promise.all(deleteCustomerPromise)
+          .then(() => this.finishProccesing())
+          .catch(err => console.log(err));
+      } else {
+        this.finishProccesing();
+      }
     });
   }
 
