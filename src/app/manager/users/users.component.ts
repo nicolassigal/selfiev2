@@ -225,6 +225,8 @@ export class UsersComponent implements OnInit, OnDestroy {
       if (customer) {
         const updateUsernameArray = [];
         const tbDataCustomer = this.tableData.filter(cs => cs.id === customer.id)[0];
+        customer.ask_change_info = +customer.ask_change_info === 1 ? true : false;
+        customer.ask_change_pwd = +customer.ask_change_pwd === 1 ? true : false;
         if (customer.update) {
           customer = {
             ...tbDataCustomer,

@@ -15,6 +15,6 @@ export class UtilsService {
       }
     });
 
-    return maxid + 1;
+    return +maxid + 1;
   }
 }

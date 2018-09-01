@@ -53,8 +53,11 @@
           class="example-right-align" [disabled]="editing">
       </mat-form-field>
       <div style="width:100%">
-          <mat-checkbox class="example-margin" name="updatedInfo" [(ngModel)]="askToChange"> ask to change email and password? </mat-checkbox>
+          <mat-checkbox class="example-margin" name="ask_change_info" [(ngModel)]="ask_change_info"> ask to change info? </mat-checkbox>
       </div>
+      <div style="width:100%">
+        <mat-checkbox class="example-margin" name="ask_change_pwd" [(ngModel)]="ask_change_pwd"> ask to change password? </mat-checkbox>
+    </div>
     </div>
 
     <div *ngIf="errors" class="error">
