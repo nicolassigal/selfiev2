@@ -105,21 +105,47 @@ export class AuthService {
       this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
         this._secondaryApp.auth().currentUser.delete().then(() => {
             const customerRows = operations.filter(op => op.customer_id == user.id);
-            customerRows.map(row => {
+            if (customerRows.length) {
+              customerRows.map(row => {
                 row['deleted'] = 1;
                 const ref = this._db.collection('operations').doc(`${row['hbr_id']}`).ref;
                 batch.set(ref, row);
             });
             batch.commit().then(() => {
-                this._db.collection('users').doc(`${user.id}`)
-                .delete()
+                this._db.collection('users').doc(`${user.id}`).delete()
                 .then(() => {
                     this._secondaryApp.auth().signOut();
                     resolve();
                 }).catch(err => reject(err));
             }).catch(err => reject(err));
+            } else {
+              this._db.collection('users').doc(`${user.id}`).delete()
+              .then(() => {
+                  this._secondaryApp.auth().signOut();
+                  resolve();
+              }).catch(err => reject(err));
+            }
         }).catch(err => reject(err));
       }).catch(err => reject(err));
     });
+  }
+
+  deleteUserByXLS = (user) => {
+    const operations = this._dataService.getStock();
+    const batch = this._db.firestore.batch();
+    const customerRows = operations.filter(op => op.customer_id == user.id);
+    if (!customerRows.length) {
+      return new Promise((reject, resolve) => {
+        this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
+          this._secondaryApp.auth().currentUser.delete().then(() => {
+            this._db.collection('users').doc(`${user.id}`).delete()
+            .then(() => {
+                this._secondaryApp.auth().signOut();
+                resolve();
+            }).catch(err => reject(err));
+          }).catch(err => reject(err));
+        }).catch(err => reject(err));
+      });
+    }
   }
 }

@@ -218,67 +218,76 @@ export class UsersComponent implements OnInit, OnDestroy {
     <ul>
       <li><p>Getting data... Finished </p></li>
       <li><p>Preparing data... Finished </p></li>
-      <li><p>Updating ${data.length} new entries... please wait </p></li>
+      <li><p>Checking ${data.length} new entries... please wait </p></li>
     </ul>
     `);
-
+    let nextId = this._utils.getId(this.tableData);
+    const updateUsernameArray = [];
     data.map(customer => {
       if (customer) {
-        const updateUsernameArray = [];
-        const tbDataCustomer = this.tableData.filter(cs => cs.id === customer.id)[0];
-        customer.ask_change_info = +customer.ask_change_info === 1 ? true : false;
-        customer.ask_change_pwd = +customer.ask_change_pwd === 1 ? true : false;
-        customer.deleted = +customer.deleted === 1 ? true : false;
+        const tbDataCustomer = this.tableData.filter(cs => cs.id == customer.id)[0];
+        customer.ask_change_info = +customer.ask_change_info == 1 ? true : false;
+        customer.ask_change_pwd = +customer.ask_change_pwd == 1 ? true : false;
+        customer.deleted = +customer.deleted == 1 ? true : false;
         if (customer.update) {
           customer = {
             ...tbDataCustomer,
             ...customer
           };
         }
-        customer.id = customer.id ? customer.id : this._utils.getId(this.tableData);
+        customer.id = customer.id ? customer.id : nextId;
         customer.username = customer.username ? customer.username : `username_${customer.id}@tucourier.com.ar`;
         customer.email = customer.username;
         if (!customer.update) {
           customer.password = `password_${customer.id}`;
+          this._authService._addUser(customer.username, customer.password).subscribe();
+          nextId = nextId + 1;
         }
         customer.changed_pwd = customer.changed_pwd ? true : false;
         customer.role = customer.role ? customer.role : 0;
         if (customer.update && !customer.updatedInfo) {
           customer.updatedInfo = false;
         }
-        if (!customer.update) {
-          this._authService._addUser(customer.username, customer.password).subscribe();
-        }
+
         if (customer.update && tbDataCustomer && tbDataCustomer.username !== customer.username) {
           updateUsernameArray.push(this._authService.updateUsername(tbDataCustomer.username, customer.username, tbDataCustomer.password));
         }
 
         if (customer.deleted) {
-          deleteCustomerPromise.push(this._authService.deleteUser(customer));
-        }
-
-        const ref = this._db.collection('users').doc(`${customer.id}`).ref;
-        customerBatch.set(ref, customer);
-
-        if (updateUsernameArray.length) {
-          Promise.all(updateUsernameArray)
-          .then(res => console.log(res))
-          .catch(err => console.log(err));
+          deleteCustomerPromise.push(this._authService.deleteUserByXLS(customer));
+        } else {
+          const ref = this._db.collection('users').doc(`${customer.id}`).ref;
+          customerBatch.set(ref, customer);
         }
       }
     });
+
+    if (updateUsernameArray.length) {
+      Promise.all(updateUsernameArray)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+    }
 
     customerBatch.commit().then(res => {
       this.infoService.showMessage(`
       <ul>
         <li><p>Getting data... Finished </p></li>
         <li><p>Preparing data... Finished </p></li>
-        <li><p>Updating ${data.length} new entries... Finished</p></li>
+        <li><p>Updating ${data.length - deleteCustomerPromise.length} new entries... Finished</p></li>
       </ul>
       `);
       if (deleteCustomerPromise.length) {
         Promise.all(deleteCustomerPromise)
-          .then(() => this.finishProccesing())
+          .then(() => {
+            this.infoService.showMessage(`
+            <ul>
+              <li><p>Getting data... Finished </p></li>
+              <li><p>Preparing data... Finished </p></li>
+              <li><p>Deleting ${deleteCustomerPromise.length} users... Finished</p></li>
+            </ul>
+            `);
+            this.finishProccesing();
+          })
           .catch(err => console.log(err));
       } else {
         this.finishProccesing();
