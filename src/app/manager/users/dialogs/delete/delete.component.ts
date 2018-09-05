@@ -39,11 +39,11 @@ export class DeleteUserDialogComponent implements OnInit {
     update = () => {
         if (this.email === this.user.username || this.email === this.user.email ) {
           this.deleting = true;
-          this._authService.deleteUser(this.user).then(() => {
+          this._authService.deleteUser(this.user).then(res => {
             this.closeDialog();
             this.deleting = false;
           })
-          .catch((err) => console.log(err));
+          .catch(err => console.log(err));
       } else {
         this.error = 'email doesnt match';
       }
