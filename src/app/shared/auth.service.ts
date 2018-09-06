@@ -1,3 +1,4 @@
+import { InfoService } from 'src/app/info/info.service';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router, ActivationEnd } from '@angular/router';
@@ -18,6 +19,7 @@ export class AuthService {
     private auth: AngularFireAuth,
     private _http: Http,
     private _dataService: DataService,
+    private _infoService: InfoService,
     private _db: AngularFirestore) { }
 
   _setToken = (token, role) => {
@@ -99,7 +101,7 @@ export class AuthService {
   }
 
   deleteUser = (user) => {
-    return new Promise((reject, resolve) => {
+    return new Promise((resolve, reject) => {
       const operations = this._dataService.getStock();
       const batch = this._db.firestore.batch();
         this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
@@ -114,10 +116,8 @@ export class AuthService {
                 });
                 batch.commit().then(() => {
                     this._db.collection('users').doc(`${user.id}`).delete()
-                    .then(() => {
-                        this._secondaryApp.auth().signOut();
-                        resolve();
-                    }).catch(err => reject(err));
+                    .then((res) => resolve(res))
+                    .catch(err => reject(err));
                 }).catch(err => reject(err));
                 } else {
                   this._db.collection('users').doc(`${user.id}`).delete()
@@ -125,8 +125,8 @@ export class AuthService {
                   .catch(err => reject(err));
                 }
               });
-          }).catch(err => reject(err));
-        }).catch(err => reject(err));
+          }).catch(err => console.log(err));
+        }).catch(err => console.log(err));
     });
   }
 
@@ -135,17 +135,20 @@ export class AuthService {
     const batch = this._db.firestore.batch();
     const customerRows = operations.filter(op => op.customer_id == user.id);
     if (!customerRows.length) {
-      return new Promise((reject, resolve) => {
+      return new Promise((resolve, reject) => {
         this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
           this._secondaryApp.auth().currentUser.delete().then(() => {
-            this._secondaryApp.auth().signOut().then(res => {
               this._db.collection('users').doc(`${user.id}`).delete()
-              .then(res => resolve(res))
-              .catch(err => reject(err));
-            });
+              .then(res => {
+                this._secondaryApp.auth().signOut().then(res => {
+                resolve(res);
+                });
+              }).catch(err => reject(err));
           }).catch(err => reject(err));
         }).catch(err => reject(err));
       });
+    } else {
+      console.log("cannot add user " + user.name);
     }
   }
 }
