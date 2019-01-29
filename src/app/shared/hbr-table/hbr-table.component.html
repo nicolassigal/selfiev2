@@ -1,6 +1,13 @@
   <mat-table #table matSort [dataSource]="dataSource">
     <!-- Generic column definition -->
     <div *ngFor="let column of columns">
+
+    <ng-container *ngIf="column.header === 'Select' && column.columnDef==='select'" [matColumnDef]="column.columnDef">
+        <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="markedRow(row)" [(ngModel)]="row.checked"></mat-checkbox>
+        </mat-cell>
+      </ng-container>
       <ng-container *ngIf="column.header === 'Actions' && column.columnDef==='actions'" [matColumnDef]="column.columnDef">
         <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
         <mat-cell *matCellDef="let row">
@@ -17,7 +24,7 @@
           </mat-menu>
         </mat-cell>
       </ng-container>
-      <ng-container *ngIf="column.header !== 'Actions'" [matColumnDef]="column.columnDef">
+      <ng-container *ngIf="column.header !== 'Actions' && column.header !== 'Select'" [matColumnDef]="column.columnDef">
         <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column.header }}</mat-header-cell>
         <mat-cell *matCellDef="let row">
           <span class="mobile-label">{{ column.header }}: </span>
@@ -35,7 +42,7 @@
       </ng-container>
     </div>
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="clickedRow(row)"></mat-row>
   </mat-table>
   <div class="table-footer">
     <div class="totalizer" *ngIf="!noTotal">

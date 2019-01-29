@@ -5,6 +5,12 @@
     height: calc(100% - 64px);
 }
 .shipping {
+    .cta-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
     form {
         background: white;
         display: flex;

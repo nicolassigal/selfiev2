@@ -29,6 +29,7 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
   @Input('noProfit') noProfit;
   @Input('noTotalOperation') noTotalOperation;
   @Output() editRowEvent = new EventEmitter<{}>();
+  @Output() markedRowEvent = new EventEmitter<{}>();
   @Output() deleteRowEvent = new EventEmitter<{}>();
   @Output() sendRowEvent = new EventEmitter<{}>();
   @Output() ReceivedRowEvent = new EventEmitter<{}>();
@@ -92,6 +93,16 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
 
   editRow = (row) => {
     this.editRowEvent.emit(row);
+  }
+
+  markedRow = (row) => {
+    row.checked = !row.checked;
+    this.markedRowEvent.emit(row);
+  }
+
+  clickedRow = (row) => {
+    row.checked = !row.checked;
+    this.markedRowEvent.emit(row);
   }
 
   deleteRow = (row) => {

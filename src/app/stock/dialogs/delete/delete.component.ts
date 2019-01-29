@@ -13,8 +13,10 @@ export class DeleteStockDialogComponent implements OnInit {
     customers = [];
     couriers = [];
     awbs = [];
+    boxes = []
     box = {
         id: null,
+        checked: false,
         status_id: null,
         processes: [],
         received_date: null,
@@ -25,6 +27,7 @@ export class DeleteStockDialogComponent implements OnInit {
     };
     moment = _moment;
     maxQty;
+    operationsBatch;
     constructor(
         private _dialogRef: MatDialogRef<any>,
         private _dialog: MatDialog,
@@ -32,7 +35,9 @@ export class DeleteStockDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit(){
-        this.box = { ...this.data.row };
+        this.box = { ...this.data.row }; 
+        this.boxes = [...this.data.rows];
+        this.operationsBatch = this._db.firestore.batch();
     }
 
     public closeDialog() {
@@ -40,9 +45,22 @@ export class DeleteStockDialogComponent implements OnInit {
     }
 
     update = () => {
-        this.data.row.deleted = 1;
-        this._db.collection('operations').doc(`${this.data.row.hbr_id}`).set(this.data.row)
-            .then(res => this.closeDialog())
-            .catch(err => console.log(err));
+        if(!this.data.rows.length){
+            this.data.row.deleted = 1;
+            this.data.row.checked = false;
+            this._db.collection('operations').doc(`${this.data.row.hbr_id}`).set(this.data.row)
+                .then(res => this.closeDialog())
+                .catch(err => console.log(err));
+        } else {
+            this.data.rows.forEach(row => {
+                row.deleted = 1;
+                row.checked = false;
+                let ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
+                this.operationsBatch.set(ref, row);
+            });
+            this.operationsBatch.commit()
+                .then(res => this.closeDialog())
+                .catch(err => console.log('error on deleting operations', err));
+        }
     }
 }

@@ -3,7 +3,7 @@
         <span> {{ data.title }}</span>
     </mat-toolbar-row>
 </mat-toolbar>
-<form ngNativeValidate (ngSubmit)="update()">
+<form ngNativeValidate (ngSubmit)="triggerUpdate()">
     <mat-dialog-content ngDraggable>
         <div class="form-container">
             <mat-form-field>
@@ -16,7 +16,7 @@
                     <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field *ngIf="!rows.length">
                 <input matInput type="number" min="0" required name="box_qty" (change)="changeQty($event.target.value)" max="maxQty" placeholder="Box Quantity" [(ngModel)]="box.quantity">
             </mat-form-field>
             <mat-form-field>
@@ -35,6 +35,15 @@
             </mat-form-field>
             <mat-form-field>
                 <input type="date" required matInput [(ngModel)]="box.shipping_date" name="shipping_date" placeholder="Shipping date" [disabled]="box.id">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-select placeholder="Operation N°" [(ngModel)]="selectedRow" name="id">
+                    <mat-option [value]="''"> Select </mat-option>
+                    <mat-option *ngFor="let row of rows" [value]="row"> {{ row.hbr_id }} </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field *ngIf="selectedRow">
+                <input matInput type="number" min="0" required name="row_qty" (input)="changeRowsQty($event.target.value)" max="selectedRow.box_qty" placeholder="Box Quantity" [(ngModel)]="rowQty">
             </mat-form-field>
         </div>
     </mat-dialog-content>

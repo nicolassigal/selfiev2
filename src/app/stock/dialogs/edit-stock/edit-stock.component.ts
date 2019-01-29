@@ -18,6 +18,7 @@ import { take } from 'rxjs/operators';
     box = {
       date: null,
       hbr_id: null,
+      checked: false,
       wh_id: null,
       warehouse: null,
       customer_id: null,
@@ -55,6 +56,7 @@ import { take } from 'rxjs/operators';
 
     update = () => {
       this.isEditing = true;
+      this.box.checked = false;
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh => wh.id === this.box.wh_id)[0].name : null;
       this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;

@@ -5,6 +5,10 @@
     width: 100%;
 }
 
+.mat-checkbox {
+    pointer-events: none;
+}
+
 .mat-row:hover {
     background-color: #ededed;
     transition: 0.5s ease-in-out;

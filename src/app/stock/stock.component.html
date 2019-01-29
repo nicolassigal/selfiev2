@@ -1,36 +1,61 @@
 <div class="shipping" *ngIf="!loadingData">
+  <div class="cta-container">
     <form>
-        <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
-        <div class="btn-container">
-            <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop" *ngIf="role == 2">
-                <mat-icon>cloud_upload</mat-icon>
-                Upload File
-            </button>
-            <button mat-raised-button color="primary" (click)="download()" class="btn-desktop" *ngIf="role == 2">
-                <mat-icon>cloud_download</mat-icon>
-                Download
-            </button>
-            <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add')" class="btn-desktop" *ngIf="role == 2">
-                    <mat-icon>add</mat-icon>
-                    Add
-                </button>
-        </div>
-        <div class="btn-container-mobile"  *ngIf="role == 2">
-            <mat-icon  (click)="file.click()" aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
-            <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
-            <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
-        </div>
+      <div class="btn-container">
+        <span *ngIf="markedRows.length == 1">
+          <button mat-raised-button color="primary" (click)="onEditRow(markedRows[0])" class="btn-desktop">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+          <button mat-raised-button color="primary" (click)="onDeleteRow(markedRows[0])" class="btn-desktop">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+          <button mat-raised-button color="primary" (click)="onSendRow(markedRows[0])" class="btn-desktop">
+            <mat-icon>forward</mat-icon>
+            Send Box
+          </button>
+        </span>
+        <span *ngIf="markedRows.length > 1">
+          <button mat-raised-button color="primary" (click)="onDeleteAllRows(markedRows)" class="btn-desktop">
+            <mat-icon>delete</mat-icon>
+            Delete All
+          </button>
+          <button mat-raised-button color="primary" (click)="onSendAllRows(markedRows)" class="btn-desktop">
+            <mat-icon>forward</mat-icon>
+            Send all
+          </button>
+        </span>
+      </div>
     </form>
-    <app-hbr-table
-      ondrop="parseXLS(event)"
-      [datasrc]="tableData"
-      [cols]="cols"
-      (editRowEvent)="onEditRow($event)"
-      (deleteRowEvent)="onDeleteRow($event)"
-      (sendRowEvent)="onSendRow($event)"
-      [noProfit]="role !== 2"
-    ></app-hbr-table>
+    <form>
+      <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false"
+        type="file" />
+      <div class="btn-container">
+        <button (click)="file.click()" mat-raised-button color="primary" class="btn-desktop" *ngIf="role == 2">
+          <mat-icon>cloud_upload</mat-icon>
+          Upload File
+        </button>
+        <button mat-raised-button color="primary" (click)="download()" class="btn-desktop" *ngIf="role == 2">
+          <mat-icon>cloud_download</mat-icon>
+          Download
+        </button>
+        <button mat-raised-button color="primary" (click)="onEditRow({}, 'Add')" class="btn-desktop" *ngIf="role == 2">
+          <mat-icon>add</mat-icon>
+          Add
+        </button>
+      </div>
+      <div class="btn-container-mobile" *ngIf="role == 2">
+        <mat-icon (click)="file.click()" aria-label="Example icon-button with a heart icon">cloud_upload</mat-icon>
+        <mat-icon (click)="download()" aria-label="Example icon-button with a heart icon">cloud_download</mat-icon>
+        <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
+      </div>
+    </form>
+  </div>
+  <app-hbr-table ondrop="parseXLS(event)" [datasrc]="tableData" [cols]="cols" (editRowEvent)="onEditRow($event)"
+    (markedRowEvent)="onMarkedRowEvent($event)" (deleteRowEvent)="onDeleteRow($event)" (sendRowEvent)="onSendRow($event)"
+    [noProfit]="role !== 2"></app-hbr-table>
 </div>
 <div *ngIf="loadingData && !tableData.length" class="spinner-container">
-    <app-spinner></app-spinner>
+  <app-spinner></app-spinner>
 </div>

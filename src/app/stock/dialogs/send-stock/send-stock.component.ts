@@ -16,10 +16,13 @@ export class SendStockDialogComponent implements OnInit {
     couriers = [];
     warehouses = [];
     awbs = [];
+    rows = [];
     moment = _moment;
+    selectedRow = null;
     box = {
         id: null,
         shipping_date: null,
+        checked: false,
         processes: [],
         quantity: null,
         customer_id: null,
@@ -45,7 +48,9 @@ export class SendStockDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: any) { }
 
     ngOnInit() {
+        if(this.data.row) { 
         this.maxQty = Number(this.data.row.box_qty);
+        }
         this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
         this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
         this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
@@ -53,6 +58,8 @@ export class SendStockDialogComponent implements OnInit {
         this.awbs = this.awbs.filter(row => row.status_id < 3);
         this.box.quantity = this.maxQty;
         this.box.shipping_date = this.moment().format("YYYY-MM-DD");
+        
+        this.rows = [...this.data.rows];
     }
 
     public closeDialog() {
@@ -68,6 +75,23 @@ export class SendStockDialogComponent implements OnInit {
         }
     }
 
+    changeRowsQty = (val) => {
+        const maxQty = Number(this.selectedRow.box_qty);
+        if (val > maxQty) {
+            this.selectedRow.quantity = maxQty;
+        } else if (val < 0) {
+            this.selectedRow.quantity = 0;
+        } else {
+            this.selectedRow.quantity = Number(val);
+        }
+
+        this.rows.map(row => {
+            if(row.hbr_id === this.selectedRow.hbr_id) {
+                row = { ...this.selectedRow }
+            }
+        });
+    }
+
     selectAwb(awb) {
         if (awb) {
             this.box = { ...this.awbs.filter(el => el.id === awb)[0] };
@@ -76,6 +100,7 @@ export class SendStockDialogComponent implements OnInit {
         } else {
             this.box = {
                 id: null,
+                checked: false,
                 shipping_date: null,
                 processes: [],
                 quantity: null,
@@ -105,58 +130,70 @@ export class SendStockDialogComponent implements OnInit {
     /**
      * update airwaybill in database
      */
-    update() {
-        if (this.box.quantity) {
-            const attachedProcess = { ...this.data.row };
-            attachedProcess.box_qty = this.box.quantity;
-            attachedProcess.doc_id = this._db.createId();
+    updateOne() {
+            if (this.box.quantity) {
+                const attachedProcess = { ...this.data.row };
+                attachedProcess.box_qty = this.box.quantity;
+                attachedProcess.doc_id = this._db.createId();
 
-            // get value per unit
-            const kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
-            const valuePerUnit = Number(this.data.row.profit) / Number(this.data.row.box_qty);
+                // get value per unit
+                const kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
+                const valuePerUnit = Number(this.data.row.profit) / Number(this.data.row.box_qty);
 
-            // calc actual weight and value in transit
-            attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
-            attachedProcess.profit = Number(valuePerUnit) * Number(attachedProcess.box_qty);
+                // calc actual weight and value in transit
+                attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
+                attachedProcess.profit = Number(valuePerUnit) * Number(attachedProcess.box_qty);
 
-            this.box.processes.push({ ...attachedProcess });
+                this.box.processes.push({ ...attachedProcess });
 
-            // calc total profit in guide
-            this.box.total_weight = 0;
-            this.box.profit = 0;
-            this.box.box_qty = 0;
-            this.box.processes.map(process => {
-                this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
-                this.box.profit = Number(this.box.profit) + Number(process.profit);
-                this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
-            });
+                // calc total profit in guide
+                this.box.total_weight = 0;
+                this.box.profit = 0;
+                this.box.box_qty = 0;
+                this.box.processes.map(process => {
+                    this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
+                    this.box.profit = Number(this.box.profit) + Number(process.profit);
+                    this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
+                });
 
-            // calc remaining values in stock
-            this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
-            this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
-            this.data.row.profit = Number(valuePerUnit) * Number(this.data.row.box_qty);
+                // calc remaining values in stock
+                this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
+                this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
+                this.data.row.profit = Number(valuePerUnit) * Number(this.data.row.box_qty);
 
-            if (this.data.row.box_qty === 0) {
-              this.data.row.delivered = 1;
-            }
-            // get box id
-            this.box.id = this.box.id === null ? this._utils.getId(this.awbs) : this.box.id;
-            this.box.status_id = 0;
+                if (this.data.row.box_qty === 0) {
+                this.data.row.delivered = 1;
+                }
+                // get box id
+                this.box.id = this.box.id === null ? this._utils.getId(this.awbs) : this.box.id;
+                this.box.status_id = 0;
 
-            // parse date to unix timestamp
-            this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
+                // parse date to unix timestamp
+                this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
 
-            // push to database
-            this._db.collection('awbs').doc(`${this.box.id}`)
-              .set(this.box)
-              .then(res => {
-                  this._db.collection('operations')
-                      .doc(`${this.data.row.hbr_id}`)
-                      .set(this.data.row)
-                      .then(() => this._dialogRef.close())
-                      .catch(err => console.log(err));
-              }).catch(err => console.log(err));
+                this.box.checked = false;
 
-        }
+                // push to database
+                this._db.collection('awbs').doc(`${this.box.id}`)
+                .set(this.box)
+                .then(res => {
+                    this._db.collection('operations')
+                        .doc(`${this.data.row.hbr_id}`)
+                        .set(this.data.row)
+                        .then(() => this._dialogRef.close())
+                        .catch(err => console.log(err));
+                }).catch(err => console.log(err));
+
+            }  
+    }
+
+    updateAll() {
+
+    }
+
+    triggerUpdate() {
+        this.rows.length ? this.updateAll() : this.updateOne();
     }
 }
+
+//TODO Enviar todas las cajas con sus cantidades individuales.

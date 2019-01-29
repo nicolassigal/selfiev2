@@ -116,12 +116,12 @@ export class AuthService {
                 });
                 batch.commit().then(() => {
                     this._db.collection('users').doc(`${user.id}`).delete()
-                    .then((res) => resolve(res))
+                    .then((res) => resolve())
                     .catch(err => reject(err));
                 }).catch(err => reject(err));
                 } else {
                   this._db.collection('users').doc(`${user.id}`).delete()
-                  .then(res => resolve(res))
+                  .then(res => resolve())
                   .catch(err => reject(err));
                 }
               });
