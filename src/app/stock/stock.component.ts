@@ -529,7 +529,7 @@ export class StockComponent implements OnInit, OnDestroy {
         confirmBtn: 'Send',
         cancelBtn: 'Cancel'
       }, width: '500px'
-    })
+    });
   }
 
   onDeleteAllRows = (rows) => {
@@ -541,6 +541,7 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
+    .afterClosed().subscribe(() => this.markedRows = []);
   }
 
   onSendAllRows = (rows) => {
@@ -555,6 +556,7 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
+    .afterClosed().subscribe(() => this.markedRows = []);
   }
 
   onMarkedRowEvent = (row) => {

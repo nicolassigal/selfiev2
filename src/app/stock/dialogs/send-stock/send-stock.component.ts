@@ -59,7 +59,10 @@ export class SendStockDialogComponent implements OnInit {
         this.box.quantity = this.maxQty;
         this.box.shipping_date = this.moment().format("YYYY-MM-DD");
         
-        this.rows = [...this.data.rows];
+        if(this.data.rows) {
+            this.rows = [...this.data.rows];
+            this.rows.map(row => row.quantity = row.box_qty);
+        }
     }
 
     public closeDialog() {
