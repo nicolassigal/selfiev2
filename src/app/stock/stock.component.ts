@@ -364,7 +364,7 @@ export class StockComponent implements OnInit, OnDestroy {
       .catch(err => console.log('error on adding customers', err));
     let nextId = Number(this.tableData.length ? this.tableData[0].hbr_id : 0) + 1;
     data.map(entry => {
-      entry.deleted = 0;
+      entry.deleted = entry.deleted && entry.deleted == 1 ? 1 : 0;
       entry.initial_qty = Number(entry.initial_qty);
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
@@ -392,7 +392,7 @@ export class StockComponent implements OnInit, OnDestroy {
     chunks.map(chunk => {
       const batch = this._db.firestore.batch();
       chunk.map(row => {
-        console.log('row', row.delivered, row.delivered == 1);
+        row.checked = false;
         if (row.delivered == 1 && !this.delivered.some(row => row.hbr_id == row.hbr_id)) {
           let id = this._db.createId();
           const ref = this._db.collection('delivered').doc(`${id}`).ref;
@@ -400,6 +400,7 @@ export class StockComponent implements OnInit, OnDestroy {
         } else {
           const ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
           batch.set(ref, row);
+          console.log(row);
         }
       });
       promiseArr.push(batch.commit());
@@ -437,6 +438,7 @@ export class StockComponent implements OnInit, OnDestroy {
     const today = this.moment().format('DD_MM_YYYY');
     let ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
+      delete row.checked;
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
         delete row.update;

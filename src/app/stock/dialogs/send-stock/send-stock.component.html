@@ -37,7 +37,7 @@
                 <input type="date" required matInput [(ngModel)]="box.shipping_date" name="shipping_date" placeholder="Shipping date" [disabled]="box.id">
             </mat-form-field>
             <mat-form-field>
-                <mat-select placeholder="Operation N°" [(ngModel)]="selectedRow" name="id">
+                <mat-select placeholder="Operation N°" [(ngModel)]="selectedRow" name="id" (ngModelChange)="rowQty = selectedRow.box_qty">
                     <mat-option [value]="''"> Select </mat-option>
                     <mat-option *ngFor="let row of rows" [value]="row"> {{ row.hbr_id }} </mat-option>
                 </mat-select>

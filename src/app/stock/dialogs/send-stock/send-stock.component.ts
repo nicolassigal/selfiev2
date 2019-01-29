@@ -131,14 +131,72 @@ export class SendStockDialogComponent implements OnInit {
      * update airwaybill in database
      */
     updateOne() {
-            if (this.box.quantity) {
-                const attachedProcess = { ...this.data.row };
-                attachedProcess.box_qty = this.box.quantity;
-                attachedProcess.doc_id = this._db.createId();
+        if (this.box.quantity) {
+            const attachedProcess = { ...this.data.row };
+            attachedProcess.box_qty = this.box.quantity;
+            attachedProcess.doc_id = this._db.createId();
 
+            // get value per unit
+            const kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
+            const valuePerUnit = Number(this.data.row.profit) / Number(this.data.row.box_qty);
+
+            // calc actual weight and value in transit
+            attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
+            attachedProcess.profit = Number(valuePerUnit) * Number(attachedProcess.box_qty);
+
+            this.box.processes.push({ ...attachedProcess });
+
+            // calc total profit in guide
+            this.box.total_weight = 0;
+            this.box.profit = 0;
+            this.box.box_qty = 0;
+            this.box.processes.map(process => {
+                this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
+                this.box.profit = Number(this.box.profit) + Number(process.profit);
+                this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
+            });
+
+            // calc remaining values in stock
+            this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
+            this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
+            this.data.row.profit = Number(valuePerUnit) * Number(this.data.row.box_qty);
+
+            if (this.data.row.box_qty === 0) {
+            this.data.row.delivered = 1;
+            }
+            // get box id
+            this.box.id = this.box.id === null ? this._utils.getId(this.awbs) : this.box.id;
+            this.box.status_id = 0;
+
+            // parse date to unix timestamp
+            this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
+
+            this.box.checked = false;
+
+            // push to database
+            this._db.collection('awbs').doc(`${this.box.id}`)
+            .set(this.box)
+            .then(res => {
+                this._db.collection('operations')
+                    .doc(`${this.data.row.hbr_id}`)
+                    .set(this.data.row)
+                    .then(() => this._dialogRef.close())
+                    .catch(err => console.log(err));
+            }).catch(err => console.log(err));
+
+        }  
+    }
+
+    updateAll() {
+        this.rows.map(row => {
+            row.checked = false;
+            if(row.quantity) {
+                const attachedProcess = { ...row };
+                attachedProcess.box_qty = row.quantity;
+                attachedProcess.doc_id = this._db.createId();
                 // get value per unit
-                const kgPerUnit = Number(this.data.row.total_weight) / Number(this.data.row.box_qty);
-                const valuePerUnit = Number(this.data.row.profit) / Number(this.data.row.box_qty);
+                const kgPerUnit = Number(row.total_weight) / Number(row.box_qty);
+                const valuePerUnit = Number(row.profit) / Number(row.box_qty);
 
                 // calc actual weight and value in transit
                 attachedProcess.total_weight = Number(kgPerUnit) * Number(attachedProcess.box_qty);
@@ -146,49 +204,52 @@ export class SendStockDialogComponent implements OnInit {
 
                 this.box.processes.push({ ...attachedProcess });
 
-                // calc total profit in guide
-                this.box.total_weight = 0;
-                this.box.profit = 0;
-                this.box.box_qty = 0;
-                this.box.processes.map(process => {
-                    this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
-                    this.box.profit = Number(this.box.profit) + Number(process.profit);
-                    this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
-                });
-
                 // calc remaining values in stock
-                this.data.row.box_qty = Number(this.data.row.box_qty) - Number(this.box.quantity);
-                this.data.row.total_weight = Number(kgPerUnit) * Number(this.data.row.box_qty);
-                this.data.row.profit = Number(valuePerUnit) * Number(this.data.row.box_qty);
+                row.box_qty = Number(row.box_qty) - Number(row.quantity);
+                row.total_weight = Number(kgPerUnit) * Number(row.box_qty);
+                row.profit = Number(valuePerUnit) * Number(row.box_qty);
 
-                if (this.data.row.box_qty === 0) {
-                this.data.row.delivered = 1;
+                if (row.box_qty === 0) {
+                    row.delivered = 1;
                 }
-                // get box id
-                this.box.id = this.box.id === null ? this._utils.getId(this.awbs) : this.box.id;
-                this.box.status_id = 0;
+            }
+        })
 
-                // parse date to unix timestamp
-                this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
+        // calc total profit in guide
+        this.box.total_weight = 0;
+        this.box.profit = 0;
+        this.box.box_qty = 0;
+        this.box.processes.map(process => {
+            this.box.total_weight = Number(this.box.total_weight) + Number(process.total_weight);
+            this.box.profit = Number(this.box.profit) + Number(process.profit);
+            this.box.box_qty = Number(this.box.box_qty) + Number(process.box_qty);
+            this.box.quantity = Number(this.box.box_qty);
+        });
 
-                this.box.checked = false;
+         // get box id
+         this.box.id = this.box.id === null ? this._utils.getId(this.awbs) : this.box.id;
+         this.box.status_id = 0;
 
-                // push to database
-                this._db.collection('awbs').doc(`${this.box.id}`)
-                .set(this.box)
-                .then(res => {
-                    this._db.collection('operations')
-                        .doc(`${this.data.row.hbr_id}`)
-                        .set(this.data.row)
-                        .then(() => this._dialogRef.close())
-                        .catch(err => console.log(err));
-                }).catch(err => console.log(err));
+         // parse date to unix timestamp
+         this.box.shipping_date = this.box.shipping_date ? this.moment(this.box.shipping_date).unix() : null;
 
-            }  
-    }
-
-    updateAll() {
-
+         this.box.checked = false;
+         // push to database
+         this._db.collection('awbs').doc(`${this.box.id}`)
+         .set(this.box)
+         .then(res => {
+            let promiseArray = [];
+            this.data.rows.forEach(row => {
+                row.checked = false;
+                promiseArray.push(this._db.collection('operations').doc(`${row.hbr_id}`).set(row))
+        });
+            Promise.all(promiseArray)
+                .then(() => {
+                    this.data.rows.map(row => row.checked = false);
+                    this._dialogRef.close();
+                })
+                .catch(err => console.log(err));
+         }).catch(err => console.log(err));
     }
 
     triggerUpdate() {
