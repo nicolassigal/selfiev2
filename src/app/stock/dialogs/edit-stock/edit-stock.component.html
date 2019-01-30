@@ -19,6 +19,9 @@
           required name="total_weight">
       </mat-form-field>
       <mat-form-field>
+        <input matInput type="text" placeholder="WR0" [disabled]="isEditing" [(ngModel)]="box.wr0" name="wr0">
+      </mat-form-field>
+      <mat-form-field>
         <input matInput type="number" step="0.01" placeholder="Profit" [disabled]="isEditing" [(ngModel)]="box.profit" name="profit">
       </mat-form-field>
       <mat-form-field>

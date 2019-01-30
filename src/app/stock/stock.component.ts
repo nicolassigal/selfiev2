@@ -64,7 +64,7 @@ export class StockComponent implements OnInit, OnDestroy {
     this._sidenav.setTitle(title);
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
-    //{ columnDef: 'linked_op', header: 'Linked Op.', type: '', cell: (element) => `${element.linked_op ? element.linked_op : ''}` },
+      { columnDef: 'wr0', header: 'WR0', type: '', cell: (element) => `${element.wr0 ? element.wr0 : ''}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
       { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? `${element.box_qty}` : 0}` },
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
@@ -439,6 +439,7 @@ export class StockComponent implements OnInit, OnDestroy {
     let ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       delete row.checked;
+      delete row.WR0;
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
         delete row.update;
@@ -451,8 +452,8 @@ export class StockComponent implements OnInit, OnDestroy {
       header: [
         'update',
         'hbr_id',
+        'wr0',
         'date',
-        //'linked_op',
         'wh_id',
         'warehouse',
         'courier_id',
@@ -505,6 +506,10 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
+    .afterClosed().subscribe(() =>{
+      this.tableData.map(row => row.checked = false);
+      this.markedRows = [];
+    });
   }
 
   onDeleteRow = (row) => {
@@ -516,6 +521,10 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
+    .afterClosed().subscribe(() =>{
+      this.tableData.map(row => row.checked = false);
+      this.markedRows = [];
+    });
   }
 
   onSendRow = (row) => {
@@ -529,6 +538,10 @@ export class StockComponent implements OnInit, OnDestroy {
         confirmBtn: 'Send',
         cancelBtn: 'Cancel'
       }, width: '500px'
+    })
+    .afterClosed().subscribe(() =>{
+      this.tableData.map(row => row.checked = false);
+      this.markedRows = [];
     });
   }
 
@@ -541,7 +554,10 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
-    .afterClosed().subscribe(() => this.markedRows = []);
+    .afterClosed().subscribe(() =>{
+      this.tableData.map(row => row.checked = false);
+      this.markedRows = [];
+    });
   }
 
   onSendAllRows = (rows) => {
@@ -556,7 +572,10 @@ export class StockComponent implements OnInit, OnDestroy {
         cancelBtn: 'Cancel'
       }, width: '500px'
     })
-    .afterClosed().subscribe(() => this.markedRows = []);
+    .afterClosed().subscribe(() =>{
+      this.tableData.map(row => row.checked = false);
+      this.markedRows = [];
+    });
   }
 
   onMarkedRowEvent = (row) => {

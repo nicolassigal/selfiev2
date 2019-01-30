@@ -16,6 +16,7 @@ export class DeleteStockDialogComponent implements OnInit {
     boxes = []
     box = {
         id: null,
+        hbr_id: null,
         checked: false,
         status_id: null,
         processes: [],
@@ -45,7 +46,7 @@ export class DeleteStockDialogComponent implements OnInit {
     }
 
     update = () => {
-        if(!this.data.rows.length){
+        if(!this.data.rows){
             this.data.row.deleted = 1;
             this.data.row.checked = false;
             this._db.collection('operations').doc(`${this.data.row.hbr_id}`).set(this.data.row)

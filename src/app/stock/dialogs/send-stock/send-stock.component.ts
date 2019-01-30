@@ -36,6 +36,7 @@ export class SendStockDialogComponent implements OnInit {
         dest_type: null
     };
     maxQty;
+    rowQty;
     @ViewChild('mat-dialog-container') dialog;
     constructor(
         private _dialogRef: MatDialogRef<any>,

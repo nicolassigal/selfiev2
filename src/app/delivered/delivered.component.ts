@@ -32,7 +32,7 @@ export class DeliveredComponent implements OnInit, OnDestroy {
   role = 0;
   cols = [
     { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
-    { columnDef: 'linked_op', header: 'Linked op.', type: '', cell: (element) => `${element.linked_op ? element.linked_op : ''}` },
+    { columnDef: 'wr0', header: 'WR0', type: '', cell: (element) => `${element.wr0 ? element.wr0 : ''}` },
     { columnDef: 'warehouse', header: 'Origin', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
     { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty > 0 ? element.box_qty : element.initial_qty}` },
     { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => `${element.total_weight ? element.total_weight : 0}` },
