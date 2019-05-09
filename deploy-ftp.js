@@ -4,19 +4,19 @@ const env = process.env.NODE_ENV === 'production' ? 'prod':'beta';
 const credentials = {
     beta: {
         user: "nsigal@beta.tucourier.com.ar",
-        password: "owl(6Q[v+-bE",
+        password: "",
         host: "ftp.tucourier.com.ar",
         port: 21,
         localRoot: __dirname + '/dist/selfiev2',
         remoteRoot: '/beta/selfie-v2'
     },
     prod: {
-        user: "",
+        user: "prod@tucourier.com.ar",
         password: "",
-        host: "",
-        port: null,
-        localRoot: '',
-        remoteRoot: ''
+        host: "ftp.tucourier.com.ar",
+        port: 21,
+        localRoot: __dirname + '/dist/selfiev2',
+        remoteRoot: '/public_html/selfie-v2'
     }
 }
 const config = {
@@ -26,10 +26,10 @@ const config = {
     exclude: [
         "node_modules/**",
         "node_modules/**/.*",
-        "dist/selfiev2/server",
+        "dist/selfiev2/server/",
         "dist/selfiev2/server/**",
         "dist/selfiev2/server/**/.*",
-        "dist/selfiev2/xlsx",
+        "dist/selfiev2/xlsx/",
         "dist/selfiev2/xlsx/**",
         "dist/selfiev2/xlsx/**/.*",
     ],
@@ -37,14 +37,14 @@ const config = {
     forcePasv: true                 // Passive mode is forced (EPSV command is not sent)
 }
  
-console.log('Start deployment on ' + env);
+console.log('\nStart deployment on ' + env);
 ftpDeploy.deploy(config)
-    .then(res => console.log('finished'))
+    .then(res => console.log('\nfinished'))
     .catch(err => console.log(err))
 
 ftpDeploy.on("uploading", function(data) {
     const total = data.totalFilesCount; // total file count being transferred
-    const transfered = data.transferredFileCount; // number of files transferred
+    const transfered = data.transferredFileCount+1; // number of files transferred
     const filename = data.filename; // partial path with filename being uploaded
-    process.stdout.write(`\u001b[2K\u001b[0E[transferred: ${transfered}/${total}] [file: ${filename}]`);
+    process.stdout.write(`\u001b[2K\u001b[0E[transferred: ${transfered}/${total}] [file: ${filename} ]`);
 });
