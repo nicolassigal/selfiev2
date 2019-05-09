@@ -5,6 +5,7 @@
     width: 100%;
 }
 
+
 .mat-checkbox {
     pointer-events: none;
 }
@@ -49,6 +50,7 @@
   }
 }
 .table-footer {
+    position: fixed;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -108,10 +110,16 @@
     z-index: 1;
     background-color: inherit;
 }
-
+.small {
+    max-width: 100px;
+}
 .mat-table {
     overflow: auto;
     height: calc(100vh - 208px);
+    &.big-table {
+        width: 200%;
+    }
+
 }
 
 .mobile-label {

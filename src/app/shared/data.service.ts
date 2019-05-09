@@ -78,6 +78,14 @@ export class DataService {
     this.roles = roles;
     this.rolesSubject.next(roles);
   };
+
+  getCustomerById = (id) => {
+    return this.customers.find(customer => customer.id === id);
+  }
+
+  getWarehouseById = (id) => {
+    return this.warehouses.find(warehouse => warehouse.id === id);
+  }
   
   getRoles = () => this.roles;
 }

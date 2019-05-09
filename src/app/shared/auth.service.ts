@@ -7,6 +7,7 @@ import { take, filter } from 'rxjs/operators';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import * as firebase from 'firebase/app';
 import { DataService } from './data.service';
+import { environment } from '../../environments/environment';
 
 @Injectable()
 export class AuthService {
@@ -125,30 +126,45 @@ export class AuthService {
                   .catch(err => reject(err));
                 }
               });
-          }).catch(err => console.log(err));
+          }).catch(err => {
+            if (err.message === "app-deleted") {
+              this._secondaryApp.auth().signOut().then(res => {
+                this.deleteUser(user);
+              });
+            }
+          });
         }).catch(err => console.log(err));
     });
   }
 
-  deleteUserByXLS = (user) => {
+  deleteUserByXLS = async (user) => {
     const operations = this._dataService.getStock();
     const batch = this._db.firestore.batch();
     const customerRows = operations.filter(op => op.customer_id == user.id);
+    firebase.initializeApp(environment.firebase, user.id);
+    const app = firebase.app(user.id);
     if (!customerRows.length) {
-      return new Promise((resolve, reject) => {
-        this._secondaryApp.auth().signInWithEmailAndPassword(user.username, user.password).then(res => {
-          this._secondaryApp.auth().currentUser.delete().then(() => {
-              this._db.collection('users').doc(`${user.id}`).delete()
-              .then(res => {
-                this._secondaryApp.auth().signOut().then(res => {
-                resolve(res);
-                });
-              }).catch(err => reject(err));
-          }).catch(err => reject(err));
-        }).catch(err => reject(err));
-      });
+      try {
+        await app.auth().signInWithEmailAndPassword(user.email, user.password);
+        await app.auth().currentUser.delete();
+        await this._db.collection('users').doc(`${user.id}`).delete();
+        await firebase.app(user.id).delete();
+        return;
+      } catch (err) {
+        console.error({'error deleting customer without operations': err});
+      }
     } else {
-      console.log("cannot add user " + user.name);
+      customerRows.map(row => {
+        row['deleted'] = 1;
+        const ref = this._db.collection('operations').doc(`${row['hbr_id']}`).ref;
+        batch.set(ref, row);
+      });
+      try {
+      await batch.commit();
+      await this._db.collection('users').doc(`${user.id}`).delete();
+      } catch (err) {
+        console.error('error deleting customer with operations', err);
+      } 
     }
   }
 }

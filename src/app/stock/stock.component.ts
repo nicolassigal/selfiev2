@@ -42,6 +42,7 @@ export class StockComponent implements OnInit, OnDestroy {
   cols = [];
   markedRows = [];
   tableData = [];
+  dragging = false;
   stockSubscription = new Subscription();
 
   constructor(
@@ -62,11 +63,16 @@ export class StockComponent implements OnInit, OnDestroy {
     const snapshotTitle = this._route.snapshot.data.filter;
     const title = snapshotTitle == 'warehouse' ? 'Warehouse Stock' : snapshotTitle == 'users'? 'User Stock' : 'Manage Stock';
     this._sidenav.setTitle(title);
+
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'wr0', header: 'WR0', type: '', cell: (element) => `${element.wr0 ? element.wr0 : ''}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
-      { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => `${element.box_qty ? `${element.box_qty}` : 0}` },
+      { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => {
+        let boxQty = '0';
+        boxQty = element.box_qty && element.box_qty === element.initial_qty ? `${element.box_qty}` : `${element.box_qty}/${element.initial_qty}` ;
+        return boxQty;
+      }},
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
         return `${element.total_weight ? element.total_weight : 0}`;
       }},
@@ -74,7 +80,11 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
       { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-      { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` }
+      { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
+      { columnDef: 'entry', header: 'Entry Point', type: '', cell: (element) => {
+        return `${element.entry_point && element.entry_point.name ? element.entry_point.name : ''}`
+      }},
+      { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.dest_type ?` In ${element.dest_type}` : ''}` }
     );
 
     this.couriers = this._dataService.getCouriers();
@@ -104,6 +114,7 @@ export class StockComponent implements OnInit, OnDestroy {
     .subscribe(couriers => this.couriers = couriers);
     this._dataService.stockSubject.subscribe(data => {
       this.tableData = data;
+      console.log(data);
       this.filterData(this.tableData);
     });
 
@@ -196,6 +207,25 @@ export class StockComponent implements OnInit, OnDestroy {
     }
 
     this.tableData = data;
+  }
+
+  onDrop(event) {
+    event.preventDefault();
+    event['target']['files'] = event.dataTransfer.files;
+    this.dragging = false;
+    this.parseXLS(event);
+  }
+
+  onDragOver(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.dragging = true;
+  }
+
+  onDragLeave(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.dragging = false;
   }
 
   parseXLS = (evt: any) => {
@@ -362,10 +392,12 @@ export class StockComponent implements OnInit, OnDestroy {
 
     customerBatch.commit()
       .catch(err => console.log('error on adding customers', err));
-    let nextId = Number(this.tableData.length ? this.tableData[0].hbr_id : 0) + 1;
+    
     data.map(entry => {
       entry.deleted = entry.deleted && entry.deleted == 1 ? 1 : 0;
       entry.initial_qty = Number(entry.initial_qty);
+      let nextId = Number(this.tableData.length ? this.tableData[0].hbr_id : 0) + 1;
+      entry.id = !isNaN(entry.id) ? Number(entry.id) : this._utils.getId(this.tableData);
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
       entry.delivered = !isNaN(entry.box_qty) && entry.box_qty > 0 ? 0 : 1;
@@ -378,7 +410,6 @@ export class StockComponent implements OnInit, OnDestroy {
 
       entry.received_date = entry.received_date ? this.moment(entry.received_date).unix() : null;
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
-
       if (!entry.hbr_id) {
         if (this.tableData.length) {
           entry.hbr_id = nextId;
@@ -393,15 +424,8 @@ export class StockComponent implements OnInit, OnDestroy {
       const batch = this._db.firestore.batch();
       chunk.map(row => {
         row.checked = false;
-        if (row.delivered == 1 && !this.delivered.some(row => row.hbr_id == row.hbr_id)) {
-          let id = this._db.createId();
-          const ref = this._db.collection('delivered').doc(`${id}`).ref;
+          const ref = this._db.collection('operations').doc(`${row.id}`).ref;
           batch.set(ref, row);
-        } else {
-          const ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
-          batch.set(ref, row);
-          console.log(row);
-        }
       });
       promiseArr.push(batch.commit());
     });
@@ -439,6 +463,7 @@ export class StockComponent implements OnInit, OnDestroy {
     let ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       delete row.checked;
+      delete row.id;
       delete row.WR0;
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;
       row.received_date = row.received_date ? this.moment.unix(row.received_date).format('DD-MM-YYYY') : null;
@@ -579,7 +604,7 @@ export class StockComponent implements OnInit, OnDestroy {
   }
 
   onMarkedRowEvent = (row) => {
-    let index = this.markedRows.findIndex(mr => mr.hbr_id === row.hbr_id);
+    let index = this.markedRows.findIndex(mr => mr.id === row.id);
     if (index > -1) {
       this.markedRows.splice(index, 1);
     } else {

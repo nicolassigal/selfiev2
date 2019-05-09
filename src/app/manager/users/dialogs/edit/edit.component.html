@@ -15,8 +15,21 @@
           [disabled]="editing">
       </mat-form-field>
       <mat-form-field>
-        <input type="text" autocomplete="off" matInput placeholder="Cuit" [(ngModel)]="user.cuit" name="cuit" class="example-right-align"
+        <input type="text" autocomplete="off" matInput placeholder="Cuit/Cuil" [(ngModel)]="user.id_key" name="id_key" class="example-right-align"
           [disabled]="editing">
+      </mat-form-field>
+      <mat-form-field>
+      <mat-select placeholder="ID Type" [disabled]="editing" [(ngModel)]="user.key_type" name="key_type">
+          <mat-option [value]="'cuit'"> Cuit </mat-option>
+          <mat-option [value]="'cuil'"> Cuil </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+      <mat-select placeholder="Inscription type" [disabled]="editing" [(ngModel)]="user.inscript_type" name="inscript_type">
+          <mat-option [value]="'Monotributista'"> Monotributista </mat-option>
+          <mat-option [value]="'Responsable Inscripto'"> Responsable Inscripto </mat-option>
+          <mat-option [value]="'Consumidor final'"> Consumidor final </mat-option>
+        </mat-select>
       </mat-form-field>
       <mat-form-field>
         <input type="text" required autocomplete="off" matInput placeholder="Tel" [(ngModel)]="user.tel" name="tel" class="example-right-align"
@@ -31,19 +44,13 @@
           [disabled]="editing">
       </mat-form-field>
       <mat-form-field>
+          <input type="text" required autocomplete="off" matInput placeholder="Zip Code" [(ngModel)]="user.zip_code" name="zip_code" class="example-right-align"
+            [disabled]="editing">
+        </mat-form-field>
+      <mat-form-field>
         <input type="text" required autocomplete="off" matInput placeholder="Country" [(ngModel)]="user.country" name="country" class="example-right-align"
           [disabled]="editing">
       </mat-form-field>
-      <mat-form-field>
-        <mat-select placeholder="Role" name="role" [(ngModel)]="user.role" [disabled]="editing">
-          <mat-option *ngFor="let role of roles" [value]="role.id"> {{ role.name }} </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field *ngIf="user.wh_id || user.role === 1">
-          <mat-select [required]="user.role === 1" placeholder="Warehouse" name="wh" [(ngModel)]="user.wh_id" [disabled]="editing">
-            <mat-option *ngFor="let wh of warehouses" [value]="wh.id"> {{ wh.name }} </mat-option>
-          </mat-select>
-        </mat-form-field>
       <mat-form-field>
         <input type="password" autocomplete="off" matInput placeholder="Password" [(ngModel)]="password" name="password"
           class="example-right-align" [disabled]="editing">
@@ -51,6 +58,16 @@
       <mat-form-field>
         <input type="password" autocomplete="off" matInput placeholder="Repeat password" [(ngModel)]="password2" name="password2"
           class="example-right-align" [disabled]="editing">
+      </mat-form-field>
+      <mat-form-field>
+          <mat-select placeholder="Role" name="role" [(ngModel)]="user.role" [disabled]="editing">
+            <mat-option *ngFor="let role of roles" [value]="role.id"> {{ role.name }} </mat-option>
+          </mat-select>
+        </mat-form-field>
+      <mat-form-field *ngIf="user.wh_id || user.role === 1">
+        <mat-select [required]="user.role === 1" placeholder="Warehouse" name="wh" [(ngModel)]="user.wh_id" [disabled]="editing">
+          <mat-option *ngFor="let wh of warehouses" [value]="wh.id"> {{ wh.name }} </mat-option>
+        </mat-select>
       </mat-form-field>
       <div style="width:100%">
           <mat-checkbox class="example-margin" name="ask_change_info" [(ngModel)]="ask_change_info"> ask to change info? </mat-checkbox>

@@ -30,18 +30,21 @@ export class UsersComponent implements OnInit, OnDestroy {
   fileUploader = '';
   roles = [];
   warehouses = [];
+  dragging = false;
   cols = [
-    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, type: '', cell: (element) => `${element.actions}` },
-    { columnDef: 'id', header: 'User ID', type: '', cell: (element) => `${element.id}` },
-    { columnDef: 'name', header: 'Name', type: '', cell: (element) => `${element.name ? element.name : ''}` },
-    { columnDef: 'tel', header: 'Phone', type: '', cell: (element) => `${element.tel ? element.tel : ''}` },
-    { columnDef: 'address', header: 'Address', type: '', cell: (element) => `${element.address ? element.address : ''}` },
-    { columnDef: 'city', header: 'City', type: '', cell: (element) => `${element.city ? element.city : ''}` },
-    { columnDef: 'country', header: 'Country', type: '', cell: (element) => `${element.country ? element.country : ''}` },
-    { columnDef: 'cuit', header: 'Cuit', type: '', cell: (element) => `${element.cuit ? element.cuit : ''}` },
-    { columnDef: 'username', header: 'Username', type: '', cell: (element) => `${element.username ? element.username : ''}` },
-    { columnDef: 'role_name', header: 'Role', type: '', cell: (element) => `${element.role_name ? element.role_name : ''}` },
-    { columnDef: 'wh_name', header: 'Wh', type: '', cell: (element) => `${element.wh_name ? element.wh_name : ''}` },
+    { columnDef: 'actions', header: 'Actions', showEdit: true, showDelete: true, showStockRoom: true, size:'small', type: '', cell: (element) => `${element.actions}` },
+    { columnDef: 'id', header: 'User ID', size:'small', type: '', cell: (element) => `${element.id}` },
+    { columnDef: 'name', header: 'Name',  size:'', type: '', cell: (element) => `${element.name ? element.name : ''}` },
+    { columnDef: 'tel', header: 'Phone',  size:'', type: '', cell: (element) => `${element.tel ? element.tel : ''}` },
+    { columnDef: 'address', header: 'Address',  size:'', type: '', cell: (element) => `${element.address ? element.address : ''}` },
+    { columnDef: 'zip_code', header: 'Zip Code',  size:'small', type: '', cell: (element) => `${element.zip_code ? element.zip_code : ''}` },
+    { columnDef: 'city', header: 'City',  size:'', type: '', cell: (element) => `${element.city ? element.city : ''}` },
+    { columnDef: 'country', header: 'Country',  size:'', type: '', cell: (element) => `${element.country ? element.country : ''}` },
+    { columnDef: 'id_key', header: 'Cuit/Cuil',  size:'', type: '', cell: (element) => `${element.id_key ? `${element.key_type}  ${element.id_key}` : ''}` },
+    { columnDef: 'inscript_type', header: 'Inscript',  size:'', type: '', cell: (element) => `${element.inscript_type ? element.inscript_type : ''}` },
+    { columnDef: 'username', header: 'Username',  size:'', type: '', cell: (element) => `${element.username ? element.username : ''}` },
+    { columnDef: 'role_name', header: 'Role',   size:'small', type: '', cell: (element) => `${element.role_name ? element.role_name : ''}` },
+    { columnDef: 'wh_name', header: 'Wh',  size:'', type: '', cell: (element) => `${element.wh_name ? element.wh_name : ''}` },
   ];
   constructor(private _db: AngularFirestore,
     private _worker: WorkersService,
@@ -116,7 +119,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         title: `${title} User`,
         confirmBtn: title,
         cancelBtn: 'Cancel'
-      }, width: '500px'
+      }, width: '800px'
     });
   }
 
@@ -141,6 +144,25 @@ export class UsersComponent implements OnInit, OnDestroy {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       })).join(' ');
     }
+  }
+
+  onDrop(event) {
+    event.preventDefault();
+    event['target']['files'] = event.dataTransfer.files;
+    this.dragging = false;
+    this.parseXLS(event);
+  }
+
+  onDragOver(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.dragging = true;
+  }
+
+  onDragLeave(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.dragging = false;
   }
 
   parseXLS = (evt: any) => {
@@ -249,11 +271,11 @@ export class UsersComponent implements OnInit, OnDestroy {
           customer.updatedInfo = false;
         }
 
-        if (customer.update && tbDataCustomer && tbDataCustomer.username !== customer.username) {
+        if (customer.deleted === false && customer.update && tbDataCustomer && tbDataCustomer.username !== customer.username) {
           updateUsernameArray.push(this._authService.updateUsername(tbDataCustomer.username, customer.username, tbDataCustomer.password));
         }
 
-        if (customer.deleted) {
+        if (customer.deleted && customer.update ) {
           deleteCustomerPromise.push(this._authService.deleteUserByXLS(customer));
         } else {
           const ref = this._db.collection('users').doc(`${customer.id}`).ref;
@@ -267,7 +289,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       .then(res => console.log(res))
       .catch(err => console.log(err));
     }
-
+    
     customerBatch.commit().then(res => {
       this.infoService.showMessage(`
       <ul>
@@ -277,15 +299,15 @@ export class UsersComponent implements OnInit, OnDestroy {
       </ul>
       `);
       if (deleteCustomerPromise.length) {
+        this.infoService.showMessage(`
+        <ul>
+          <li><p>Getting data... Finished </p></li>
+          <li><p>Preparing data... Finished </p></li>
+          <li><p>Deleting ${deleteCustomerPromise.length} users... Finished</p></li>
+        </ul>
+        `);
         Promise.all(deleteCustomerPromise)
           .then(() => {
-            this.infoService.showMessage(`
-            <ul>
-              <li><p>Getting data... Finished </p></li>
-              <li><p>Preparing data... Finished </p></li>
-              <li><p>Deleting ${deleteCustomerPromise.length} users... Finished</p></li>
-            </ul>
-            `);
             this.finishProccesing();
           })
           .catch(err => console.log(err));
@@ -322,6 +344,8 @@ export class UsersComponent implements OnInit, OnDestroy {
       delete user.ask_change_info;
       delete user.updated_info;
       delete user.update;
+      delete user.deleted;
+      delete user.checked;
     });
     const today = this.moment().format('DD_MM_YYYY');
     const worksheet: any = XLSX.utils.json_to_sheet(users.sort((row1, row2) => Number(row1.id) - Number(row2.id)), {
@@ -334,7 +358,10 @@ export class UsersComponent implements OnInit, OnDestroy {
         'wh_id',
         'wh_name',
         'tel',
-        'cuit',
+        'id_key',
+        'key_type',
+        'inscript_type',
+        'zip_code',
         'address',
         'city',
         'country',

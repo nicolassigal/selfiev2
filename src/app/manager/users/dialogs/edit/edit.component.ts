@@ -42,7 +42,12 @@ export class UserDialogComponent implements OnInit {
     wh_name: null,
     updatedInfo: false,
     ask_change_info: false,
-    ask_change_pwd: false
+    ask_change_pwd: false,
+    zip_code: null,
+    inscript_type: null,
+    key_type:null,
+    id_key: null,
+
   };
 
   constructor(
@@ -70,7 +75,7 @@ export class UserDialogComponent implements OnInit {
     this._dialogRef.close();
   }
 
-  update = () => {
+  update = async () => {
     const exists = this.users.some(user => user.username === this.user.username || user.email === this.user.username);
     this.user.updatedInfo = this.ask_change_info ? false : true;
     this.user.ask_change_info = this.ask_change_info ? true : false;
@@ -84,25 +89,18 @@ export class UserDialogComponent implements OnInit {
           this.user.email = this.user.username;
           this.user.role = this.user.role || 0;
           this.user.password = this.password;
-          this.secondaryApp.auth().createUserWithEmailAndPassword(this.user.username, this.password)
-            .then(res => {
-              this.secondaryApp.auth().signOut();
-              this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-                .then(res => {
-                  this.editing = false;
-                  this.closeDialog();
-                })
-                .catch(err => {
-                  this.editing = false;
-                  console.log(err);
-                  this.errors = err.message;
-                });
-            })
-            .catch(err => {
+          try {
+            await this.secondaryApp.auth().createUserWithEmailAndPassword(this.user.username, this.password)
+            await this.secondaryApp.auth().signOut();
+            await this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+            this.editing = false;
+            this.closeDialog();
+            return;
+          } catch (err) {
               this.editing = false;
               console.log(err);
               this.errors = err.message;
-            });
+          }
         } else {
           this.editing = false;
           this.errors = 'E-mail already exists';
@@ -115,74 +113,52 @@ export class UserDialogComponent implements OnInit {
       this.editing = true;
       this.errors = '';
       if (this.password && this.password2 && this.password === this.password2) {
-        this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password).then(res => {
-          this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
-          this.secondaryApp.auth().currentUser.updatePassword(this.password).then(res => {
-            this.secondaryApp.auth().signOut();
-            this.user.password = this.password,
-            this.user.updatedInfo = this.ask_change_info ? false : true;
-            this.user.ask_change_info = this.ask_change_info ? true : false;
-            this.user.ask_change_pwd = this.ask_change_pwd ? true : false;
-            this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-              .then(res => {
-                this.editing = false;
-                this.closeDialog();
-              })
-              .catch(err => {
-                this.editing = false;
-                console.log(err);
-                this.errors = err.message;
-              });
-          }).catch(err => {
-            this.editing = false;
-            console.log(err);
-            this.errors = err.message;
-          });
-        }).catch(err => {
+        try {
+          await this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password)
+          await this.secondaryApp.auth().currentUser.updateEmail(this.user.username)
+          await this.secondaryApp.auth().currentUser.updatePassword(this.password)
+          await this.secondaryApp.auth().signOut();
+          this.user.password = this.password,
+          this.user.updatedInfo = this.ask_change_info ? false : true;
+          this.user.ask_change_info = this.ask_change_info ? true : false;
+          this.user.ask_change_pwd = this.ask_change_pwd ? true : false;
+          await this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+          this.editing = false;
+          this.closeDialog();
+        } catch (err) {
           this.editing = false;
           console.log(err);
           this.errors = err.message;
-        });
-        })
+        }
       } else {
         if (this.data.row.username !== this.user.username) {
-          this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password).then(res => {
-            this.secondaryApp.auth().currentUser.updateEmail(this.user.username).then(res => {
-              this.user.email = this.user.username;
-              this.user.updatedInfo = this.ask_change_info ? false : true;
-              this.user.ask_change_info = this.ask_change_info ? true : false;
-              this.user.ask_change_pwd = this.ask_change_pwd ? true : false;
-              this.secondaryApp.auth().signOut();
-              this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-                .then(res => {
-                  this.editing = false;
-                  this.closeDialog();
-                })
-                .catch(err => {
-                  this.editing = false;
-                  console.log(err);
-                  this.errors = err.message;
-                });
-            }).catch(err => {
-              this.editing = false;
-              console.log(err);
-              this.errors = err.message;
-            });
-          }).catch(err => {
+          try {
+            await this.secondaryApp.auth().signInWithEmailAndPassword(this.data.row.username, this.data.row.password)
+            await this.secondaryApp.auth().currentUser.updateEmail(this.user.username)
+            this.user.email = this.user.username;
+            this.user.updatedInfo = this.ask_change_info ? false : true;
+            this.user.ask_change_info = this.ask_change_info ? true : false;
+            this.user.ask_change_pwd = this.ask_change_pwd ? true : false;
+            await this.secondaryApp.auth().signOut();
+            await this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+            this.editing = false;
+            this.closeDialog();
+          } catch (err) {
             this.editing = false;
             console.log(err);
             this.errors = err.message;
-          });
+          }
         } else {
           this.user.updatedInfo = this.ask_change_info ? false : true;
           this.user.ask_change_info = this.ask_change_info ? true : false;
           this.user.ask_change_pwd = this.ask_change_pwd ? true : false;
-          this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-            .then(res => {
-              this.editing = false;
-              this.closeDialog();
-            })
-            .catch(err => console.log(err));
+          try {
+            await this._db.collection('users').doc(`${this.user.id}`).set(this.user)
+            this.editing = false;
+            this.closeDialog();
+          } catch (err) {
+            console.log(err)
+          }
         }
       }
     }

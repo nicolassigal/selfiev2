@@ -24,6 +24,7 @@ export class HbrTableComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Input('datasrc') datasrc;
+  @Input('className') className;
   @Input('cols') cols;
   @Input('noTotal') noTotal;
   @Input('noProfit') noProfit;

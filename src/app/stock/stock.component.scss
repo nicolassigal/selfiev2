@@ -4,6 +4,25 @@
 .spinner-container {
     height: calc(100% - 64px);
 }
+.dragging {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    position: absolute;
+    top:0;
+    z-index: 999999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .mat-icon {
+        color: #3b4fbd;
+        font-size: 180px;
+        width: 180px;
+        height: 180px;
+    }
+}
 .shipping {
     .cta-container {
         display: flex;

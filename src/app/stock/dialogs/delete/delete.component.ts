@@ -49,14 +49,14 @@ export class DeleteStockDialogComponent implements OnInit {
         if(!this.data.rows){
             this.data.row.deleted = 1;
             this.data.row.checked = false;
-            this._db.collection('operations').doc(`${this.data.row.hbr_id}`).set(this.data.row)
+            this._db.collection('operations').doc(`${this.data.row.id}`).set(this.data.row)
                 .then(res => this.closeDialog())
                 .catch(err => console.log(err));
         } else {
             this.data.rows.forEach(row => {
                 row.deleted = 1;
                 row.checked = false;
-                let ref = this._db.collection('operations').doc(`${row.hbr_id}`).ref;
+                let ref = this._db.collection('operations').doc(`${row.id}`).ref;
                 this.operationsBatch.set(ref, row);
             });
             this.operationsBatch.commit()

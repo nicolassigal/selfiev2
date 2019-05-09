@@ -1,4 +1,5 @@
 <div class="users" *ngIf="!loadingData">
+    <div *ngIf="dragging" class="dragging"><mat-icon>cloud_upload</mat-icon></div>
     <form>
             <input #file name="fileUploader" [(ngModel)]="fileUploader" class="ng-hide" (change)="parseXLS($event)" multiple="false" type="file" />
         <div class="btn-container">
@@ -21,13 +22,21 @@
             <mat-icon (click)="onEditRow({}, 'Add')" aria-label="Example icon-button with a heart icon">add</mat-icon>
         </div>
     </form>
-    <app-hbr-table
-    [datasrc]="tableData"
-    [cols]="cols"
-    [noTotal]="true"
-    (editRowEvent)="onEditRow($event)"
-    (stockRoomEvent)="onStockRoomEvent($event)"
-    (deleteRowEvent)="onDeleteRow($event)"></app-hbr-table>
+        <div class="example-container">
+                <app-hbr-table
+                [className]="'big-table'"
+                (drop)="onDrop($event);"
+                (dragover)="onDragOver($event);"
+                (dragleave)="onDragLeave($event);"
+                [datasrc]="tableData"
+                [cols]="cols"
+                [noTotal]="true"
+                (editRowEvent)="onEditRow($event)"
+                (stockRoomEvent)="onStockRoomEvent($event)"
+                (deleteRowEvent)="onDeleteRow($event)">
+            </app-hbr-table>
+        </div>
+        
 </div>
 <div *ngIf="loadingData" class="spinner-container">
         <app-spinner></app-spinner>

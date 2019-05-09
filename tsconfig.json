@@ -8,6 +8,8 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
     "target": "es5",
     "paths": {
       "#notifications": ["src/server/notifications"],

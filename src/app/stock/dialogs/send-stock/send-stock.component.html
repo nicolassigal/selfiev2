@@ -7,39 +7,41 @@
     <mat-dialog-content ngDraggable>
         <div class="form-container">
             <mat-form-field>
-                <mat-select placeholder="Send to Warehouse"  name="wh_id" (ngModelChange)="clearSelect('wh')" [(ngModel)]="box.wh_id" [disabled]="box.id" [required]="!box.customer_id">
+                <mat-select placeholder="Send to Warehouse"  name="wh_id" (ngModelChange)="clearSelect('wh')" [(ngModel)]="box.wh_id"  [required]="!box.customer_id">
                     <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id"> {{ warehouse.name }} </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field>
-                <mat-select placeholder="Send to customer" [required]="!box.wh_id" name="customer_id" (ngModelChange)="clearSelect('customer')" [(ngModel)]="box.customer_id" [disabled]="box.id">
+                <mat-select placeholder="Send to customer" [required]="!box.wh_id" name="customer_id" (ngModelChange)="clearSelect('customer')" [(ngModel)]="box.customer_id">
                     <mat-option *ngFor="let customer of customers" [value]="customer.id"> {{ customer.name }} </mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field *ngIf="!rows.length">
+            <mat-form-field *ngIf="!markedRows.length">
                 <input matInput type="number" min="0" required name="box_qty" (change)="changeQty($event.target.value)" max="maxQty" placeholder="Box Quantity" [(ngModel)]="box.quantity">
             </mat-form-field>
-            <mat-form-field>
+            <!-- TODO REMOVE THIS -->
+            <!-- <mat-form-field>
                 <mat-select placeholder="Courier"  name="courier_id" [(ngModel)]="box.courier_id" [disabled]="box.id">
                     <mat-option *ngFor="let courier of couriers" [value]="courier.id"> {{ courier.name }} </mat-option>
                 </mat-select>
-            </mat-form-field>
+            </mat-form-field> -->
             <mat-form-field>
-                <input matInput placeholder="Tracking" name="tracking" [(ngModel)]="box.tracking" [disabled]="box.id">
+                <input matInput placeholder="Tracking" name="tracking" [(ngModel)]="box.tracking">
             </mat-form-field>
-            <mat-form-field>
+             <!-- TODO REMOVE THIS -->
+            <!-- <mat-form-field>
                 <mat-select placeholder="AWB N°" [(ngModel)]="box.id" name="id" (ngModelChange)="selectAwb(box.id)">
                     <mat-option [value]="''"> Select </mat-option>
                     <mat-option *ngFor="let awb of awbs" [value]="awb.id"> {{ awb.id }} </mat-option>
                 </mat-select>
-            </mat-form-field>
+            </mat-form-field> -->
             <mat-form-field>
-                <input type="date" required matInput [(ngModel)]="box.shipping_date" name="shipping_date" placeholder="Shipping date" [disabled]="box.id">
+                <input type="date" required matInput [(ngModel)]="box.shipping_date" name="shipping_date" placeholder="Shipping date">
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field *ngIf="markedRows.length">
                 <mat-select placeholder="Operation N°" [(ngModel)]="selectedRow" name="id" (ngModelChange)="rowQty = selectedRow.box_qty">
                     <mat-option [value]="''"> Select </mat-option>
-                    <mat-option *ngFor="let row of rows" [value]="row"> {{ row.hbr_id }} </mat-option>
+                    <mat-option *ngFor="let row of markedRows" [value]="row"> {{ row.hbr_id }} </mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field *ngIf="selectedRow">

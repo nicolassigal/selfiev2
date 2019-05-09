@@ -4,6 +4,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
 import { take } from 'rxjs/operators';
+import { UtilsService } from '../../../shared/utils.service';
 
 @Component({
     templateUrl: './edit-stock.component.html',
@@ -16,6 +17,7 @@ import { take } from 'rxjs/operators';
     couriers = [];
     isEditing = false;
     box = {
+      id: null,
       date: null,
       hbr_id: null,
       checked: false,
@@ -31,7 +33,8 @@ import { take } from 'rxjs/operators';
       description: null,
       deleted: 0,
       delivered: 0,
-      tracking: ''
+      tracking: '',
+      wr0: null
      };
     moment = _moment;
     constructor(
@@ -39,6 +42,7 @@ import { take } from 'rxjs/operators';
       private _dialog: MatDialog,
       private _db: AngularFirestore,
       private _dataService: DataService,
+      private _utils: UtilsService,
       @Inject(MAT_DIALOG_DATA) public data: any) {}
 
 
@@ -60,16 +64,16 @@ import { take } from 'rxjs/operators';
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh => wh.id === this.box.wh_id)[0].name : null;
       this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;
-
-      if (!this.box.hbr_id) {
-        this.box.hbr_id = this.operations.length ? Number(this.operations[0].hbr_id) + 1 : 1;
+      if (!this.box.id) {
+        this.box.id = this._utils.getId(this.operations);
         this.box.deleted = 0;
         this.box.delivered = 0;
         this.box.initial_qty = this.box.box_qty;
       }
 
+      this.box.hbr_id = this.operations.length ? Number(this.operations[0].hbr_id) + 1 : 1;
       this._db.collection('operations')
-        .doc(`${this.box.hbr_id}`)
+        .doc(`${this.box.id}`)
         .set(this.box)
         .then(res => {
           this.isEditing = false;

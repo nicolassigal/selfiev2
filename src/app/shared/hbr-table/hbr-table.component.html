@@ -1,4 +1,4 @@
-  <mat-table #table matSort [dataSource]="dataSource">
+  <mat-table #table matSort [dataSource]="dataSource" [ngClass]="className">
     <!-- Generic column definition -->
     <div *ngFor="let column of columns">
 
@@ -9,8 +9,8 @@
         </mat-cell>
       </ng-container>
       <ng-container *ngIf="column.header === 'Actions' && column.columnDef==='actions'" [matColumnDef]="column.columnDef">
-        <mat-header-cell *matHeaderCellDef>{{ column.header }}</mat-header-cell>
-        <mat-cell *matCellDef="let row">
+        <mat-header-cell *matHeaderCellDef [ngClass]="column.size == 'small'? 'small':''">{{ column.header }}</mat-header-cell>
+        <mat-cell *matCellDef="let row" [ngClass]="column.size == 'small'? 'small':''">
         <button mat-icon-button [matMenuTriggerFor]="appMenu">
             <mat-icon class="more-mobile">more_vert</mat-icon>
           </button>
@@ -25,8 +25,8 @@
         </mat-cell>
       </ng-container>
       <ng-container *ngIf="column.header !== 'Actions' && column.header !== 'Select'" [matColumnDef]="column.columnDef">
-        <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column.header }}</mat-header-cell>
-        <mat-cell *matCellDef="let row">
+        <mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="column.size == 'small'? 'small':''">{{ column.header }}</mat-header-cell>
+        <mat-cell *matCellDef="let row" [ngClass]="column.size == 'small'? 'small':''">
           <span class="mobile-label">{{ column.header }}: </span>
           <span *ngIf="column.cell(row)
           && column.type !== 'value'

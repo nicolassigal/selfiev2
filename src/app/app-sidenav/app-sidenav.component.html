@@ -7,8 +7,8 @@
         </mat-toolbar>
         <mat-nav-list>
             <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/stock">Stock</a>
-            <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/delivered">Delivered</a>
-            <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/transit">Transit</a>
+            <!-- <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/delivered">Delivered</a> -->
+            <!-- <a *ngIf="checkRole([0, 1, 2])" mat-list-item routerLink="/dashboard/transit">Transit</a> -->
             <a *ngIf="checkRole([2])" mat-list-item routerLink="/dashboard/users">Users</a>
             <a *ngIf="checkRole([2])" mat-list-item routerLink="/dashboard/warehouses">Warehouses</a>
             <a *ngIf="checkRole([2])" mat-list-item routerLink="/dashboard/couriers">Couriers</a>
