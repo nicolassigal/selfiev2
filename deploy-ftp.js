@@ -57,6 +57,6 @@ ftpDeploy.on("uploading", function(data) {
     const percentText = chalk.green.bold(`${percent}%`);
     const progressArr = progress.split("");
     for (var i = 0; i < percent; i++) { progressArr[i] = "#"; }
-    progress = chalk.yellow.bold(progressArr.join(""));
+    progress = progressArr.join("");
     process.stdout.write(`\u001b[2K\u001b[0E[${progress}][${percentText}][ ${total} files ]`);
 });

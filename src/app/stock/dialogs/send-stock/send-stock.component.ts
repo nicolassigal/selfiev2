@@ -25,9 +25,7 @@ export class SendStockDialogComponent implements OnInit {
     valuePerUnit = 0;
     from;
     to;
-    //TODO Remove this
-    //awbs = [];
-    //couriers = [];
+
     @ViewChild('mat-dialog-container') dialog;
     constructor(
         private _dialogRef: MatDialogRef<any>,
