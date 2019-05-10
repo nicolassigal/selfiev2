@@ -80,10 +80,11 @@ export class StockComponent implements OnInit, OnDestroy {
       { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
       { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
       { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-      { columnDef: 'date', header: 'WH In date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
+      { columnDef: 'date', header: 'Entry date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
       { columnDef: 'entry', header: 'Entry Point', type: '', cell: (element) => {
         return `${element.entry_point && element.entry_point.name ? element.entry_point.name : ''}`
       }},
+      { columnDef: 'shipping_date', header: 'Shipping Date', type: 'date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}` },
       { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.dest_type ?` In ${element.dest_type}` : ''}` }
     );
 
@@ -114,7 +115,6 @@ export class StockComponent implements OnInit, OnDestroy {
     .subscribe(couriers => this.couriers = couriers);
     this._dataService.stockSubject.subscribe(data => {
       this.tableData = data;
-      console.log(data);
       this.filterData(this.tableData);
     });
 
@@ -207,6 +207,7 @@ export class StockComponent implements OnInit, OnDestroy {
     }
 
     this.tableData = data;
+    console.log(data);
   }
 
   onDrop(event) {
@@ -407,6 +408,8 @@ export class StockComponent implements OnInit, OnDestroy {
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
       entry.courier = entry.courier && entry.courier.length ? this.capitalizeText(entry.courier) : null;
       entry.date = entry.date && this.moment(entry.date, 'DD-MM-YYYY').isValid() ? this.moment(entry.date).unix() : null;
+      entry.entry_point = {name: entry.warehouse, id: entry.wh_id};
+      entry.dest_type = entry.dest_type.length ? entry.dest_type : "Warehouse";
 
       entry.received_date = entry.received_date ? this.moment(entry.received_date).unix() : null;
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
@@ -463,6 +466,7 @@ export class StockComponent implements OnInit, OnDestroy {
     let ordered = JSON.parse(JSON.stringify(this.tableData));
     ordered.map(row => {
       delete row.checked;
+      delete row.entry_point;
       delete row.id;
       delete row.WR0;
       row.date = row.date ? this.moment.unix(row.date).format('DD-MM-YYYY') : null;

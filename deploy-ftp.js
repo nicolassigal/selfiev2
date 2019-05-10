@@ -1,6 +1,11 @@
 const FtpDeploy = require('ftp-deploy');
+const chalk = require('chalk');
 const ftpDeploy = new FtpDeploy();
 const env = process.env.NODE_ENV === 'production' ? 'prod':'beta';
+let progress = "";
+let percentChar = "#";
+for (var i = 0; i < 100; i++) { progress = progress + "-"; };
+
 const credentials = {
     beta: {
         user: "nsigal@beta.tucourier.com.ar",
@@ -46,5 +51,12 @@ ftpDeploy.on("uploading", function(data) {
     const total = data.totalFilesCount; // total file count being transferred
     const transfered = data.transferredFileCount+1; // number of files transferred
     const filename = data.filename; // partial path with filename being uploaded
-    process.stdout.write(`\u001b[2K\u001b[0E[transferred: ${transfered}/${total}] [file: ${filename} ]`);
+    const transfer = chalk.yellow.bold(`[transferred: ${transfered}/${total}]`);
+    const file = chalk.green.bold(`[file: ${filename}]`);
+    const percent = Math.ceil((Number(transfered)/Number(total))*100);
+    const percentText = chalk.green.bold(`${percent}%`);
+    const progressArr = progress.split("");
+    for (var i = 0; i < percent; i++) { progressArr[i] = "#"; }
+    progress = chalk.yellow.bold(progressArr.join(""));
+    process.stdout.write(`\u001b[2K\u001b[0E[${progress}][${percentText}][ ${total} files ]`);
 });

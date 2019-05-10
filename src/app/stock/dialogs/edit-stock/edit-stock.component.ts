@@ -34,7 +34,9 @@ import { UtilsService } from '../../../shared/utils.service';
       deleted: 0,
       delivered: 0,
       tracking: '',
-      wr0: null
+      wr0: null,
+      dest_type: '',
+      entry_point: {name:'',id:''}
      };
     moment = _moment;
     constructor(
@@ -47,7 +49,7 @@ import { UtilsService } from '../../../shared/utils.service';
 
 
     ngOnInit() {
-      this.box = { ...this.data.row };
+      this.box = {...this.box, ...this.data.row };
       this.box.courier_id = Number(this.box.courier_id);
       this.box.wh_id = Number(this.box.wh_id);
       this.box.customer_id = Number(this.box.customer_id);
@@ -63,6 +65,8 @@ import { UtilsService } from '../../../shared/utils.service';
       this.box.checked = false;
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh => wh.id === this.box.wh_id)[0].name : null;
+      this.box.entry_point = {name: this.box.warehouse, id: this.box.wh_id};
+      this.box.dest_type = this.box.dest_type.length ? this.box.dest_type : "Warehouse";
       this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;
       if (!this.box.id) {
         this.box.id = this._utils.getId(this.operations);
