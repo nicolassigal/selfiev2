@@ -54,10 +54,9 @@
     </form>
   </div>
     <app-hbr-table 
-      (drop)="onDrop($event);"
-      (dragover)="onDragOver($event);"
-      (dragleave)="onDragLeave($event);"
-      ondrop="parseXLS(event)" 
+    (drop)="onDrop($event);"
+    (dragover)="onDragOver($event);"
+    (dragleave)="onDragLeave($event);"
       [datasrc]="tableData" 
       [cols]="cols" 
       (editRowEvent)="onEditRow($event)"

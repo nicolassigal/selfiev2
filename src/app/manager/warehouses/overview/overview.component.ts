@@ -25,15 +25,21 @@ export class WHOverviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this._sidenav.setTitle('Warehouses Overview');
     this.warehouses = this._dataService.getWarehouses();
+    this.warehouses = this.filterWharehouses(this.warehouses);
     this._dataService.warehouseSubject
     .pipe(takeUntil(componentDestroyed(this)))
     .subscribe(warehouses => {
-      this.warehouses = warehouses;
+      this.warehouses = this.filterWharehouses(warehouses);
       this.getData();
     });
     if (this.warehouses.length) {
       this.getData();
     }
+  }
+
+  filterWharehouses = (warehouses) => {
+    const whs = warehouses.filter(warehouse => warehouse.box_qty > 0 ? warehouse : null);
+    return whs;
   }
 
   ngOnDestroy() {

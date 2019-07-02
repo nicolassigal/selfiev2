@@ -16,7 +16,7 @@ export class DeepSearchComponent implements OnInit {
     { label: 'Hbr id', query: 'hbr_id' },
     { label: 'Warehouse id', query: 'wh_id' },
     { label: 'Customer id', query: 'customer_id' },
-    { label: 'Courier id', query: 'courier_id' }
+    { label: 'Customer name', query: 'customer' }
   ];
 
   defaultLabel: string = 'Search By ...';
@@ -24,12 +24,8 @@ export class DeepSearchComponent implements OnInit {
   queryText : any = '';
   searched = false;
   stock = [];
-  delivered = [];
-  transit = [];
 
   stockData = [];
-  awbsData = [];
-  deliveredData = [];
   constructor(
     private _sidenav: SidenavService,
     private _data: DataService,
@@ -49,7 +45,7 @@ export class DeepSearchComponent implements OnInit {
       this.queryText = data.id;
       if (data.query && data.id) {
         this.queryParam = data.query;
-        this.queryText = Number(data.id);
+        this.queryText = data.id;
         this.getData();
       }
     });
@@ -62,11 +58,9 @@ export class DeepSearchComponent implements OnInit {
 
   deepSearch = (f: NgForm) => {
     this.stock = [];
-    this.delivered = [];
-    this.transit = [];
     if (this.queryParam && this.queryText) {
       let {query, id} = this._route.snapshot.params;
-      if(this.queryParam !== query && Number(this.queryText) !== Number(id)){
+      if(this.queryParam !== query && this.queryText != id){
       this._router.navigateByUrl(`/dashboard/deep-search/${this.queryParam}/${this.queryText}`);
       } else {
         this.getData();
@@ -75,43 +69,19 @@ export class DeepSearchComponent implements OnInit {
   }
 
   getData = () => {
+    
     let stock = this.stockData.length ? this.stockData : this._data.getStock();
-    let delivered = this.deliveredData.length ? this.deliveredData : this._data.getDelivered();
-    let awbs = this.awbsData.length ? this.awbsData : this._data.getAwbs();
-    let id = Number(this.queryText);
+    let id = this.queryText;
+
     this._dataService.stockSubject.subscribe(data => stock = data)
-    if (this.queryParam === 'hbr_id') {
-      stock = stock.filter(operation => (operation[this.queryParam] == id || operation['linked_op'] == id) && operation.delivered == 0);
+    if (this.queryParam!=="customer") {
+      stock = stock.filter(operation => (operation[this.queryParam] == id));
       this.stock.push(...stock);
-
-      delivered = delivered.filter(delivered => delivered[this.queryParam] == id  || delivered['linked_op'] == id);
-      this.delivered.push(...delivered);
-
-      awbs = awbs.filter(awb => {
-        let processes = [];
-        processes = awb.processes.filter(process => process[this.queryParam] == id || process['linked_op'] == id);
-        if (processes.length) {
-          awb.processes = processes;
-          return awb;
-        }
-      });
-      this.transit.push(...awbs);
     } else {
-      stock = stock.filter(operation => operation[this.queryParam] == id && operation.delivered == 0);
+      stock = stock.filter(operation => (operation[this.queryParam].toLowerCase().includes(id.toLowerCase())? operation : null));
       this.stock.push(...stock);
-
-      delivered = delivered.filter(delivered => delivered[this.queryParam] == id);
-      this.delivered.push(...delivered);
-
-      awbs.map(awb => {
-        let processes = [];
-        processes = awb.processes.filter(process => process[this.queryParam] == id);
-        if (processes.length) {
-          processes.map(process => process['awb_id'] = awb.id);
-          this.transit.push(...processes);
-        }
-      });
     }
+
     this.searched = true;
   }
 }

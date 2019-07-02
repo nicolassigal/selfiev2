@@ -5,6 +5,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import * as _moment from 'moment';
 import { take } from 'rxjs/operators';
 import { UtilsService } from '../../../shared/utils.service';
+import { NotificationService } from '../../../shared/notification.service';
 
 @Component({
     templateUrl: './edit-stock.component.html',
@@ -14,7 +15,6 @@ import { UtilsService } from '../../../shared/utils.service';
     warehouses = [];
     customers = [];
     operations = [];
-    couriers = [];
     isEditing = false;
     box = {
       id: null,
@@ -45,6 +45,7 @@ import { UtilsService } from '../../../shared/utils.service';
       private _db: AngularFirestore,
       private _dataService: DataService,
       private _utils: UtilsService,
+      private _notify: NotificationService,
       @Inject(MAT_DIALOG_DATA) public data: any) {}
 
 
@@ -55,32 +56,45 @@ import { UtilsService } from '../../../shared/utils.service';
       this.box.customer_id = Number(this.box.customer_id);
       this.customers = this.data.customers.sort((a, b) => a.name.localeCompare(b.name));
       this.warehouses = this.data.warehouses.sort((a, b) => a.name.localeCompare(b.name));
-      this.couriers = this.data.couriers.sort((a, b) => a.name.localeCompare(b.name));
       this.box.date = this.box.date ? this.moment.unix(this.box.date).format('YYYY-MM-DD') : this.moment().format('YYYY-MM-DD');
       this.operations = this._dataService.getStock();
     }
 
-    update = () => {
+    update = async () => {
       this.isEditing = true;
       this.box.checked = false;
       this.box.date = this.box.date ? this.moment(this.box.date).unix() : null;
       this.box.warehouse = this.box.wh_id ? this.warehouses.filter(wh => wh.id === this.box.wh_id)[0].name : null;
       this.box.entry_point = {name: this.box.warehouse, id: this.box.wh_id};
       this.box.dest_type = this.box.dest_type.length ? this.box.dest_type : "Warehouse";
-      this.box.customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0].name : null;
+      const customer = this.box.customer_id ? this.customers.filter(customer => customer.id === this.box.customer_id)[0] : null;
+      this.box.customer = customer.name;
+      let isNew=false;
       if (!this.box.id) {
+        isNew = true;
         this.box.id = this._utils.getId(this.operations);
         this.box.deleted = 0;
         this.box.delivered = 0;
         this.box.initial_qty = this.box.box_qty;
       }
 
-      this.box.hbr_id = this.operations.length ? Number(this.operations[0].hbr_id) + 1 : 1;
+      if(!this.box.hbr_id){
+        isNew = true;
+        this.box.hbr_id = this.operations.length ? Number(this.operations[0].hbr_id) + 1 : 1;
+      }
+      
       this._db.collection('operations')
         .doc(`${this.box.id}`)
         .set(this.box)
-        .then(res => {
+        .then(async (res) => {
           this.isEditing = false;
+          if(isNew){ 
+            try {
+            await this._notify.firstEntry(customer.name, customer.email,this.box.warehouse, this.box.tracking, this.box.hbr_id);
+            } catch(e) {
+              console.error(e);
+            } 
+          }
           this._dialogRef.close();
         })
         .catch(err => console.log(err));

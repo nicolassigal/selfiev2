@@ -143,28 +143,27 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loggingin = false;
   }
 
-  register = () => {
+  register = async () => {
     if (this.email && this.password && this.password2) {
       if (this.password === this.password2) {
         this.registering = true;
-        this.auth.auth.createUserWithEmailAndPassword(this.email, this.password)
-          .then(res => {
-            this.user.email = this.email;
-            this.user.username = this.email;
-            this.user.password = this.password;
-            this.user.role = 0;
-            this.user.id = this._utils.getId(this.users);
-            this.user.updatedInfo = true;
-            this._db.collection('users').doc(`${this.user.id}`).set(this.user)
-              .then(() => {
-                this._notificationService.notify(this.user.email, this.template, this.subject).subscribe(() => {
-                  this.loggingin = false;
-                  this.error = '';
-                  this.registering = false;
-                  this.registered = true;
-                });
-              }).catch(err => console.log(err));
-          }).catch(err => this.handleErrors(err));
+        try {
+          await this.auth.auth.createUserWithEmailAndPassword(this.email, this.password);
+          this.user.email = this.email;
+          this.user.username = this.email;
+          this.user.password = this.password;
+          this.user.role = 0;
+          this.user.id = this._utils.getId(this.users);
+          this.user.updatedInfo = true;
+          await this._db.collection('users').doc(`${this.user.id}`).set(this.user);
+          await this._notificationService.notify(this.user.email, this.template, this.subject);
+          this.loggingin = false;
+          this.error = '';
+          this.registering = false;
+          this.registered = true;
+        } catch (e) {
+          this.handleErrors(e);
+        }
       } else {
         this.error = 'Passwords doesnt match';
       }

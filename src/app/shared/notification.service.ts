@@ -9,7 +9,38 @@ export class NotificationService {
     private _http: Http
   ) { }
 
-  notify = (to, body, subject, altBody?) => {
+  firstEntry = async (name, email, warehouse, tracking, hbr_id) => {
+    const subject = `¡${name} Le damos la bienvenida a tu pedido!`;
+    const body = `
+      <p>Estimado <b>${name}</b> hemos recibido tus envios en nuestro deposito <b>${warehouse}</b>, la misma arribo el dia de la fecha con el tracking <b>${tracking}</b>. En breve estaremos armando la ruta de tus envios,identificado bajo el ID <b>${hbr_id}</b></p>
+      <p>Muchas Gracias por confiar en hbr tucourier.</p>`;
+
+      try {
+        await this.notify(email, body, subject);
+      } catch(e) {
+        console.error(e);
+      }  
+      return;
+  }
+
+  countryArrival = async (name, email, hbr_id) => {
+    const subject = `${name}, tu pedido ya esta en Buenos Aires!`;
+    const body = `
+      <p>Estimado cliente, tu envio ${hbr_id} ha arribado a nuestro deposito de Buenos Aires, te estaremos contactando en breve para coordinar la entrega del mismo.</p>
+      <p>Muchas Gracias por confiar en hbr tucourier.</p>`;
+
+      try {
+        await this.notify(email, body, subject);
+      } catch(e) {
+        console.error(e);
+      }
+      return;
+  }
+
+  notify = async (to, body, subject, altBody?) => {
+    const prodEnv = sessionStorage.getItem('env');
+    const baseUrl = prodEnv ? 'https://www.tucourier.com.ar' : 'https://beta.tucourier.com.ar';
+    const address = prodEnv ? to : 'nicolas.sigal@gmail.com';
     const template = `
     <!DOCTYPE html>
       <html lang="en">
@@ -49,7 +80,12 @@ export class NotificationService {
         </body>
       </html>
     `;
-    const data = { to: to, body: template, subject: subject, altBody: altBody || '' };
-    return this._http.post('https://www.tucourier.com.ar/selfie-v2/server/notifications/notify.php', data);
+    const data = { to: address, body: template, subject: subject, altBody: altBody || '' };
+    try {
+      await this._http.post('/selfie-v2/server/notifications/notify.php', data).toPromise();
+      return;
+    } catch (e) {
+      console.error(`Email could not been sent: ${e}`);
+    }
   }
 }

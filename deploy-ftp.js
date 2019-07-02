@@ -9,7 +9,7 @@ for (var i = 0; i < 100; i++) { progress = progress + "-"; };
 const credentials = {
     beta: {
         user: "nsigal@beta.tucourier.com.ar",
-        password: "",
+        password: "Moi10mois!!!..",
         host: "ftp.tucourier.com.ar",
         port: 21,
         localRoot: __dirname + '/dist/selfiev2',
@@ -28,16 +28,7 @@ const config = {
     ...credentials[env],
     include: ['*', '**/*'],      // this would upload everything except dot files
     //include: ['*.php', 'dist/*'],
-    exclude: [
-        "node_modules/**",
-        "node_modules/**/.*",
-        "dist/selfiev2/server/",
-        "dist/selfiev2/server/**",
-        "dist/selfiev2/server/**/.*",
-        "dist/selfiev2/xlsx/",
-        "dist/selfiev2/xlsx/**",
-        "dist/selfiev2/xlsx/**/.*",
-    ],
+    exclude: ["dist/**/*.map", "node_modules/**", "node_modules/**/.*","dist/selfiev2/server/**", ,"dist/selfiev2/xlsx/**"],
     deleteRemote: true,              // delete ALL existing files at destination before uploading, if true
     forcePasv: true                 // Passive mode is forced (EPSV command is not sent)
 }

@@ -14,7 +14,5 @@
     <button (click)="deepSearch(f)" mat-raised-button color="primary"><mat-icon>search</mat-icon> Search </button>
   </form>
   <app-results class="results" *ngIf="stock.length" [data]="stock" [title]="'Stock'" [route]="'stock'"></app-results>
-  <app-results class="results" *ngIf="transit.length" [data]="transit" [title]="'Transit'" [route]="'transit'"></app-results>
-  <app-results class="results" *ngIf="delivered.length" [data]="delivered" [title]="'Delivered'" [route]="'delivered'"></app-results>
-  <h3 *ngIf="searched && (!stock.length && !transit.length && !delivered.length)">No Results</h3>
+  <h3 *ngIf="searched && !stock.length">No Results</h3>
 </div>

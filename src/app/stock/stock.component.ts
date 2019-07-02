@@ -67,24 +67,23 @@ export class StockComponent implements OnInit, OnDestroy {
     this.cols.push(
       { columnDef: 'hbr_id', header: 'Hbr id', type: '', cell: (element) => `${element.hbr_id}` },
       { columnDef: 'wr0', header: 'WR0', type: '', cell: (element) => `${element.wr0 ? element.wr0 : ''}` },
+      { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
+      { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
+      { columnDef: 'date', header: 'Entry date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
       { columnDef: 'warehouse', header: 'Warehouse', type: '', cell: (element) => `${element.warehouse ? element.warehouse : ''}` },
       { columnDef: 'box_qty', header: 'Box qty.', type: '', cell: (element) => {
         let boxQty = '0';
-        boxQty = element.box_qty && element.box_qty === element.initial_qty ? `${element.box_qty}` : `${element.box_qty}/${element.initial_qty}` ;
+        boxQty = element.box_qty && element.box_qty === element.initial_qty || element.initial_qty === 0? `${element.box_qty}` : `${element.box_qty}/${element.initial_qty}` ;
         return boxQty;
       }},
       { columnDef: 'total_weight', header: 'Total Weight', type: 'weight', cell: (element) => {
         return `${element.total_weight ? element.total_weight : 0}`;
       }},
-
-      { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
-      { columnDef: 'tracking', header: 'Tracking', type: '', cell: (element) => `${element.tracking ? element.tracking : ''}` },
-      { columnDef: 'customer', header: 'Customer', type: '', cell: (element) => `${element.customer ? element.customer : ''}` },
-      { columnDef: 'date', header: 'Entry date', type: 'date', cell: (element) => `${element.date ? element.date : ''}` },
       { columnDef: 'entry', header: 'Entry Point', type: '', cell: (element) => {
         return `${element.entry_point && element.entry_point.name ? element.entry_point.name : ''}`
       }},
       { columnDef: 'shipping_date', header: 'Shipping Date', type: 'date', cell: (element) => `${element.shipping_date ? element.shipping_date : ''}` },
+      { columnDef: 'description', header: 'Description', type: '', cell: (element) => `${element.description ? element.description : ''}` },
       { columnDef: 'status', header: 'Status', type: '', cell: (element) => `${element.dest_type ?` In ${element.dest_type}` : ''}` }
     );
 
@@ -110,9 +109,6 @@ export class StockComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(componentDestroyed(this)))
     .subscribe(awbs => this.transit = awbs);
 
-    this._dataService.couriersSubject
-    .pipe(takeUntil(componentDestroyed(this)))
-    .subscribe(couriers => this.couriers = couriers);
     this._dataService.stockSubject.subscribe(data => {
       this.tableData = data;
       this.filterData(this.tableData);
@@ -142,10 +138,6 @@ export class StockComponent implements OnInit, OnDestroy {
 
     this.warehouses.map(wh => {
       promises.push(this._db.collection('backup_warehouses').doc(`${wh.id}`).set(wh));
-    });
-
-    this.couriers.map(courier => {
-      promises.push(this._db.collection('backup_couriers').doc(`${courier.id}`).set(courier));
     });
 
     Promise.all(promises).then(res => console.log(res)).catch(err => console.log(err));
@@ -297,8 +289,8 @@ export class StockComponent implements OnInit, OnDestroy {
 
   addEntry = (data) => {
     const promiseArr = [];
-    const courierBatch = this._db.firestore.batch();
     const customerBatch = this._db.firestore.batch();
+    const newCustomers = [];
     const chunk_size = 250;
     this.infoService.showMessage(`
     <ul>
@@ -308,35 +300,16 @@ export class StockComponent implements OnInit, OnDestroy {
     </ul>
     `);
 
-    const newCustomers = [];
-    const newCouriers = [];
     data.map(row => {
 
       const customerById = this.customers.filter(cs => Number(cs.id) === Number(row.customer_id));
       const whById = this.warehouses.filter(cs => Number(cs.id) === Number(row.wh_id));
-      const courierById = this.couriers.filter(cs => Number(cs.id) === Number(row.courier_id));
 
       row.customer = customerById.length ? customerById[0].name : row.customer;
       row.warehouse = whById.length ? whById[0].name : row.warehouse;
-      row.courier = courierById.length ? courierById[0].name : row.courier;
 
       const rowCustomer = row.customer ? row.customer.toLowerCase().trim() : null;
-      const rowCourier = row.courier ? row.courier.toLowerCase().trim() : null;
 
-      if (!this.couriers.some(courier => courier.name.toLowerCase().trim() === rowCourier)) {
-        if (rowCourier && rowCourier.length) {
-          const id = this._utils.getId(this.couriers);
-          const courierToAdd = { id: id, name: rowCourier.toUpperCase() };
-          if (!newCouriers.some(e => e.id === courierToAdd.id)) {
-            row.courier_id = courierToAdd.id;
-            newCouriers.push(courierToAdd);
-          }
-        }
-      } else {
-        if (!row.courier_id) {
-          row.courier_id = this.couriers.filter(courier => courier.name.toLowerCase().trim() === rowCourier)[0].id;
-        }
-      }
       if (!this.customers.some(customer => customer.name.toLowerCase().trim() === rowCustomer)) {
         if (rowCustomer && rowCustomer.length) {
           const id = this._utils.getId(this.customers);
@@ -381,35 +354,25 @@ export class StockComponent implements OnInit, OnDestroy {
       }
     });
 
-    newCouriers.map(courier => {
-      if (courier) {
-        const ref = this._db.collection('couriers').doc(`${this._utils.getId(this.couriers)}`).ref;
-        courierBatch.set(ref, courier);
-      }
-    });
-
-    courierBatch.commit()
-      .catch(err => console.log('error on adding couriers', err));
-
     customerBatch.commit()
       .catch(err => console.log('error on adding customers', err));
     
     data.map(entry => {
       entry.deleted = entry.deleted && entry.deleted == 1 ? 1 : 0;
-      entry.initial_qty = Number(entry.initial_qty);
       let nextId = Number(this.tableData.length ? this.tableData[0].hbr_id : 0) + 1;
       entry.id = !isNaN(entry.id) ? Number(entry.id) : this._utils.getId(this.tableData);
+      if(entry.id ==0) entry.id++;
       entry.hbr_id = !isNaN(entry.hbr_id) ? Number(entry.hbr_id) : null;
       entry.box_qty = !isNaN(entry.box_qty) ? Number(entry.box_qty) : null;
+      entry.initial_qty = Number(entry.initial_qty) === 0 ? entry.box_qty : Number(entry.initial_qty);
       entry.delivered = !isNaN(entry.box_qty) && entry.box_qty > 0 ? 0 : 1;
       entry.profit = !isNaN(entry.profit) ? Number(entry.profit) : null;
       entry.total_weight = !isNaN(entry.total_weight) ? Number(entry.total_weight) : null;
       entry.customer = entry.customer && entry.customer.length ? this.capitalizeText(entry.customer) : null;
       entry.warehouse = entry.warehouse && entry.warehouse.length ? this.capitalizeText(entry.warehouse) : null;
-      entry.courier = entry.courier && entry.courier.length ? this.capitalizeText(entry.courier) : null;
       entry.date = entry.date && this.moment(entry.date, 'DD-MM-YYYY').isValid() ? this.moment(entry.date).unix() : null;
       entry.entry_point = {name: entry.warehouse, id: entry.wh_id};
-      entry.dest_type = entry.dest_type.length ? entry.dest_type : "Warehouse";
+      entry.dest_type = entry.dest_type && entry.dest_type.length ? entry.dest_type : "Warehouse";
 
       entry.received_date = entry.received_date ? this.moment(entry.received_date).unix() : null;
       entry.shipping_date = entry.shipping_date ? this.moment(entry.shipping_date).unix() : null;
@@ -421,6 +384,7 @@ export class StockComponent implements OnInit, OnDestroy {
           entry.hbr_id = 1;
         }
       }
+      this.tableData.push(entry);
     });
     const chunks = data.map((e, i) => i % chunk_size === 0 ? data.slice(i, i + chunk_size) : null).filter(e => e);
     chunks.map(chunk => {
@@ -482,13 +446,18 @@ export class StockComponent implements OnInit, OnDestroy {
         'update',
         'hbr_id',
         'wr0',
+        'tracking',
+        'customer_id',
+        'customer',
         'date',
         'wh_id',
         'warehouse',
-        'courier_id',
-        'courier',
-        'customer_id',
-        'customer',
+        'box_qty',
+        'total_weight',
+        'profit',
+        'destination',
+        'shipping_date',
+        'delivered',
         'contact_name',
         'cuit',
         'email',
@@ -497,14 +466,6 @@ export class StockComponent implements OnInit, OnDestroy {
         'city',
         'country',
         'description',
-        'destination',
-        'shipping_date',
-        'box_qty',
-        'profit',
-        'total_weight',
-        'tracking',
-        'received_date',
-        'delivered'
       ]
     });
 

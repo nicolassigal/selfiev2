@@ -37,7 +37,9 @@ export class DeleteStockDialogComponent implements OnInit {
 
     ngOnInit(){
         this.box = { ...this.data.row }; 
-        this.boxes = [...this.data.rows];
+        if(this.data.rows){
+            this.boxes = [...this.data.rows];
+        }
         this.operationsBatch = this._db.firestore.batch();
     }
 

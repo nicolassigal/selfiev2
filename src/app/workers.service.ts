@@ -35,16 +35,16 @@ private checkDBWorker = `
         let delivered = e.data.delivered;
         let transit = e.data.transit;
         if (db.length) {
-            toStorage = xls.filter(row => (!db.some(entry => +row.hbr_id === +entry.hbr_id) || row.update == 1) );
+            toStorage = xls.filter(row => (!db.some(entry => +row.id === +entry.id) || row.update == 1) );
         } else {
           toStorage = xls;
         }
         if(delivered.length) {
-          toStorage = toStorage.filter(row => !delivered.some(entry => +row.hbr_id === +entry.hbr_id));
+          toStorage = toStorage.filter(row => !delivered.some(entry => +row.id === +entry.id));
         }
 
         if(transit.length) {
-          toStorage = toStorage.filter(entry => !transit.some(awb => awb['processes'].some(process => +process.hbr_id === +entry.hbr_id)));
+          toStorage = toStorage.filter(entry => !transit.some(awb => awb['processes'].some(process => +process.id === +entry.id)));
         }
         self.postMessage(JSON.stringify(toStorage));
     }
